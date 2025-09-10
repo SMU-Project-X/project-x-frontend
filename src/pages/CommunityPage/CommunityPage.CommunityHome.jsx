@@ -6,11 +6,13 @@ import * as itemS from './styled/CommunityPage.CommunityHome.style';
 // 이미지
 import puzzle from '@/assets/images/CommunityPage/puzzle.png';
 
-import Banner from '@/pages/CommunityPage/CommunityPage.CommunityHome.Banner';
-import VoteModal from '@/pages/CommunityPage/components/CommunityPage.VoteModal.Component';
+import Banner from '@/pages/CommunityPage/components/CommunityPage.Banner.Component';
+import Unit from '@/pages/CommunityPage/components/CommunityPage.VotePage.Unit.Component';
+import VotePage from '@/pages/CommunityPage/CommunityPage.VotePage'
 
 
 export const CommunityHome = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
     return(
       <>        
       {/* 상단 헤더 */}
@@ -18,7 +20,7 @@ export const CommunityHome = () => {
           <itemS.Nav>
             <itemS.Logo>Project - x</itemS.Logo>
             <itemS.MenuNav>
-              <li><a href="#">HOME</a></li>
+              <li><a href="/">HOME</a></li>
               <li><a href="#">MD</a></li>
               <li><a href="#">COMMUNITY</a></li>
               <li><a href="#">CONTENT</a></li>
@@ -36,8 +38,14 @@ export const CommunityHome = () => {
         <itemS.ContentContainer>
           {/* 배너부분 */}
           <itemS.Container>
-            <Banner></Banner>
+            <Banner onOpenModal={()=>setIsModalOpen(true)}></Banner>
           </itemS.Container>
+          
+          {/* 모달창 오픈 */}
+          <VotePage
+          isModalOpen={isModalOpen}
+          onClose={()=>setIsModalOpen(false)}
+          />
 
           {/* 게시판 콘텐츠 */}
           <itemS.ContentsContainer>

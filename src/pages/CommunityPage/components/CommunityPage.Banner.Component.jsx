@@ -1,5 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+// style
+import * as itemS from '../styled/CommunityPage.VoteBanner.style';
+import styled from 'styled-components';
 // Swiper 라이브러리
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -13,14 +16,11 @@ import next from '@/assets/images/CommunityPage/next.png';
 import image2 from '@/assets/images/CommunityPage/image2.png';
 import voteicon from '@/assets/images/CommunityPage/voteicon.png';
 import image1 from '@/assets/images/CommunityPage/image1.png';
-import Modal from './components/CommunityPage.VoteModal.Component';
+import Modal from '../CommunityPage.VotePage';
 
-// style
-import * as itemS from './styled/CommunityPage.VoteBanner.style';
-import styled from 'styled-components';
+import VoteSlideCard from './CommunityPage.VoteSlideCard';
 
-
-export const Banner = () => {
+export const Banner = ({onOpenModal}) => {
 
     const PrevBtn = styled.div`
         left: 10px;
@@ -45,9 +45,8 @@ export const Banner = () => {
         }
     `;
 
-
     const [isModalOpen, setIsModalOpen] = useState(false);
-
+  
     return (
     <section className='voting_section'>
         <itemS.banner_container>
@@ -73,49 +72,52 @@ export const Banner = () => {
                 >
                     <itemS.slide>
                         <SwiperSlide>
-                            <itemS.vote_card onClick={() => setIsModalOpen(true)}>
-                                <itemS.vote_content>
-                                    <h3 className='vote_title'>응원봉 투표하기</h3>
-                                    <p className='vote_date'>2025.09.03~2025.09.24</p>
-                                </itemS.vote_content>
-                                <itemS.vote_img><img src={image2}></img></itemS.vote_img>
-                            </itemS.vote_card>
+                            <VoteSlideCard 
+                                title = "투표 모달창 실험"
+                                date= "2025.09.03~2025.09.24"
+                                img = {image2}
+                                onClick={onOpenModal}
+                            />
                         </SwiperSlide>
                         <SwiperSlide>
-                            <itemS.vote_card >
-                                <itemS.vote_content>
-                                    <h3 className='vote_title'>유닛조합 투표하기</h3>
-                                    <p className='vote_date'>2025.09.03~2025.09.24</p>
-                                </itemS.vote_content>
-                                <itemS.vote_img><img src={image2} /></itemS.vote_img>
-                            </itemS.vote_card> 
-                        </SwiperSlide>     
+                            <VoteSlideCard 
+                                title = "투표 모달창 실험"
+                                date= "2025.09.03~2025.09.24"
+                                img = {image2}
+                                onClick={onOpenModal}
+                            />
+                        </SwiperSlide>                        
                         <SwiperSlide>
-                            <itemS.vote_card>
-                                <itemS.vote_content>
-                                    <h3 className='vote_title'>투표결과 확인</h3>
-                                    <p className='vote_date'>2025.09.03~2025.09.24</p>
-                                </itemS.vote_content>
-                                <itemS.vote_img><img src={image2} /></itemS.vote_img>
-                            </itemS.vote_card>
+                            <VoteSlideCard 
+                                title = "투표 모달창 실험"
+                                date= "2025.09.03~2025.09.24"
+                                img = {image2}
+                                onClick={onOpenModal}
+                            />
                         </SwiperSlide>
                         <SwiperSlide>
-                            <itemS.vote_card>
-                                <itemS.vote_content>
-                                    <itemS.vote_title>투표결과 확인</itemS.vote_title>
-                                    <p className='vote_date'>2025.09.03~2025.09.24</p>
-                                </itemS.vote_content>
-                                <itemS.vote_img><img src={image2} /></itemS.vote_img>
-                            </itemS.vote_card>
-                        </SwiperSlide>
+                            <VoteSlideCard 
+                                title = "투표 모달창 실험"
+                                date= "2025.09.03~2025.09.24"
+                                img = {image2}
+                                onClick={onOpenModal}
+                            />
+                        </SwiperSlide>                        
                         <SwiperSlide>
-                            <itemS.vote_card>
-                                <itemS.vote_content>
-                                    <h3 className='vote_title'>투표결과 확인</h3>
-                                    <p className='vote_date'>2025.09.03~2025.09.24</p>
-                                </itemS.vote_content>
-                                <itemS.vote_img><img src={image2} /></itemS.vote_img>
-                            </itemS.vote_card>
+                            <VoteSlideCard 
+                                title = "투표 모달창 실험"
+                                date= "2025.09.03~2025.09.24"
+                                img = {image2}
+                                onClick={onOpenModal}
+                            />
+                        </SwiperSlide>                        
+                        <SwiperSlide>
+                            <VoteSlideCard 
+                                title = "투표 모달창 실험"
+                                date= "2025.09.03~2025.09.24"
+                                img = {image2}
+                                onClick={onOpenModal}
+                            />
                         </SwiperSlide>
                     </itemS.slide>
                 </Swiper>

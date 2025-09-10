@@ -10,7 +10,7 @@ import image1 from '@/assets/images/CommunityPage/image1.png';
 import image2 from '@/assets/images/CommunityPage/image2.png';
 import moreicon from '@/assets/images/CommunityPage/moreicon.png';
 import shareicon from '@/assets/images/CommunityPage/shareicon.png';
-import Modal from './components/CommunityPage.VoteModal.Component';
+import Modal from './CommunityPage.VotePage';
 
 function CommentContent() {
   return (

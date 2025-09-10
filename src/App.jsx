@@ -8,10 +8,10 @@ import SelectMemberPage from '@/pages/RandingPage/RandingPage.SelectMemberPage';
 
 import CommunityHome from '@/pages/CommunityPage/CommunityPage.CommunityHome';
 import CheerArtist from '@/pages/CommunityPage/CommunityPage.CheerArtist';
-// import FandomTalk from './pages/CommunityPage/CommunityPage.FandomTalk';
-import Vote from '@/pages/CommunityPage/components/CommunityPage.VoteModal.Component';
+import VotePage from '@/pages/CommunityPage/CommunityPage.VotePage';
 import SelectMember from '@/pages/CommunityPage/CommunityPage.SelectMember';
 import ViewPage from './pages/RandingPage/RandingPage.SelectMemberPage.ViewPage';
+// import FandomTalk from './pages/CommunityPage/CommunityPage.FandomTalk';
 
 
 
@@ -27,7 +27,7 @@ export default function App() {
 
         {/* 커뮤니티 path */}
         <Route path="/Community/" element={<CommunityHome />} />
-        <Route path='/Community/Vote' element={<Vote />} />
+        <Route path='/Community/VotePage' element={<VotePage />} />
         <Route path="/Community/CheerArtist" element={<CheerArtist />} />
         <Route path="/Community/SelectMember" element={<SelectMember />} />
         {/* <Route path="/Community/FandomTalk" element={<FandomTalk />} /> */}

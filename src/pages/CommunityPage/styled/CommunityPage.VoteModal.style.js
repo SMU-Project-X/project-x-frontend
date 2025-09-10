@@ -1,38 +1,33 @@
 import styled from "styled-components";
 
-/* 투표 모달창 */
-// export const ModuleContainer = styled.div`
-//     display: flex;
-//     justify-content: center;
-//     align-items: center;
-//     height: 100%;
-//     width: 1000px;
-// `;
-
 export const ModuleContainer = styled.div `
+    background-color: #B3D1F0;
     border: 2px solid #B3D1F0;
     border-radius: 40px;
-    margin-top: 119px;
-    width: 1410px;
-    height: 767px;
-    max-width: 1410px;
+    margin-top: 40px;
+    width: 70vw;
+    height: 40vw;
+    max-width: 90%;
     overflow-y: auto;
+    position: relative;
 `;
 export const VoteContainer = styled.div `
     width: 80%;
     margin: 0 auto;
+    position: relative;
     h1 {
         width: 100%;
         text-align: center;
         padding: 20px;
-        font-size: 50px;
+        font-size: 30px; font-family:Arial, Helvetica, sans-serif;
         padding: 20px;
-        font-style: bold;
+        font-weight: bold;
     }
 `;
 
 export const VoteSelect = styled.div `
     display: flex;
+    align-items: center;
     h3 {
         width: 120px;
         height: 40px;
@@ -56,8 +51,8 @@ export const Unit = styled.div `
     gap: 16px;
 `;
 export const VoteCard = styled.div `
-    width: 218px;
-    height: 260px;
+    width: 173px;
+    height: 193px;
     overflow: hidden;
     text-align: center;
     padding-top: 20px;
@@ -67,8 +62,8 @@ export const VoteCard = styled.div `
 
 export const VoteImg = styled.div `
     img {
-        width: 177px;
-        height: 193export const 51px;
+        width: 120px;
+        height: 140px;
     }
 `;
 
@@ -89,3 +84,28 @@ export const NoMoreVote = styled.div `
     }
 `;
 
+
+/* 모달창 */
+export const CloseBtn = styled.div`
+    width: 50px;
+    height: 20px;
+    text-align: center;
+    border: 1px solid black;
+    border-radius: 40px;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    cursor: pointer;
+    & hover {
+        color: #ff4d4f;
+    }
+`;
+export const Overlay = styled.div`
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+`;

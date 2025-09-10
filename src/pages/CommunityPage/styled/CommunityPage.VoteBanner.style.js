@@ -120,8 +120,6 @@ export const vote_title = styled.h3`
     @media (max-width: 768px) {
         font-size: 16px;
     }
-}
-
 `;
 
 export const vote_date = styled.div`
