@@ -14,7 +14,6 @@ import {
   Dummy3D,
   ViewerActions,
   Sidebar,
-  SidebarTitle,
   Panel,
   PanelTitle,
   SubTitle,
@@ -44,23 +43,22 @@ export default function LightStickCustomPage() {
       <Header>
         <HeaderLeft>
           <Logo aria-hidden>✨</Logo>
-          <h1>Lightstick Studio</h1>
+          <h1>라이트스틱 스튜디오</h1>
         </HeaderLeft>
         <HeaderActions>
-          <Button className="ghost" title="My Presets">📁 My Presets</Button>
-          <Button className="primary">Share</Button>
+          <Button className="ghost" title="내 프리셋">📁 내 프리셋</Button>
+          <Button className="primary">공유하기</Button>
         </HeaderActions>
       </Header>
 
       <Content>
         {/* 좌측 3D 미리보기 카드 */}
         <ViewerCard>
-          
           <ViewerStage>
             {/* 현재는 3D 대신 자리표시자 + 힌트 */}
             <StageHint>
-              <Dummy3D>3D Lightstick<br />Model</Dummy3D>
-              <p>Rotate and zoom to view your design</p>
+              <Dummy3D>3D 라이트스틱<br />모델</Dummy3D>
+              <p>회전 및 확대/축소로 디자인을 확인하세요</p>
             </StageHint>
 
             {/* 추후 R3F로 교체될 영역 */}
@@ -68,21 +66,20 @@ export default function LightStickCustomPage() {
           </ViewerStage>
 
           <ViewerActions>
-            <Button>Reset All</Button>
+            <Button>전체 초기화</Button>
             <div className="spacer" />
-            <Button>Save Preset</Button>
-            <Button className="dark">Share Creation</Button>
+            <Button>프리셋 저장</Button>
+            <Button className="dark">제작 공유하기</Button>
           </ViewerActions>
         </ViewerCard>
 
         {/* 우측 커스터마이즈 섹션 (전부 더미) */}
         <Sidebar>
-          <SidebarTitle>Customize Your Lightstick</SidebarTitle>
 
           <Panel>
-            <PanelTitle>Shape &amp; Style</PanelTitle>
+            <PanelTitle>모양 &amp; 스타일</PanelTitle>
 
-            <SubTitle>Cap Shape</SubTitle>
+            <SubTitle>캡 모양</SubTitle>
             <IconGrid>
               <ShapeBtn><Cap className="round" /></ShapeBtn>
               <ShapeBtn><Cap className="flat" /></ShapeBtn>
@@ -90,7 +87,7 @@ export default function LightStickCustomPage() {
               <ShapeBtn><Cap className="cube" /></ShapeBtn>
             </IconGrid>
 
-            <SubTitle>Grip Style</SubTitle>
+            <SubTitle>그립 스타일</SubTitle>
             <IconRow>
               <ShapeBtn className="tall"><Grip /></ShapeBtn>
               <ShapeBtn className="tall"><Grip className="wide" /></ShapeBtn>
@@ -98,23 +95,23 @@ export default function LightStickCustomPage() {
           </Panel>
 
           <Panel>
-            <PanelTitle>Colors</PanelTitle>
+            <PanelTitle>색상</PanelTitle>
             <Field>
-              <span>Body Color</span>
+              <span>바디 색상</span>
               <ColorField>
                 <input type="text" value="#000000" readOnly />
                 <input type="color" value="#000000" readOnly />
               </ColorField>
             </Field>
             <Field>
-              <span>Cap Color</span>
+              <span>캡 색상</span>
               <ColorField>
                 <input type="text" value="#666666" readOnly />
                 <input type="color" value="#666666" readOnly />
               </ColorField>
             </Field>
             <Field>
-              <span>Button Color</span>
+              <span>버튼 색상</span>
               <ColorField>
                 <input type="text" value="#999999" readOnly />
                 <input type="color" value="#999999" readOnly />
@@ -123,23 +120,23 @@ export default function LightStickCustomPage() {
           </Panel>
 
           <Panel>
-            <PanelTitle>Material Properties</PanelTitle>
+            <PanelTitle>재질 속성</PanelTitle>
             <SliderField>
-              <label>Metalness</label>
+              <label>메탈릭</label>
               <div className="slider">
                 <input type="range" min="0" max="1" step="0.01" value="0.20" readOnly />
                 <span className="value">0.20</span>
               </div>
             </SliderField>
             <SliderField>
-              <label>Roughness</label>
+              <label>거칠기</label>
               <div className="slider">
                 <input type="range" min="0" max="1" step="0.01" value="0.60" readOnly />
                 <span className="value">0.60</span>
               </div>
             </SliderField>
             <SliderField>
-              <label>Glow Intensity</label>
+              <label>발광 강도</label>
               <div className="slider">
                 <input type="range" min="0" max="1" step="0.01" value="0.40" readOnly />
                 <span className="value">0.40</span>
@@ -148,28 +145,28 @@ export default function LightStickCustomPage() {
           </Panel>
 
           <Panel>
-            <PanelTitle>Attachments</PanelTitle>
+            <PanelTitle>악세서리</PanelTitle>
             <AttachRow>
-              <AttachBtn title="Lanyard">🪢</AttachBtn>
-              <AttachBtn title="Charm">⭐</AttachBtn>
-              <AttachBtn title="Keyring">🔗</AttachBtn>
-              <AttachBtn title="Case">🧳</AttachBtn>
+              <AttachBtn title="스트랩">🪢</AttachBtn>
+              <AttachBtn title="참">⭐</AttachBtn>
+              <AttachBtn title="키링">🔗</AttachBtn>
+              <AttachBtn title="케이스">🧳</AttachBtn>
             </AttachRow>
           </Panel>
 
           <Panel>
-            <PanelTitle>Stickers &amp; Decals</PanelTitle>
+            <PanelTitle>스티커 &amp; 데칼</PanelTitle>
             <UploadCard>
-              <div className="title">Upload your design</div>
-              <Button className="ghost small">Browse Files</Button>
-              <p className="hint">Placement restricted to body and cap</p>
+              <div className="title">디자인 업로드</div>
+              <Button className="ghost small">파일 선택</Button>
+              <p className="hint">적용 위치: 바디와 캡으로 제한</p>
             </UploadCard>
           </Panel>
         </Sidebar>
       </Content>
 
-      {/* Presets (나중에) */}
-      {/*
+      {/* 프리셋 (나중에) */}
+      {/* 
       <section>
         ...
       </section>

@@ -103,7 +103,7 @@ export const IconBtn = styled.button`
 /* 본문 그리드: 좌(2) : 우(1) */
 export const Content = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 3fr 1fr;
   gap: 16px;
   padding: 16px;
 
@@ -121,8 +121,8 @@ export const ViewerCard = styled.section`
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  height: 480px;
-  max-height: 480px;
+  height: 800px;
+  max-height: 800px;
 `;
 
 export const ViewerToolbar = styled.div`
@@ -190,12 +190,6 @@ export const Sidebar = styled.aside`
   display: flex;
   flex-direction: column;
   gap: 14px;
-`;
-
-export const SidebarTitle = styled.h3`
-  margin: 0 2px 2px 2px;
-  font-size: 14px;
-  color: #475569;
 `;
 
 export const Panel = styled.div`
