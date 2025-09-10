@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-/* 공통 색/그리드 토큰: 루트에 두고 하위에서 var()로 사용 */
+/* 공통 색/그리드 토큰 */
 export const PageRoot = styled.div`
   --bg: #f5f6f8;
   --card: #ffffff;
@@ -20,7 +20,7 @@ export const PageRoot = styled.div`
     "Noto Color Emoji";
 `;
 
-/* 상단 헤더 */
+/* Header */
 export const Header = styled.header`
   height: 56px;
   padding: 0 20px;
@@ -33,18 +33,15 @@ export const Header = styled.header`
   top: 0;
   z-index: 5;
 `;
-
 export const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-
   h1 {
     font-size: 16px;
     margin: 0;
   }
 `;
-
 export const Logo = styled.span`
   display: inline-flex;
   width: 22px;
@@ -52,13 +49,12 @@ export const Logo = styled.span`
   align-items: center;
   justify-content: center;
 `;
-
 export const HeaderActions = styled.div`
   display: flex;
   gap: 8px;
 `;
 
-/* 공통 버튼들 */
+/* Buttons */
 export const Button = styled.button`
   height: 34px;
   padding: 0 12px;
@@ -88,51 +84,29 @@ export const Button = styled.button`
   }
 `;
 
-export const IconBtn = styled.button`
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: var(--card);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-`;
-
-/* 본문 그리드: 좌(2) : 우(1) */
+/* 본문 그리드 */
 export const Content = styled.div`
   display: grid;
   grid-template-columns: 3fr 1fr;
   gap: 16px;
   padding: 16px;
 
-  /* 좁은 화면 대응 */
   @media (max-width: 960px) {
     grid-template-columns: 1fr;
   }
 `;
 
-/* 좌측 3D 카드 (비율은 2:1, 높이 480px 고정) */
+/* 좌측 3D 카드 */
 export const ViewerCard = styled.section`
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: 14px;
+  overflow: hidden;
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  height: 800px;
-  max-height: 800px;
+  height: 860px;
 `;
-
-export const ViewerToolbar = styled.div`
-  display: flex;
-  gap: 8px;
-  padding: 10px;
-  justify-content: flex-end;
-  border-bottom: 1px solid var(--line);
-`;
-
 export const ViewerStage = styled.div`
   position: relative;
   flex: 1;
@@ -143,35 +117,6 @@ export const ViewerStage = styled.div`
   min-height: 320px;
   background: #fafbfc;
 `;
-
-export const StageHint = styled.div`
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  pointer-events: none;
-  color: var(--muted);
-  font-size: 12px;
-  gap: 10px;
-  padding-bottom: 44px; /* 하단 액션바와 겹치지 않도록 */
-`;
-
-export const Dummy3D = styled.div`
-  width: 90px;
-  height: 150px;
-  border-radius: 8px;
-  border: 1px dashed #c9ced6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  background: #f3f4f6;
-  color: #717991;
-  font-weight: 600;
-`;
-
 export const ViewerActions = styled.div`
   display: flex;
   align-items: center;
@@ -185,107 +130,136 @@ export const ViewerActions = styled.div`
   }
 `;
 
-/* 우측 패널 */
+/* Sidebar */
 export const Sidebar = styled.aside`
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
+/* Panel */
 export const Panel = styled.div`
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 10px;
   padding: 12px;
   box-shadow: var(--shadow);
-`;
 
+  &.wide {
+    grid-column: span 2;
+  }
+`;
 export const PanelTitle = styled.div`
   font-weight: 700;
   margin-bottom: 10px;
 `;
-
 export const SubTitle = styled.div`
   font-size: 12px;
   color: #64748b;
   margin: 10px 0 6px;
 `;
 
-/* 아이콘형 버튼 그리드 */
+/* 섹션 내부 버튼 컨테이너: 2x2 그리드 */
 export const IconGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 6px;
+  align-items: stretch;
+  justify-items: stretch;
 `;
-
 export const IconRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 6px;
+  align-items: stretch;
+  justify-items: stretch;
 `;
 
-export const ShapeBtn = styled.button`
+/* 캡 버튼 (정사각형, 칸을 꽉 채움) */
+export const CapBtn = styled.button`
   border: 1px solid var(--line);
   background: var(--card);
   border-radius: 10px;
-  height: 48px;
+  width: 30%;
+  aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 
-  &.tall {
-    height: 64px;
+  &.active {
+    outline: 2px solid var(--accent);
+    outline-offset: 0;
   }
+
+  &.round::before,
+  &.flat::before,
+  &.cube::before {
+    content: "";
+    width: 60%;
+    height: 60%;
+    background: #e5e7eb;
+    border: 2px solid #94a3b8;
+    display: block;
+  }
+  &.round::before {
+    border-radius: 999px;
+  }
+  &.flat::before {
+    border-radius: 8px;
+  }
+  &.cube::before {
+    border-radius: 6px;
+  }
+
+  &.taper::before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 30% solid transparent;
+    border-right: 30% solid transparent;
+    border-bottom: 60% solid #94a3b8;
+  }
+`;
+
+/* 그립 버튼 (정사각형, 칸을 꽉 채움) */
+export const GripBtn = styled.button`
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 10px;
+  width: 30%;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 
   &.active {
     outline: 2px solid var(--accent);
     outline-offset: 0;
   }
-`;
 
-/* 캡/그립 간단한 도형 더미 */
-export const Cap = styled.span`
-  display: block;
-  width: 28px;
-  height: 28px;
-  background: #e5e7eb;
-  border: 2px solid #94a3b8;
-  border-radius: 6px;
-
-  &.round {
-    border-radius: 999px;
+  &::before {
+    content: "";
+    width: 24%;
+    height: 60%;
+    background: #94a3b8;
+    border-radius: 6px;
+    display: block;
   }
-  &.flat {
-    border-radius: 8px;
-  }
-  &.taper {
-    width: 0;
-    height: 0;
-    border-left: 16px solid transparent;
-    border-right: 16px solid transparent;
-    border-bottom: 28px solid #94a3b8;
-    background: transparent;
-    border-top: none;
-  }
-  &.cube {
-    /* 기본 사각형 유지 */
+  &.wide::before {
+    width: 36%;
   }
 `;
 
-export const Grip = styled.span`
-  display: block;
-  width: 10px;
-  background: #94a3b8;
-  height: 38px;
-  border-radius: 6px;
-
-  &.wide {
-    width: 16px;
-  }
-`;
-
-/* 폼 필드 */
+/* Fields */
 export const Field = styled.label`
   display: flex;
   flex-direction: column;
@@ -297,7 +271,6 @@ export const Field = styled.label`
     color: #475569;
   }
 `;
-
 export const ColorField = styled.div`
   display: flex;
   gap: 8px;
@@ -321,7 +294,6 @@ export const ColorField = styled.div`
     background: #fff;
   }
 `;
-
 export const SliderField = styled.div`
   display: flex;
   flex-direction: column;
@@ -345,7 +317,7 @@ export const SliderField = styled.div`
   }
 `;
 
-/* 첨부/업로드 */
+/* Attachments */
 export const AttachRow = styled.div`
   display: flex;
   gap: 8px;
@@ -362,7 +334,6 @@ export const AttachBtn = styled.button`
   justify-content: center;
   box-shadow: var(--shadow);
 `;
-
 export const UploadCard = styled.div`
   border: 1px dashed #cbd5e1;
   border-radius: 14px;

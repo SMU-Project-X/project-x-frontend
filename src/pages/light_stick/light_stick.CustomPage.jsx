@@ -5,13 +5,9 @@ import {
   Logo,
   HeaderActions,
   Button,
-  IconBtn,
   Content,
   ViewerCard,
-  ViewerToolbar,
   ViewerStage,
-  StageHint,
-  Dummy3D,
   ViewerActions,
   Sidebar,
   Panel,
@@ -19,9 +15,8 @@ import {
   SubTitle,
   IconGrid,
   IconRow,
-  ShapeBtn,
-  Cap,
-  Grip,
+  CapBtn,
+  GripBtn,
   Field,
   ColorField,
   SliderField,
@@ -29,72 +24,55 @@ import {
   AttachBtn,
   UploadCard,
 } from "./styled/light_stick.CustomPage.style.js";
+
+import { Canvas } from "@react-three/fiber";
 import MyElement3D from "./MyElement3D";
 
-/**
- * HTML + CSS 레이아웃만 구성 (상태/로직 없음)
- * - 좌(3D 카드) : 우(사이드바) = 2:1
- * - 3D 카드 높이 480px 고정
- * - 컨트롤은 전부 더미 요소 (JS 로직 없이 시각만)
- */
 export default function LightStickCustomPage() {
   return (
     <PageRoot>
       <Header>
         <HeaderLeft>
           <Logo aria-hidden>✨</Logo>
-          <h1>라이트스틱 스튜디오</h1>
+          <h1>응원봉 커스텀</h1>
         </HeaderLeft>
-        <HeaderActions>
-          <Button className="ghost" title="내 프리셋">📁 내 프리셋</Button>
-          <Button className="primary">공유하기</Button>
-        </HeaderActions>
       </Header>
 
       <Content>
-        {/* 좌측 3D 미리보기 카드 */}
         <ViewerCard>
           <ViewerStage>
-            {/* 현재는 3D 대신 자리표시자 + 힌트 */}
-            <StageHint>
-              <Dummy3D>3D 라이트스틱<br />모델</Dummy3D>
-              <p>회전 및 확대/축소로 디자인을 확인하세요</p>
-            </StageHint>
-
-            {/* 추후 R3F로 교체될 영역 */}
-            <MyElement3D />
+            <Canvas camera={{ position: [3, 3, 3], fov: 50 }}>
+              <ambientLight intensity={0.5} />
+              <directionalLight position={[5, 5, 5]} />
+              <MyElement3D />
+            </Canvas>
           </ViewerStage>
-
           <ViewerActions>
-            <Button>전체 초기화</Button>
+            <Button>초기화</Button>
             <div className="spacer" />
-            <Button>프리셋 저장</Button>
-            <Button className="dark">제작 공유하기</Button>
+            <Button className="dark">공유하기</Button>
           </ViewerActions>
         </ViewerCard>
 
-        {/* 우측 커스터마이즈 섹션 (전부 더미) */}
         <Sidebar>
-
-          <Panel>
-            <PanelTitle>모양 &amp; 스타일</PanelTitle>
-
+          <Panel className="wide">
+            <PanelTitle>모양 & 스타일</PanelTitle>
             <SubTitle>캡 모양</SubTitle>
             <IconGrid>
-              <ShapeBtn><Cap className="round" /></ShapeBtn>
-              <ShapeBtn><Cap className="flat" /></ShapeBtn>
-              <ShapeBtn><Cap className="taper" /></ShapeBtn>
-              <ShapeBtn><Cap className="cube" /></ShapeBtn>
+              <CapBtn className="round" />
+              <CapBtn className="flat" />
+              <CapBtn className="taper" />
+              <CapBtn className="cube" />
             </IconGrid>
 
             <SubTitle>그립 스타일</SubTitle>
             <IconRow>
-              <ShapeBtn className="tall"><Grip /></ShapeBtn>
-              <ShapeBtn className="tall"><Grip className="wide" /></ShapeBtn>
+              <GripBtn />
+              <GripBtn className="wide" />
             </IconRow>
           </Panel>
 
-          <Panel>
+          <Panel className="wide">
             <PanelTitle>색상</PanelTitle>
             <Field>
               <span>바디 색상</span>
@@ -119,7 +97,7 @@ export default function LightStickCustomPage() {
             </Field>
           </Panel>
 
-          <Panel>
+          <Panel className="wide">
             <PanelTitle>재질 속성</PanelTitle>
             <SliderField>
               <label>메탈릭</label>
@@ -147,15 +125,15 @@ export default function LightStickCustomPage() {
           <Panel>
             <PanelTitle>악세서리</PanelTitle>
             <AttachRow>
-              <AttachBtn title="스트랩">🪢</AttachBtn>
-              <AttachBtn title="참">⭐</AttachBtn>
-              <AttachBtn title="키링">🔗</AttachBtn>
-              <AttachBtn title="케이스">🧳</AttachBtn>
+              <AttachBtn>🪢</AttachBtn>
+              <AttachBtn>⭐</AttachBtn>
+              <AttachBtn>🔗</AttachBtn>
+              <AttachBtn>🧳</AttachBtn>
             </AttachRow>
           </Panel>
 
           <Panel>
-            <PanelTitle>스티커 &amp; 데칼</PanelTitle>
+            <PanelTitle>스티커 & 데칼</PanelTitle>
             <UploadCard>
               <div className="title">디자인 업로드</div>
               <Button className="ghost small">파일 선택</Button>
@@ -164,13 +142,6 @@ export default function LightStickCustomPage() {
           </Panel>
         </Sidebar>
       </Content>
-
-      {/* 프리셋 (나중에) */}
-      {/* 
-      <section>
-        ...
-      </section>
-      */}
     </PageRoot>
   );
 }
