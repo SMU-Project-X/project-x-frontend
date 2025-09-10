@@ -2,8 +2,6 @@ import React from "react";
 import MemberImg from "./PicturePage.MemberDecoPage.MemberImg";
 import { useLocation } from 'react-router-dom'
 
-import member from "@/assets/images/PicturePage/member3.png"
-
 function MemberDropArea({ wrapperRef, imgRef, decorations, onDrop, onDragOver }) {
     const location = useLocation();
     const { selectedMember } = location.state || {};
