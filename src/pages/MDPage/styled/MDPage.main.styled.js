@@ -205,7 +205,7 @@ export const ProductPrice = styled.p`
   font-family: 'Pretendard', sans-serif;
   font-size: 16px;
   font-weight: 700;
-  color: #A259FF;
+  color: #74B9FF;
   margin: 0;
 `;
 
