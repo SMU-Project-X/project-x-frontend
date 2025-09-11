@@ -88,7 +88,7 @@ export const ProductPrice = styled.div`
   font-size: 28px;
   font-weight: 700;
   font-family: 'Pretendard', sans-serif;
-  color: #A259FF;
+  color: #a3c8ecad;
   margin-bottom: 30px;
 `;
 
