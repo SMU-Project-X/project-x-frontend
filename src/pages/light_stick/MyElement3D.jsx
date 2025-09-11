@@ -82,7 +82,7 @@ export default function MyElement3D({
   const starGeo = useStarGeometry();
 
   // 바디 파라미터
-  const bodyRadius = thickness === "wide" ? 0.16 : 0.11;
+  const bodyRadius = thickness === "wide" ? 0.12 : 0.09;
   const bodyHeight = useMemo(() => {
     const map = { short: 1.0, long: 1.4 };
     return map[bodyLength] ?? 1.2;
@@ -167,7 +167,7 @@ export default function MyElement3D({
       )}
 
       {capShape === "star" && (
-        <group position={[0, bodyTopY + CAP_OFFSETS.star, 0]}>
+        <group position={[0, bodyTopY + CAP_OFFSETS.star -0.03, 0]}>
           <mesh rotation={[0, 0, Math.PI]}>
             <primitive attach="geometry" object={starGeo} />
             <meshPhysicalMaterial {...capPhysMatProps} />
