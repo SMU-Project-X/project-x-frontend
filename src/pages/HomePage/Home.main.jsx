@@ -8,6 +8,7 @@ import MemberInfoCard from "./Home.main.MemberInfoCard"
 import ContentViewBtn from "./Home.main.ContentViewBtn"
 
 import ArrowContainer from "@/pages/HomePage/Home.main.ArrowContainer"
+import Countdown from "./Home.main.Countdown"
 
 
 function Home() {
@@ -31,12 +32,15 @@ function Home() {
                 <MemberInfoCard/>
             </itemS.MemberInfoContainer>
             <itemS.ContentContainer>
-                <itemS.CountdownWrapper>카운트다운 영역</itemS.CountdownWrapper>
+                <itemS.CountdownWrapper>
+                    <itemS.JoinTitleText>베일이 걷히는 순간까지</itemS.JoinTitleText>
+                    <Countdown/>
+                </itemS.CountdownWrapper>
                 <itemS.ContentMapContainer>
                     <ContentViewBtn />
-                    <ArrowContainer color={Chevron_grey} rotate={180} count={1}/>
+                    <ArrowContainer color={Chevron_grey} rotate={0} count={1}/>
                     <ContentViewBtn />
-                    <ArrowContainer color={Chevron_grey} rotate={180} count={1}/>
+                    <ArrowContainer color={Chevron_grey} rotate={0} count={1}/>
                     <ContentViewBtn />
                     <ArrowContainer color={Chevron_grey} rotate={90} count={1}/>
                     <ContentViewBtn />

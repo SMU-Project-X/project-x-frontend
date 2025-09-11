@@ -2,6 +2,7 @@ import styled from "styled-components"
 
 export const HomePageContainer = styled.div`
     width: 100vw;
+    min-height: 100vh; /* 화면 최소 높이만 보장 */
     display: flex;
     flex-direction: column;
 `
@@ -64,6 +65,7 @@ export const ArrowContainer = styled.div`
     margin-top: 10px;
     display: flex;
     flex-direction: column;
+    
 `
     
 
@@ -75,7 +77,6 @@ export const ChevronImage = styled.img`
 export const MemberInfoContainer = styled.div`
     width: 100vw;
     height: 100vh;
-    background-color: aliceblue;
 
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -124,8 +125,11 @@ export const ContentContainer = styled.div`
 
 export const CountdownWrapper = styled.div`
     width: 100%;
-    height: 354px;
-    background-color: red;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-evenly;
 `
 
 export const ContentMapContainer = styled.div`
