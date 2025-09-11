@@ -87,7 +87,7 @@ export const Button = styled.button`
 /* 본문 그리드 */
 export const Content = styled.div`
   display: grid;
-  grid-template-columns: 3fr 1fr;
+  grid-template-columns: 3.5fr 1fr;
   gap: 16px;
   padding: 16px;
 
@@ -163,31 +163,26 @@ export const SubTitle = styled.div`
   margin: 10px 0 6px;
 `;
 
-/* 섹션 내부 버튼 컨테이너: 2x2 그리드 */
+/* 기존: 섹션 내부 버튼 컨테이너 (유지) */
 export const IconGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: 1fr;
-  gap: 6px;
-  align-items: stretch;
-  justify-items: stretch;
+  grid-template-columns: repeat(4, 1fr); /* 한 줄에 4개 */
+  gap: 10px;
 `;
 export const IconRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: 1fr;
-  gap: 6px;
-  align-items: stretch;
-  justify-items: stretch;
+  grid-template-columns: repeat(4, 1fr); /* 한 줄에 2개 */
+  gap: 10px;
 `;
 
-/* 캡 버튼 (정사각형, 칸을 꽉 채움) */
+
+/* 캡 버튼 */
 export const CapBtn = styled.button`
   border: 1px solid var(--line);
   background: var(--card);
   border-radius: 10px;
-  width: 30%;
-  aspect-ratio: 1 / 1;
+  width: 100%;          /* 부모 칸 100% 채우기 */
+  aspect-ratio: 1 / 1;  /* 정사각형 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -229,13 +224,13 @@ export const CapBtn = styled.button`
   }
 `;
 
-/* 그립 버튼 (정사각형, 칸을 꽉 채움) */
+/* 그립 버튼 */
 export const GripBtn = styled.button`
   border: 1px solid var(--line);
   background: var(--card);
   border-radius: 10px;
-  width: 30%;
-  aspect-ratio: 1 / 1;
+  width: 100%;          /* 부모 칸 100% 채우기 */
+  aspect-ratio: 1 / 1;  /* 정사각형 */
   display: flex;
   align-items: center;
   justify-content: center;

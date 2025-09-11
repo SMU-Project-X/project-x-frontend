@@ -56,13 +56,15 @@ export default function LightStickCustomPage() {
 
         <Sidebar>
           <Panel className="wide">
-            <PanelTitle>모양 & 스타일</PanelTitle>
+            <PanelTitle>커스터마이즈</PanelTitle>
+
+            {/* 모양 & 스타일 */}
             <SubTitle>캡 모양</SubTitle>
             <IconGrid>
               <CapBtn className="round" />
               <CapBtn className="flat" />
-              <CapBtn className="taper" />
               <CapBtn className="cube" />
+              <CapBtn className="taper" />
             </IconGrid>
 
             <SubTitle>그립 스타일</SubTitle>
@@ -70,10 +72,9 @@ export default function LightStickCustomPage() {
               <GripBtn />
               <GripBtn className="wide" />
             </IconRow>
-          </Panel>
 
-          <Panel className="wide">
-            <PanelTitle>색상</PanelTitle>
+            {/* 색상 */}
+            <SubTitle>색상</SubTitle>
             <Field>
               <span>바디 색상</span>
               <ColorField>
@@ -95,10 +96,9 @@ export default function LightStickCustomPage() {
                 <input type="color" value="#999999" readOnly />
               </ColorField>
             </Field>
-          </Panel>
 
-          <Panel className="wide">
-            <PanelTitle>재질 속성</PanelTitle>
+            {/* 재질 속성 */}
+            <SubTitle>재질 속성</SubTitle>
             <SliderField>
               <label>메탈릭</label>
               <div className="slider">
@@ -120,20 +120,18 @@ export default function LightStickCustomPage() {
                 <span className="value">0.40</span>
               </div>
             </SliderField>
-          </Panel>
 
-          <Panel>
-            <PanelTitle>악세서리</PanelTitle>
+            {/* 악세서리 */}
+            <SubTitle>악세서리</SubTitle>
             <AttachRow>
               <AttachBtn>🪢</AttachBtn>
               <AttachBtn>⭐</AttachBtn>
               <AttachBtn>🔗</AttachBtn>
               <AttachBtn>🧳</AttachBtn>
             </AttachRow>
-          </Panel>
 
-          <Panel>
-            <PanelTitle>스티커 & 데칼</PanelTitle>
+            {/* 스티커 & 데칼 */}
+            <SubTitle>스티커 & 데칼</SubTitle>
             <UploadCard>
               <div className="title">디자인 업로드</div>
               <Button className="ghost small">파일 선택</Button>
