@@ -5,17 +5,12 @@ import ChatHeader from './hooks/Chatbot.ChatHeader';
 import MessageArea from './hooks/Chatbot.MessageArea';
 import InputArea from './hooks/Chatbot.InputArea';
 import { findContactByNameOrEnglish } from './utils/helpers';
-<<<<<<< Updated upstream
-import './styled/ChatApp.css'; 
-//
-=======
 
 import {
     Container, Header, NavContainer, Logo, NavMenu, NavItem, LoginBtn,
     ChatMainContainer, ChatArea
 } from './styled/ChatApp.js';
 
->>>>>>> Stashed changes
 const ChatApp = () => {
     const { chatName } = useParams();
 
