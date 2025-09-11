@@ -1,27 +1,51 @@
 import styled from "styled-components";
 
 export const header = styled.div`
-        width:100vw; height:75px; background-color: #B3D1F0;
-        display:flex; justify-content: center; align-items: center; text-align: center;
+        width: 100vw; 
+        height: 75px;
+        background-color: #B3D1F0;
+        display: flex; 
+        justify-content: center;
+        align-items: center;
+        text-align: center;
 `;
 export const logo = styled.div`
-        width:20%; font-size:25px; font-weight: 800;
+        width: 20%;
+        font-size: 25px;
+        font-weight: 800;
+        cursor: pointer;
 `;
 export const logo_x = styled.span`
-        font-size:35px; font-family: cursive;
+        font-size: 35px;
+        font-family: cursive;
 `;
 export const menu= styled.div`
-        width:50%; display:flex; justify-content: center; font-size:25px; font-weight: 700;
+        width: 50%;
+        display: flex;
+        justify-content: center;
+        font-size: 25px;
+        font-weight: 700;
+
         span {
-          margin:0 10px;
+          margin:0 20px;
+          cursor: pointer;
         }
 `;
 export const login = styled.div`
-        width:20%; display:flex; justify-content: center;
+        width: 20%;
+        display: flex;
+        justify-content: center;
+        cursor: pointer;
+
         img {
-          width:40px; height:40px;
+          width: 40px;
+          height: 40px;
         }
 `;
 export const login_text = styled.span`
-        font-size:15px; font-weight: 600; margin-left: 5px;
+        font-size: 15px;
+        font-weight: 600;
+        margin-left: 5px;
+        height: 40px;
+        line-height: 40px;
 `;
