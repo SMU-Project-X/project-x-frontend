@@ -4,7 +4,10 @@ import * as itemS from "@/pages/HomePage/styled/Home.main.style"
 import Video from "@/assets/images/HomaPage/LogoVideo2.mp4"
 import Chevron_white from "@/assets/images/HomaPage/ChevronLeft_white.png"
 import Chevron_grey from "@/assets/images/RandingPage/ChevronLeft.png"
-import MemberInfoPage from "./Home.MemberInfoPage"
+import MemberInfoCard from "./Home.main.MemberInfoCard"
+import ContentViewBtn from "./Home.main.ContentViewBtn"
+
+import ArrowContainer from "@/pages/HomePage/Home.main.ArrowContainer"
 
 
 function Home() {
@@ -18,67 +21,33 @@ function Home() {
                 <itemS.HideWrapper></itemS.HideWrapper>
                 <itemS.MemberInfoNavContainer>
                     <itemS.MemberInfoNav>Member Info</itemS.MemberInfoNav>
-                    <itemS.ArrowContainer>
-                        <itemS.ChevronImage src={Chevron_white} $rotate={0} />
-                        <itemS.ChevronImage src={Chevron_white} $rotate={0} />
-                    </itemS.ArrowContainer>
+                    <ArrowContainer color={Chevron_white} rotate={0} count={2}/>
                 </itemS.MemberInfoNavContainer>
             </itemS.LogoVideoWrapper>
             <itemS.MemberInfoContainer>
-                <MemberInfoPage/>
-                <MemberInfoPage/>
-                <MemberInfoPage/>
-                <MemberInfoPage/>
+                <MemberInfoCard/>
+                <MemberInfoCard/>
+                <MemberInfoCard/>
+                <MemberInfoCard/>
             </itemS.MemberInfoContainer>
             <itemS.ContentContainer>
                 <itemS.CountdownWrapper>카운트다운 영역</itemS.CountdownWrapper>
                 <itemS.ContentMapContainer>
-                    <itemS.ContentViewBtnWrapper>
-                        <itemS.ContenDateWrapper></itemS.ContenDateWrapper>
-                        <itemS.ContentViewBtn></itemS.ContentViewBtn>
-                    </itemS.ContentViewBtnWrapper>
-                    <itemS.ArrowContainer>
-                        <itemS.ChevronImage src={Chevron_grey} $rotate={0}/>
-                    </itemS.ArrowContainer>
-                    <itemS.ContentViewBtnWrapper>
-                        <itemS.ContenDateWrapper></itemS.ContenDateWrapper>
-                        <itemS.ContentViewBtn></itemS.ContentViewBtn>
-                    </itemS.ContentViewBtnWrapper>
-                    <itemS.ArrowContainer>
-                        <itemS.ChevronImage src={Chevron_grey} $rotate={0}/>
-                    </itemS.ArrowContainer>
-                    <itemS.ContentViewBtnWrapper>
-                        <itemS.ContenDateWrapper></itemS.ContenDateWrapper>
-                        <itemS.ContentViewBtn></itemS.ContentViewBtn>
-                    </itemS.ContentViewBtnWrapper>
-                    <itemS.ArrowContainer>
-                        <itemS.ChevronImage src={Chevron_grey} $rotate={90}/>
-                    </itemS.ArrowContainer>
-                    <itemS.ContentViewBtnWrapper>
-                        <itemS.ContenDateWrapper></itemS.ContenDateWrapper>
-                        <itemS.ContentViewBtn></itemS.ContentViewBtn>
-                    </itemS.ContentViewBtnWrapper>
-                    <itemS.ArrowContainer>
-                        <itemS.ChevronImage src={Chevron_grey} $rotate={180}/>
-                    </itemS.ArrowContainer>
-                    <itemS.ContentViewBtnWrapper>
-                        <itemS.ContenDateWrapper></itemS.ContenDateWrapper>
-                        <itemS.ContentViewBtn></itemS.ContentViewBtn>
-                    </itemS.ContentViewBtnWrapper>
-                    <itemS.ArrowContainer>
-                        <itemS.ChevronImage src={Chevron_grey} $rotate={180}/>
-                    </itemS.ArrowContainer>
-                    <itemS.ContentViewBtnWrapper>
-                        <itemS.ContenDateWrapper></itemS.ContenDateWrapper>
-                        <itemS.ContentViewBtn></itemS.ContentViewBtn>
-                    </itemS.ContentViewBtnWrapper>
+                    <ContentViewBtn />
+                    <ArrowContainer color={Chevron_grey} rotate={180} count={1}/>
+                    <ContentViewBtn />
+                    <ArrowContainer color={Chevron_grey} rotate={180} count={1}/>
+                    <ContentViewBtn />
+                    <ArrowContainer color={Chevron_grey} rotate={90} count={1}/>
+                    <ContentViewBtn />
+                    <ArrowContainer color={Chevron_grey} rotate={180} count={1}/>
+                    <ContentViewBtn />
+                    <ArrowContainer color={Chevron_grey} rotate={180} count={1}/>
+                    <ContentViewBtn />
                 </itemS.ContentMapContainer>
                 <itemS.JoinContainer>
                     <itemS.JoinTitleText>“지금, 우리와 더 가까워지자!"</itemS.JoinTitleText>
-                    <itemS.ArrowContainer>
-                        <itemS.ChevronImage src={Chevron_grey} $rotate={90} />
-                        <itemS.ChevronImage src={Chevron_grey} $rotate={90} />
-                    </itemS.ArrowContainer>
+                    <ArrowContainer color={Chevron_grey} rotate={90} count={2}/>
                     <itemS.JoinBtnContainer>
                         <itemS.JoinBtn>그룹 공유하기</itemS.JoinBtn>
                         <itemS.JoinBtn>회원가입</itemS.JoinBtn>
