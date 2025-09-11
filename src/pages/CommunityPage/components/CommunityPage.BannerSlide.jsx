@@ -2,7 +2,7 @@ import React from "react";
 import * as itemS from "../styled/CommunityPage.VoteBanner.style";
 import image2 from "@/assets/images/CommunityPage/image2.png";
 
-const VoteSlideCard = ({ title, date, img, onClick }) => {
+const BannerSlide = ({ title, date, img, onClick }) => {
   return (
     <itemS.vote_card onClick={onClick}>
       <itemS.vote_content>
@@ -16,4 +16,4 @@ const VoteSlideCard = ({ title, date, img, onClick }) => {
   );
 };
 
-export default VoteSlideCard;
+export default BannerSlide;

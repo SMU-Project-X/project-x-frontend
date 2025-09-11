@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 // modal style
 import * as VoteModal from '@/pages/CommunityPage/styled/CommunityPage.VoteModal.style';
 
+// 투표하기 유닛멤버 후보
 function VoteCard({title,img,CharacterName,Personality}) {
     return (
         <VoteModal.VoteCard>
