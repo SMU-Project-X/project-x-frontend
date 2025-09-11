@@ -3,74 +3,61 @@ import {
   PageRoot, Header, HeaderLeft, Logo, Button, Content,
   ViewerCard, ViewerStage, ViewerActions, Sidebar, Panel, PanelTitle, SubTitle,
   IconGrid, IconRow, CapBtn, GripBtn, Field, ColorField, SliderField,
-  AttachRow, AttachBtn, UploadCard
+  UploadCard
 } from "./styled/light_stick.CustomPage.style.js";
 
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Environment } from "@react-three/drei";
 import MyElement3D from "./MyElement3D";
 
 export default function LightStickCustomPage() {
-  // 캡 모양: sphere | star | heart | hemisphere
   const [capShape, setCapShape] = useState("sphere");
+  const [thickness, setThickness] = useState("thin");     // 'thin' | 'wide'
+  const [bodyLength, setBodyLength] = useState("short");  // 'short' | 'long'
 
-  // 두께(=반지름) 얇게/굵게
-  const [thickness, setThickness] = useState("thin"); // 'thin' | 'wide'
-
-  // 길이: 기본 short, 'long'만 선택 제공
-  const [bodyLength, setBodyLength] = useState("short"); // 'short' | 'long'
-
+  // 색상(유지)
   const [bodyColor, setBodyColor] = useState("#ffffff");
-  const [capColor, setCapColor] = useState("#ffffff");
-  const [buttonColor, setButtonColor] = useState("#ffffff");
+  const [capColor, setCapColor]   = useState("#ffffff");
 
-  const [metallic, setMetallic] = useState(0.0);
-  const [roughness, setRoughness] = useState(0.0);
+  // 재질/광택
+  const [metallic, setMetallic]       = useState(0.25);
+  const [roughness, setRoughness]     = useState(0.00);
+  const [transmission, setTransmission] = useState(0.50);
+  const [emissive, setEmissive]       = useState(0.00);
 
-  // 투명도(=transmission) 슬라이더 추가
-  const [transmission, setTransmission] = useState(0.5);
-
-  // 발광 강도(필라멘트에만 적용)
-  const [emissive, setEmissive] = useState(0.0);
-
-  const [accessories, setAccessories] = useState({
-    rope: false,  // 🪢
-    star: false,  // ⭐
-    chain: false, // 🔗
-    tag: false,   // 🧳
-  });
-
-  const toggleAccessory = (key) =>
-    setAccessories((prev) => ({ ...prev, [key]: !prev[key] }));
+  // 스티커/데칼
+  const [stickerUrl, setStickerUrl]   = useState("");
+  const [stickerScale, setStickerScale] = useState(0.3); // 0.1~1.0
+  const [stickerY, setStickerY]       = useState(0.5);   // 0~1 (바디 높이 내 정규화된 Y 위치)
 
   const resetAll = () => {
     setCapShape("sphere");
     setThickness("thin");
     setBodyLength("short");
-    setBodyColor("#000000");
-    setCapColor("#666666");
-    setButtonColor("#999999");
+    setBodyColor("#e5e7eb");
+    setCapColor("#ffffff");
     setMetallic(0.2);
     setRoughness(0.6);
     setTransmission(0.3);
     setEmissive(0.4);
-    setAccessories({ rope: false, star: false, chain: false, tag: false });
+    setStickerUrl("");
+    setStickerScale(0.5);
+    setStickerY(0.5);
   };
 
-  // 캔버스 캡처용 ref
+  // 캔버스 캡처
   const glRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
 
   const captureBlob = async () =>
     new Promise((resolve) => {
-      const gl = glRef.current;
-      const scene = sceneRef.current;
-      const camera = cameraRef.current;
-      if (!gl || !scene || !camera) return resolve(null);
-      // 최신 프레임 보장 후 캡처
-      gl.render(scene, camera);
-      gl.domElement.toBlob((blob) => resolve(blob), "image/png");
+      requestAnimationFrame(() => {
+        const gl = glRef.current, scene = sceneRef.current, camera = cameraRef.current;
+        if (!gl || !scene || !camera) return resolve(null);
+        gl.render(scene, camera);
+        gl.domElement.toBlob((blob) => resolve(blob), "image/png");
+      });
     });
 
   const handleSaveImage = async () => {
@@ -92,17 +79,11 @@ export default function LightStickCustomPage() {
     const file = new File([blob], "lightstick.png", { type: "image/png" });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
-        await navigator.share({
-          files: [file],
-          title: "Lightstick",
-          text: "내 커스텀 응원봉",
-        });
+        await navigator.share({ files: [file], title: "Lightstick", text: "내 커스텀 응원봉" });
       } catch {
-        // 취소/오류 시 저장으로 폴백
         handleSaveImage();
       }
     } else {
-      // 파일 공유 불가 환경은 저장으로 폴백
       handleSaveImage();
     }
   };
@@ -122,8 +103,8 @@ export default function LightStickCustomPage() {
           <ViewerStage>
             <Canvas
               dpr={[1, 2]}
-              camera={{ fov: 45, near: 0.1, far: 50, position: [2, 2, 5] }}
-              gl={{ antialias: true }}
+              camera={{ fov: 40, near: 0.05, far: 40, position: [1.5, 1.5, 2.7] }}
+              gl={{ antialias: true, preserveDrawingBuffer: true }}
               onCreated={({ gl, scene, camera }) => {
                 glRef.current = gl;
                 sceneRef.current = scene;
@@ -136,14 +117,14 @@ export default function LightStickCustomPage() {
                 bodyLength={bodyLength}
                 bodyColor={bodyColor}
                 capColor={capColor}
-                buttonColor={buttonColor}
                 metallic={metallic}
                 roughness={roughness}
                 transmission={transmission}
                 emissive={emissive}
-                accessories={accessories}
+                stickerUrl={stickerUrl}
+                stickerScale={stickerScale}
+                stickerY={stickerY}
               />
-              {/* 마우스 회전 + 휠 줌 */}
               <OrbitControls
                 makeDefault
                 enablePan={false}
@@ -157,6 +138,7 @@ export default function LightStickCustomPage() {
                 zoomSpeed={0.8}
                 rotateSpeed={0.9}
               />
+              <Environment preset="city" /> {/* 환경 */}
             </Canvas>
           </ViewerStage>
 
@@ -176,49 +158,22 @@ export default function LightStickCustomPage() {
             {/* 캡 모양 */}
             <SubTitle>캡 모양</SubTitle>
             <IconGrid>
-              <CapBtn
-                className={capShape==="sphere" ? "active" : ""}
-                onClick={()=>setCapShape("sphere")}
-              >구</CapBtn>
-              <CapBtn
-                className={capShape==="star" ? "active" : ""}
-                onClick={()=>setCapShape("star")}
-              >별</CapBtn>
-              <CapBtn
-                className={capShape==="heart" ? "active" : ""}
-                onClick={()=>setCapShape("heart")}
-              >♥</CapBtn>
-              <CapBtn
-                className={capShape==="hemisphere" ? "active" : ""}
-                onClick={()=>setCapShape("hemisphere")}
-              >반구</CapBtn>
+              <CapBtn className={capShape==="sphere" ? "active" : ""} onClick={()=>setCapShape("sphere")}>구</CapBtn>
+              <CapBtn className={capShape==="star" ? "active" : ""} onClick={()=>setCapShape("star")}>별</CapBtn>
+              <CapBtn className={capShape==="heart" ? "active" : ""} onClick={()=>setCapShape("heart")}>하트</CapBtn>
+              <CapBtn className={capShape==="hemisphere" ? "active" : ""} onClick={()=>setCapShape("hemisphere")}>반구</CapBtn>
             </IconGrid>
 
             {/* 바디 두께 · 길이 */}
             <SubTitle>바디 두께 · 길이</SubTitle>
             <IconRow>
-              {/* 두께 */}
-              <GripBtn
-                className={thickness==="thin" ? "active" : ""}
-                onClick={()=>setThickness("thin")}
-              >얇게</GripBtn>
-              <GripBtn
-                className={thickness==="wide" ? "active wide" : "wide"}
-                onClick={()=>setThickness("wide")}
-              >굵게</GripBtn>
-
-              {/* 길이 (보통 제거, short 기본값 / long 선택만 제공) */}
-              <GripBtn
-                className={bodyLength==="short" ? "active" : ""}
-                onClick={()=>setBodyLength("short")}
-              >짧게</GripBtn>
-              <GripBtn
-                className={bodyLength==="long" ? "active" : ""}
-                onClick={()=>setBodyLength("long")}
-              >길게</GripBtn>
+              <GripBtn className={thickness==="thin" ? "active" : ""} onClick={()=>setThickness("thin")}>얇게</GripBtn>
+              <GripBtn className={thickness==="wide" ? "active wide" : "wide"} onClick={()=>setThickness("wide")}>굵게</GripBtn>
+              <GripBtn className={bodyLength==="short" ? "active" : ""} onClick={()=>setBodyLength("short")}>짧게</GripBtn>
+              <GripBtn className={bodyLength==="long" ? "active" : ""} onClick={()=>setBodyLength("long")}>길게</GripBtn>
             </IconRow>
 
-            {/* 색상 */}
+            {/* 색상 (바디/캡 유지) */}
             <SubTitle>색상</SubTitle>
             <Field>
               <span>바디 색상</span>
@@ -232,13 +187,6 @@ export default function LightStickCustomPage() {
               <ColorField>
                 <input type="text" value={capColor} readOnly />
                 <input type="color" value={capColor} onChange={e=>setCapColor(e.target.value)} />
-              </ColorField>
-            </Field>
-            <Field>
-              <span>버튼 색상</span>
-              <ColorField>
-                <input type="text" value={buttonColor} readOnly />
-                <input type="color" value={buttonColor} onChange={e=>setButtonColor(e.target.value)} />
               </ColorField>
             </Field>
 
@@ -273,33 +221,39 @@ export default function LightStickCustomPage() {
               </div>
             </SliderField>
 
-            {/* 악세서리 */}
-            <SubTitle>악세서리</SubTitle>
-            <AttachRow>
-              <AttachBtn
-                onClick={()=>toggleAccessory("rope")}
-                style={{ outline: accessories.rope ? "2px solid var(--accent)" : "none" }}
-              >🪢</AttachBtn>
-              <AttachBtn
-                onClick={()=>toggleAccessory("star")}
-                style={{ outline: accessories.star ? "2px solid var(--accent)" : "none" }}
-              >⭐</AttachBtn>
-              <AttachBtn
-                onClick={()=>toggleAccessory("chain")}
-                style={{ outline: accessories.chain ? "2px solid var(--accent)" : "none" }}
-              >🔗</AttachBtn>
-              <AttachBtn
-                onClick={()=>toggleAccessory("tag")}
-                style={{ outline: accessories.tag ? "2px solid var(--accent)" : "none" }}
-              >🧳</AttachBtn>
-            </AttachRow>
-
-            {/* 스티커 & 데칼 (후순위) */}
+            {/* 스티커 & 데칼 */}
             <SubTitle>스티커 & 데칼</SubTitle>
             <UploadCard>
-              <div className="title">디자인 업로드</div>
-              <Button className="ghost small">파일 선택</Button>
-              <p className="hint">적용 위치: 바디와 캡으로 제한</p>
+              <div className="title">꾸미기 업로드</div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e)=>{
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  const url = URL.createObjectURL(f);
+                  setStickerUrl(url);
+                }}
+              />
+              <SliderField>
+                <label>스티커 크기</label>
+                <div className="slider">
+                  <input type="range" min="0.1" max="1" step="0.01" value={stickerScale} onChange={e=>setStickerScale(parseFloat(e.target.value))} />
+                  <span className="value">{stickerScale.toFixed(2)}</span>
+                </div>
+              </SliderField>
+              <SliderField>
+                <label>스티커 높이(Y)</label>
+                <div className="slider">
+                  <input
+                    type="range"
+                    min="0" max="1" step="0.01"
+                    value={stickerY}
+                    onChange={e=>setStickerY(parseFloat(e.target.value))}
+                  />
+                  <span className="value">{Math.round(stickerY * 100)}%</span>
+                </div>
+              </SliderField>
             </UploadCard>
           </Panel>
         </Sidebar>
