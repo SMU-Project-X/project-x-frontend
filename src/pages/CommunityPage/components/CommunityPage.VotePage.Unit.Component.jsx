@@ -8,12 +8,11 @@ import VoteCard from './CommunityPage.VotePage.VoteCard.component';
 import image1 from '@/assets/images/CommunityPage/image1.png'
 
 // 투표하기 후보 전체
-function Unit({title, options, unitId, setSelectedUnit, setSelectedMember}){
+function Unit({title, options}){
     return (
         <VoteModal.VoteSelect>
             <VoteModal.RadioInfo>
-                <input type="radio" name="unit" onChange= {()=> setSelectedUnit(unitId)}
-                id={title} />
+                <input type="radio" name="choice" id={title}></input>
                 <h3>{title}</h3>
             </VoteModal.RadioInfo>
             <VoteModal.Unit>
@@ -29,6 +28,7 @@ function Unit({title, options, unitId, setSelectedUnit, setSelectedMember}){
                     );
                 })}
             </VoteModal.Unit>
+            {/* <button onClick={onVote}>투표하기</button> */}
         </VoteModal.VoteSelect>
     )
 }

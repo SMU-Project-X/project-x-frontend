@@ -33,15 +33,6 @@ export const VotePage = ({isModalOpen, onClose, userId}) => {
     //     // 실제 구현에서는 서버 API 호출 후 상태 업데이트
     // }
 
-    const {
-        units,
-        hasVoted,
-        selectedMember,
-        selectedUnit,
-        setSelectedUnit,
-        setSelectedMember,
-        handleVote,
-    }  = DoVote(userId);
 
     // VoteCard 와 props 이름 일치시키기 필요
     const dummyUnits = [
@@ -86,43 +77,29 @@ export const VotePage = ({isModalOpen, onClose, userId}) => {
     ];
 
         return (
-        <VoteModal.Overlay>
-            <VoteModal.ModuleContainer>
-                <VoteModal.VoteContainer>
-                <VoteModal.BaseContainer>
+            <VoteModal.Overlay>
+                <VoteModal.ModuleContainer>
+                    <VoteModal.VoteContainer>
                     <h1>유닛조합에 투표 해주세요</h1>
-                    <VoteModal.CloseBtn onClick={onClose} >
-                        <img src={CloseBtn} alt="CloseBtn" />
-                    </VoteModal.CloseBtn>
-                </VoteModal.BaseContainer>
-                    
-                    {/* 투표가 이미 완료된 경우 안내 */}
-                    {hasVoted ? (
-                        <VoteModal.VoteBlock>
-                            <VoteModal.NoMoreVote>
-                                <p>이미 투표에 참여하셨습니다.</p>
-                                <p>결과를 기다려주세요</p>
-                            </VoteModal.NoMoreVote>
-                        </VoteModal.VoteBlock>
-                    ) : (
-                        // 투표 가능한 경우 Unit 렌더링
-                        dummyUnits.map((unit, idx) => (
-                            <Unit
-                                key={unit.unitId}
-                                title={unit.title}
-                                options={unit.options}
-                                unitId={unit.unitId}
-                                setSelectedUnit={setSelectedUnit}
-                                setSelectedMember={setSelectedMember}
+                    <VoteModal.CloseBtn onClick={onClose}>닫기</VoteModal.CloseBtn>
+                        {dummyUnits.map((unit, idx) => (
+                            <Unit 
+                                key={idx} 
+                                title={unit.title} 
+                                options={unit.options} 
                             />
-                        ))
-                    )}
-                </VoteModal.VoteContainer>  
-                <VoteModal.CloseBtn>
-                    <button onClick={handleVote}>투표하기</button>
-                </VoteModal.CloseBtn>
-            </VoteModal.ModuleContainer>
-        </VoteModal.Overlay>
+                        ))}
+                        {/* 투표가 이미 완료된 경우 안내 */}
+                            <VoteModal.VoteBlock>
+                                <VoteModal.NoMoreVote>
+                                    <p>이미 투표에 참여하셨습니다.</p>
+                                    <p>결과를 기다려주세요</p>
+                                </VoteModal.NoMoreVote>
+                            </VoteModal.VoteBlock>
+                    </VoteModal.VoteContainer> 
+                    <button>투표하기</button> 
+                </VoteModal.ModuleContainer>
+            </VoteModal.Overlay>
     );
     
 }
