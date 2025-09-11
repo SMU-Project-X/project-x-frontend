@@ -18,7 +18,7 @@ import voteicon from '@/assets/images/CommunityPage/voteicon.png';
 import image1 from '@/assets/images/CommunityPage/image1.png';
 import Modal from '../CommunityPage.VotePage';
 
-import VoteSlideCard from './CommunityPage.VoteSlideCard';
+import VoteSlideCard from './CommunityPage.BannerSlide';
 
 export const Banner = ({onOpenModal}) => {
 

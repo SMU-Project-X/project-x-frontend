@@ -86,26 +86,29 @@ export const NoMoreVote = styled.div `
 
 
 /* 모달창 */
-export const CloseBtn = styled.div`
-    width: 50px;
-    height: 20px;
-    text-align: center;
-    border: 1px solid black;
-    border-radius: 40px;
+export const Overlay = styled.div`
     position: absolute;
-    top: 16px;
-    right: 16px;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+`;
+export const BaseContainer = styled.div`
+    
+
+`;
+export const CloseBtn = styled.div`
+    width: 100%;
+    height: 30px;
+    display: flex;
+    justify-content: end;
     cursor: pointer;
     & hover {
         color: #ff4d4f;
     }
 `;
-export const Overlay = styled.div`
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-`;
+
