@@ -40,13 +40,13 @@ export default function LightStickCustomPage() {
 
       <Content>
         <ViewerCard>
+          
           <ViewerStage>
-            <Canvas camera={{ position: [3, 3, 3], fov: 50 }}>
-              <ambientLight intensity={0.5} />
-              <directionalLight position={[5, 5, 5]} />
+            <Canvas>
               <MyElement3D />
             </Canvas>
           </ViewerStage>
+
           <ViewerActions>
             <Button>초기화</Button>
             <div className="spacer" />
