@@ -1,8 +1,42 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { Decal, useTexture } from "@react-three/drei";
 
-/** 라이트 구성 */
+/**
+ * Component: MyElement3D
+ * 목적:
+ *  - 응원봉의 바디/캡(4종)/필라멘트/데칼을 구성하고, R3F 머티리얼 파라미터를 반영
+ * 입력(props):
+ *  - capShape: "sphere" | "star" | "heart" | "hemisphere"
+ *  - thickness: "thin" | "wide"
+ *  - bodyLength: "short" | "long"
+ *  - bodyColor, capColor: '#rrggbb'
+ *  - metallic, roughness, transmission, emissive: 0~1
+ *  - stickerUrl(object URL), stickerScale(0.1~1), stickerY(0~1; 바디 높이 내 정규화)
+ *
+ * 성능:
+ *  - 하트/별 Geometry는 useMemo로 캐시
+ *  - 바디 길이/두께 파생 파라미터도 메모
+ *  - 데칼 텍스처는 빈 1x1로 대체하여 훅 조건분기 방지
+ *
+ * 주의:
+ *  - transmission 사용을 위해 meshPhysicalMaterial 사용
+ *  - texture.colorSpace = SRGBColorSpace로 텍스처 감마 보정
+ */
+
+const BLANK_1x1 =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9WfYv9kAAAAASUVORK5CYII=";
+
+const CAP_OFFSETS = {
+  sphere: 0.26,
+  star: 0.22,
+  heart: 0.22,
+  hemisphere: 0.36,
+};
+
+const clamp01 = (n) => Math.min(1, Math.max(0, n));
+
+/** 장면 기본 라이트: 주변광 + 방향광(은은한 하이라이트) */
 function SceneSetup() {
   return (
     <>
@@ -12,7 +46,7 @@ function SceneSetup() {
   );
 }
 
-// 하트 Extrude
+/** 하트 Geometry 생성(Extrude + 베벨, 크기/정렬 보정) */
 function useHeartGeometry() {
   return useMemo(() => {
     const x = 0, y = 0;
@@ -30,13 +64,13 @@ function useHeartGeometry() {
       bevelSegments: 4, bevelSize: 5, bevelThickness: 5, curveSegments: 32,
     });
     geo.center();
-    const s = 0.0065, sz = s * 1.35;
+    const s = 0.0060, sz = s * 1.35; // 사이즈
     geo.scale(s, s, sz);
     return geo;
   }, []);
 }
 
-// 별 Extrude
+/** 별 Geometry 생성(Extrude + 베벨, 스파이크 5개) */
 function useStarGeometry() {
   return useMemo(() => {
     const outer = 50, inner = 20, spikes = 5;
@@ -61,78 +95,77 @@ function useStarGeometry() {
   }, []);
 }
 
-const BLANK_1x1 =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9WfYv9kAAAAASUVORK5CYII=";
-
 export default function MyElement3D({
-  capShape,        // "sphere" | "star" | "heart" | "hemisphere"
-  thickness,       // "thin" | "wide"
-  bodyLength,      // "short" | "long"
+  capShape,
+  thickness,
+  bodyLength,
   bodyColor,
   capColor,
   metallic,
   roughness,
   transmission,    // 0~1
-  emissive,        // 필라멘트 강도
+  emissive,        // 0~1 (필라멘트 발광 강도)
   stickerUrl,      // object URL
   stickerScale,    // 0.1~1.0
   stickerY,        // 0~1 (정규화된 높이)
 }) {
+  // ── 준비된 기하 ──
   const heartGeo = useHeartGeometry();
   const starGeo = useStarGeometry();
 
-  // 바디 파라미터
-  const bodyRadius = thickness === "wide" ? 0.12 : 0.09;
+  // ── 바디 파라미터(두께/길이 파생값) ──
+  const bodyRadius = useMemo(() => (thickness === "wide" ? 0.12 : 0.08), [thickness]);
   const bodyHeight = useMemo(() => {
-    const map = { short: 1.0, long: 1.4 };
+    const map = { short: 0.8, long: 1.1 };
     return map[bodyLength] ?? 1.2;
   }, [bodyLength]);
 
   const bodyCenterY = bodyHeight / 2;
   const bodyTopY = bodyHeight;
 
-  // 캡 오프셋
-  const CAP_OFFSETS = {
-    sphere: 0.26, star: 0.22, heart: 0.22, hemisphere: 0.36,
-  };
-
-  const capPhysMatProps = {
+  // ── 캡 머티리얼(유리 느낌을 위해 PhysicalMaterial 사용) ──
+  const capPhysMatProps = useMemo(() => ({
     color: capColor,
-    metalness: metallic,
-    roughness,
-    transmission,
-    thickness: 0.4,
-    ior: 1.45,
-    clearcoat: 0.6,
+    metalness: clamp01(metallic),
+    roughness: clamp01(roughness),
+    transmission: clamp01(transmission),
+    thickness: 0.4,     // 유리 두께감(투과)
+    ior: 1.45,          // 굴절률
+    clearcoat: 0.6,     // 외피 코팅
     clearcoatRoughness: 0.2,
-  };
+  }), [capColor, metallic, roughness, transmission]);
 
-  // 스티커 텍스처 (훅 조건부 호출 방지)
-  const stickerTex = useTexture(stickerUrl || BLANK_1x1);
-  if (stickerUrl) {
+  // ── 스티커 텍스처(있으면 세팅, 없으면 1x1 투명) ──
+  const texSrc = stickerUrl || BLANK_1x1;
+  const stickerTex = useTexture(texSrc);
+  useEffect(() => {
+    // 빈 텍스처(1x1)에는 불필요
+    if (!stickerUrl) return;
     stickerTex.anisotropy = 8;
     stickerTex.wrapS = stickerTex.wrapT = THREE.ClampToEdgeWrapping;
     stickerTex.colorSpace = THREE.SRGBColorSpace;
-  }
+  }, [stickerUrl, stickerTex]);
 
-  // 필라멘트(발광체): 캡 색상 톤으로 발광
+  // ── 필라멘트(발광체): 캡 색상 톤으로 발광 ──
   const Filament = ({ height = 0.14, offsetY = 0 }) => (
     <mesh position={[0, offsetY, 0]}>
       <cylinderGeometry args={[0.035, 0.035, height, 16]} />
       <meshStandardMaterial
         color={capColor}
         emissive={capColor}
-        emissiveIntensity={emissive}
+        emissiveIntensity={clamp01(emissive)}
         metalness={0}
         roughness={0.4}
       />
     </mesh>
   );
 
-  // 데칼 Y 위치 계산 (바디 로컬 좌표계에서)
-  // stickerY: 0(아래) ~ 1(위)
-  const yRange = bodyHeight * 0.9;                 // 위아래 5%는 안전 마진
-  const yLocal = (stickerY - 0.5) * yRange;        // 중앙 기준 오프셋
+  // ── 데칼 Y 위치(바디 로컬) 계산 ──
+  const { yLocal } = useMemo(() => {
+    // 위아래 5% 안전 마진 → 90% 범위에만 배치
+    const yRange = bodyHeight * 0.9;
+    return { yLocal: (clamp01(stickerY) - 0.5) * yRange };
+  }, [bodyHeight, stickerY]);
 
   return (
     <>
@@ -141,8 +174,8 @@ export default function MyElement3D({
       {/* Body */}
       <mesh position={[0, bodyCenterY, 0]}>
         <cylinderGeometry args={[bodyRadius, bodyRadius, bodyHeight, 40]} />
-        <meshStandardMaterial color={bodyColor} metalness={metallic} roughness={roughness} />
-        {/* 스티커/데칼: 바디 정면 투사 */}
+        <meshStandardMaterial color={bodyColor} metalness={clamp01(metallic)} roughness={clamp01(roughness)} />
+        {/* 스티커/데칼: 정면 투사 (Decal) */}
         {stickerUrl && (
           <Decal
             position={[0, yLocal, bodyRadius + 0.001]}
@@ -167,7 +200,7 @@ export default function MyElement3D({
       )}
 
       {capShape === "star" && (
-        <group position={[0, bodyTopY + CAP_OFFSETS.star -0.03, 0]}>
+        <group position={[0, bodyTopY + CAP_OFFSETS.star - 0.03, 0]}>
           <mesh rotation={[0, 0, Math.PI]}>
             <primitive attach="geometry" object={starGeo} />
             <meshPhysicalMaterial {...capPhysMatProps} />

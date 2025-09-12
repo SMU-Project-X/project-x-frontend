@@ -1,6 +1,15 @@
 import styled from "styled-components";
 
-/* 공통 색/그리드 토큰 */
+/**
+ * styled-system: 공통 토큰/레이아웃 정의
+ * 목적:
+ *  - 라이트/카드/그리드/버튼 상태를 토큰화하여 일관된 룩앤필 유지
+ *  - 반응형(≤960px)에서 1열 전환
+ * 비고:
+ *  - 색상/그림자/곡률 토큰은 컴포넌트 전반에서 재사용
+ *  - 아이콘형 버튼(정사각형)은 aspect-ratio로 안정적 비율 유지
+ */
+
 export const PageRoot = styled.div`
   --bg: #f5f6f8;
   --card: #ffffff;
@@ -20,7 +29,7 @@ export const PageRoot = styled.div`
     "Noto Color Emoji";
 `;
 
-/* Header */
+/** 상단 고정 헤더: 로고/타이틀/액션 영역 */
 export const Header = styled.header`
   height: 56px;
   padding: 0 20px;
@@ -54,7 +63,7 @@ export const HeaderActions = styled.div`
   gap: 8px;
 `;
 
-/* Buttons */
+/** 공통 버튼: 기본/primary/dark/ghost/small 변형 */
 export const Button = styled.button`
   height: 34px;
   padding: 0 12px;
@@ -84,7 +93,7 @@ export const Button = styled.button`
   }
 `;
 
-/* 본문 그리드 */
+/** 본문 2열 그리드: 좌(뷰어) : 우(사이드바) = 3.5 : 1 */
 export const Content = styled.div`
   display: grid;
   grid-template-columns: 3.5fr 1fr;
@@ -96,7 +105,7 @@ export const Content = styled.div`
   }
 `;
 
-/* 좌측 3D 카드 */
+/** 좌측 3D 카드: 고정 높이·스크롤 방지, 캔버스 위치 안정화 */
 export const ViewerCard = styled.section`
   background: var(--card);
   border: 1px solid var(--line);
@@ -130,7 +139,7 @@ export const ViewerActions = styled.div`
   }
 `;
 
-/* Sidebar */
+/** 우측 사이드바: 2열 카드 배치(모바일 1열) */
 export const Sidebar = styled.aside`
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -141,7 +150,7 @@ export const Sidebar = styled.aside`
   }
 `;
 
-/* Panel */
+/** 옵션 패널: 기본 박스 + span 조정 */
 export const Panel = styled.div`
   background: var(--card);
   border: 1px solid var(--line);
@@ -163,26 +172,25 @@ export const SubTitle = styled.div`
   margin: 10px 0 6px;
 `;
 
-/* 기존: 섹션 내부 버튼 컨테이너 (유지) */
+/** 아이콘형 옵션 버튼: 균등 컬럼 그리드 */
 export const IconGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 한 줄에 4개 */
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
 `;
 export const IconRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 한 줄에 2개 */
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
 `;
 
-
-/* 캡 버튼 */
+/** 캡 모양 선택 버튼: 정사각형·상태 하이라이트·간단한 도형 프리뷰 */
 export const CapBtn = styled.button`
   border: 1px solid var(--line);
   background: var(--card);
   border-radius: 10px;
-  width: 100%;          /* 부모 칸 100% 채우기 */
-  aspect-ratio: 1 / 1;  /* 정사각형 */
+  width: 100%;
+  aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -224,46 +232,61 @@ export const CapBtn = styled.button`
   }
 `;
 
-/* 그립 버튼 */
+/** 그립(두께/길이) 버튼: 위 아이콘/아래 라벨의 2행 그리드 */
 export const GripBtn = styled.button`
   border: 1px solid var(--line);
   background: var(--card);
   border-radius: 10px;
-  width: 100%;          /* 부모 칸 100% 채우기 */
-  aspect-ratio: 1 / 1;  /* 정사각형 */
-  display: flex;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  grid-template-rows: 1fr 22px;
   align-items: center;
-  justify-content: center;
+  justify-items: center;
+  padding: 8px 6px;
+  font-size: 12px;
+  color: #475569;
   cursor: pointer;
 
   &.active {
     outline: 2px solid var(--accent);
     outline-offset: 0;
+    color: var(--accent);
   }
 
   &::before {
     content: "";
-    width: 24%;
+    grid-row: 1;
+    width: 28%;
     height: 60%;
-    background: #94a3b8;
+    background: currentColor; 
     border-radius: 6px;
     display: block;
   }
-  &.wide::before {
-    width: 36%;
+  
+  &.thin::before {  width: 20%; height: 70%; }
+  &.wide::before {  width: 40%; height: 70%; }
+  &.short::before { width: 20%; height: 50%; }
+  &.long::before  { width: 20%; height: 80%; }
+
+  .label {
+    grid-row: 2;
+    line-height: 1;
+    white-space: nowrap;
+    text-align: center;
   }
 `;
 
-/* Fields */
+/** 입력 필드: 레이블/입력/보조 텍스트 배치 */
 export const Field = styled.label`
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 10px;
 
   > span {
     font-size: 12px;
     color: #475569;
+    margin-top: 8px;
   }
 `;
 export const ColorField = styled.div`
@@ -281,7 +304,7 @@ export const ColorField = styled.div`
   }
 
   input[type="color"] {
-    width: 46px;
+    width: 38px;
     height: 34px;
     border-radius: 8px;
     border: 1px solid var(--line);
@@ -312,7 +335,7 @@ export const SliderField = styled.div`
   }
 `;
 
-/* Attachments */
+/** 첨부 버튼/업로드 카드: 데칼 이미지 업로드 안내 */
 export const AttachRow = styled.div`
   display: flex;
   gap: 8px;
