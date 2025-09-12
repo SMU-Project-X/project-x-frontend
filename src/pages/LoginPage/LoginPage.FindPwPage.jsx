@@ -6,7 +6,7 @@ function FindPW() {
         <S.Container>
             <S.LoginForm>
                 <S.Top>
-                    <h2>PO-PIN</h2>
+                    <h2>PROJECT-X</h2>
                 </S.Top>
                 <form method="POST" action="/login/findpw">
                     <hr />
