@@ -10,7 +10,7 @@ function CharacterCard({ S, member, isSelected, onSelect }) {
                 <S.CharacterImg src={member.image} alt={member.name} />
             </S.CharacterAvatar>
             <S.CharacterName>{member.name}</S.CharacterName>
-            <S.CharacterRole>{member.role}</S.CharacterRole>
+            <S.CharacterRole>{member.personality}</S.CharacterRole>
         </S.CharacterCard>
     );
 }

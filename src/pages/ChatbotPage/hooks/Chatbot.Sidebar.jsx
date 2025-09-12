@@ -13,7 +13,6 @@ import {
   ContactName,
   ContactMessage,
   ContactTime,
-  UnreadDot,
   AvatarImg,
   LinkNoStyle
 } from '../styled/ChatApp.js';
@@ -40,7 +39,6 @@ const Sidebar = ({ contacts, selectedChat }) => {
                   <ContactMessage>{contact.lastMessage}</ContactMessage>
                 </ContactInfo>
                 <ContactTime>{contact.time}</ContactTime>
-                {contact.unread && <UnreadDot />}
               </ContactContent>
             </ContactItem>
           </Link>

@@ -5,7 +5,6 @@ import ChatHeader from './hooks/Chatbot.ChatHeader';
 import MessageArea from './hooks/Chatbot.MessageArea';
 import InputArea from './hooks/Chatbot.InputArea';
 import { findContactByNameOrEnglish } from './utils/helpers';
-
 import {
     Container, Header, NavContainer, Logo, NavMenu, NavItem, LoginBtn,
     ChatMainContainer, ChatArea
@@ -23,7 +22,11 @@ const ChatApp = () => {
             avatarUrl: '../src/assets/images/ChatbotPage/Arin.png',
             messages: [{ id: 1, text: '안녕하세요! 아린입니다. 오늘 하루 어떠셨나요?', sender: 'Arin', 
                 time: new Date().toLocaleTimeString('ko-KR', {hour: '2-digit',minute: '2-digit',hour12: true}) },],
-            unread: false,
+            likes: 0,
+            dislikes: 0, // dislikes 속성 추가
+            isLiked: false,
+            isDisliked: false, // isDisliked 속성 추가
+            
         },
         {
             name: '다온',
@@ -33,7 +36,10 @@ const ChatApp = () => {
             avatarUrl: '../src/assets/images/ChatbotPage/Daon.png' ,
             messages: [{ id: 1, text: '안녕하세요! 다온입니다. 오늘 하루 어떠셨나요?', sender: 'Daon', 
                 time: new Date().toLocaleTimeString('ko-KR', {hour: '2-digit',minute: '2-digit',hour12: true}) }],
-            unread: false,
+            likes: 0,
+            dislikes: 0, // dislikes 속성 추가
+            isLiked: false,
+            isDisliked: false, // isDisliked 속성 추가
         },
         {
             name: '채윤',
@@ -43,7 +49,10 @@ const ChatApp = () => {
             avatarUrl: '../src/assets/images/ChatbotPage/Chaeun.png',
             messages: [{ id: 1, text: '안녕하세요! 채윤입니다. 오늘 하루 어떠셨나요?', sender: 'Chaeun', 
                 time: new Date().toLocaleTimeString('ko-KR', {hour: '2-digit',minute: '2-digit',hour12: true}) }],
-            unread: false,
+            likes: 0,
+            dislikes: 0, // dislikes 속성 추가
+            isLiked: false,
+            isDisliked: false, // isDisliked 속성 추가
         },
         {
             name: '세인',
@@ -53,7 +62,10 @@ const ChatApp = () => {
             avatarUrl: '../src/assets/images/ChatbotPage/Sein.png',
             messages: [{ id: 1, text: '안녕하세요! 세인입니다. 오늘 하루 어떠셨나요?', sender: 'Sein', 
                 time: new Date().toLocaleTimeString('ko-KR', {hour: '2-digit',minute: '2-digit',hour12: true}) }],
-            unread: false,
+            likes: 0,
+            dislikes: 0, // dislikes 속성 추가
+            isLiked: false,
+            isDisliked: false, // isDisliked 속성 추가
         }
     ]);
     
@@ -64,6 +76,7 @@ const ChatApp = () => {
     
     const [newMessage, setNewMessage] = useState('');
     const [isActionsVisible, setIsActionsVisible] = useState(true);
+    const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
     const messagesEndRef = useRef(null);
 
     // sendMessage 함수
@@ -73,20 +86,18 @@ const ChatApp = () => {
                 id: Date.now(),
                 text: newMessage,
                 sender: 'user',
-                time: new Date().toLocaleTimeString('ko-KR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                })
+                time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                likes: 0,
+                dislikes: 0,
+                isLiked: false,
+                isDisliked: false,
             };
-
-            // 사용자 메시지를 현재 채팅방에 추가
             setContacts(prev => {
                 const updatedContacts = prev.map(contact => {
                     if (contact.englishName === selectedChat.englishName) {
-                        const updatedChat = { 
-                            ...contact, 
-                            lastMessage: newMsg.text, 
+                        const updatedChat = {
+                            ...contact,
+                            lastMessage: newMsg.text,
                             time: newMsg.time,
                             messages: [...contact.messages, newMsg]
                         };
@@ -98,8 +109,8 @@ const ChatApp = () => {
                 return updatedContacts;
             });
             setNewMessage('');
-
-            // 1초 후 봇 메시지 도착 시뮬레이션
+            setIsLoading(true); // 메시지 전송 후 로딩 상태 활성화
+            
             setTimeout(() => {
                 const responses = [
                     '네! 좋은 질문이에요! 😊',
@@ -113,25 +124,20 @@ const ChatApp = () => {
                     id: Date.now() + 1,
                     text: randomResponse,
                     sender: selectedChat.englishName,
-                    time: new Date().toLocaleTimeString('ko-KR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true
-                    })
+                    time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                    likes: 0,
+                    dislikes: 0,
+                    isLiked: false,
+                    isDisliked: false,
                 };
-
-                // 봇 메시지를 현재 채팅방에 추가
                 setContacts(prev => {
                     const updatedContacts = prev.map(contact => {
                         if (contact.englishName === selectedChat.englishName) {
-                            // 봇 메시지를 추가하고, unread 상태를 확인
-                            const updatedChat = { 
-                                ...contact, 
-                                lastMessage: botMsg.text, 
+                            const updatedChat = {
+                                ...contact,
+                                lastMessage: botMsg.text,
                                 time: botMsg.time,
                                 messages: [...contact.messages, botMsg],
-                                // 현재 URL의 채팅방 이름과 일치하지 않으면 unread: true
-                                unread: contact.englishName !== chatName // 이 부분이 핵심 로직입니다.
                             };
                             setSelectedChat(updatedChat);
                             return updatedChat;
@@ -140,6 +146,7 @@ const ChatApp = () => {
                     });
                     return updatedContacts;
                 });
+                setIsLoading(false); // 봇 메시지 도착 후 로딩 상태 비활성화
             }, 1000 + Math.random() * 500);
         }
     };
@@ -172,26 +179,23 @@ const ChatApp = () => {
             id: Date.now(),
             text: messageText,
             sender: 'user',
-            time: new Date().toLocaleTimeString('ko-KR', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            })
+            time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true }),
+            likes: 0,
+            dislikes: 0,
+            isLiked: false,
+            isDisliked: false,
         };
-
+        
         setContacts(prev => {
             const updatedContacts = prev.map(contact => 
                 contact.englishName === selectedChat.englishName
-                    ? { ...contact, 
-                        lastMessage: newMsg.text, 
-                        time: newMsg.time,
-                        messages: [...contact.messages, newMsg] 
-                      }
+                    ? { ...contact, lastMessage: newMsg.text, time: newMsg.time, messages: [...contact.messages, newMsg] }
                     : contact
             );
             setSelectedChat(updatedContacts.find(c => c.englishName === selectedChat.englishName));
             return updatedContacts;
         });
+        setIsLoading(true); // 자동 메시지 전송 후 로딩 상태 활성화
 
         setTimeout(() => {
             const botResponseText = autoResponses[messageText] || '음.. 무슨 말인지 잘 모르겠어요.🤔';
@@ -200,23 +204,21 @@ const ChatApp = () => {
                 id: Date.now() + 1,
                 text: botResponseText,
                 sender: selectedChat.englishName,
-                time: new Date().toLocaleTimeString('ko-KR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                })
+                time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                likes: 0,
+                dislikes: 0,
+                isLiked: false,
+                isDisliked: false,
             };
 
             setContacts(prev => {
                 const updatedContacts = prev.map(contact => {
                     if (contact.englishName === selectedChat.englishName) {
-                        const updatedChat = { 
-                            ...contact, 
-                            lastMessage: botMsg.text, 
+                        const updatedChat = {
+                            ...contact,
+                            lastMessage: botMsg.text,
                             time: botMsg.time,
                             messages: [...contact.messages, botMsg],
-                             // 현재 URL의 채팅방 이름과 일치하지 않으면 unread: true
-                            unread: contact.englishName !== chatName
                         };
                         setSelectedChat(updatedChat);
                         return updatedChat;
@@ -225,20 +227,66 @@ const ChatApp = () => {
                 });
                 return updatedContacts;
             });
+            setIsLoading(false); // 봇 메시지 도착 후 로딩 상태 비활성화
         }, 1000 + Math.random() * 500);
+    };
+
+    const handleToggleLike = (messageId) => {
+        setContacts(prev => {
+            return prev.map(contact => {
+                if (contact.englishName === selectedChat.englishName) {
+                    const updatedMessages = contact.messages.map(msg => {
+                        if (msg.id === messageId) {
+                            const dislikes = msg.isDisliked ? msg.dislikes - 1 : msg.dislikes;
+                            return {
+                                ...msg,
+                                isLiked: !msg.isLiked,
+                                likes: msg.isLiked ? msg.likes - 1 : msg.likes + 1,
+                                isDisliked: false,
+                                dislikes: dislikes,
+                            };
+                        }
+                        return msg;
+                    });
+                    const updatedChat = { ...contact, messages: updatedMessages };
+                    setSelectedChat(updatedChat);
+                    return updatedChat;
+                }
+                return contact;
+            });
+        });
+    };
+
+    const handleToggleDislike = (messageId) => {
+        setContacts(prev => {
+            return prev.map(contact => {
+                if (contact.englishName === selectedChat.englishName) {
+                    const updatedMessages = contact.messages.map(msg => {
+                        if (msg.id === messageId) {
+                            const likes = msg.isLiked ? msg.likes - 1 : msg.likes;
+                            return {
+                                ...msg,
+                                isDisliked: !msg.isDisliked,
+                                dislikes: msg.isDisliked ? msg.dislikes - 1 : msg.dislikes + 1,
+                                isLiked: false,
+                                likes: likes,
+                            };
+                        }
+                        return msg;
+                    });
+                    const updatedChat = { ...contact, messages: updatedMessages };
+                    setSelectedChat(updatedChat);
+                    return updatedChat;
+                }
+                return contact;
+            });
+        });
     };
 
     useEffect(() => {
         const chatByUrl = findContactByNameOrEnglish(contacts, chatName);
         if (chatByUrl) {
             setSelectedChat(chatByUrl);
-            if (chatByUrl.unread) {
-                setContacts(prev => prev.map(contact =>
-                    contact.englishName === chatName
-                        ? { ...contact, unread: false }
-                        : contact
-                ));
-            }
         }
     }, [chatName, contacts]);
 
@@ -263,22 +311,24 @@ const ChatApp = () => {
             <ChatMainContainer>
                 <Sidebar contacts={contacts} selectedChat={selectedChat} />
                 <ChatArea>
-                    <ChatHeader 
-                        selectedChat={selectedChat} 
-                        toggleActions={toggleActions} 
-                        isActionsVisible={isActionsVisible} 
+                    <ChatHeader
+                        selectedChat={selectedChat}
+                        toggleActions={toggleActions}
+                        isActionsVisible={isActionsVisible}
                         sendAutoMessage={sendAutoMessage}
                     />
-                    <MessageArea 
-                        selectedChat={selectedChat} 
-                        contacts={contacts} 
-                        messagesEndRef={messagesEndRef} 
-                        handleFeedback={handleFeedback}
+                    <MessageArea
+                        selectedChat={selectedChat}
+                        contacts={contacts}
+                        messagesEndRef={messagesEndRef}
+                        onToggleLike={handleToggleLike}
+                        onToggleDislike={handleToggleDislike}
+                        isLoading={isLoading} // isLoading props 추가
                     />
-                    <InputArea 
-                        newMessage={newMessage} 
-                        setNewMessage={setNewMessage} 
-                        sendMessage={sendMessage} 
+                    <InputArea
+                        newMessage={newMessage}
+                        setNewMessage={setNewMessage}
+                        sendMessage={sendMessage}
                         handleKeyPress={handleKeyPress}
                     />
                 </ChatArea>

@@ -70,7 +70,7 @@ function ChatChoice() {
                                 <CharacterImg src={member.image} alt={member.name} />
                             </CharacterAvatar>
                             <CharacterName>{member.name}</CharacterName>
-                            <CharacterRole>{member.role}</CharacterRole>
+                            <CharacterRole>{member.personality}</CharacterRole>
                         </CharacterCard>
                     ))}
                 </CharactersSection>

@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 // 전체 레이아웃
 export const Container = styled.div`
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -11,56 +11,62 @@ export const Container = styled.div`
   box-sizing: border-box;
 `;
 
-// 헤더
+// 스타일이 적용된 컴포넌트들
 export const Header = styled.header`
-  background: linear-gradient(90deg, #4a9eff 0%, #6bb1ff 100%);
-  color: white;
-  padding: 12px 0;
+    background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 50%, #2196f3 100%);
+    padding: 15px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    height: 60px;
 `;
 
 export const NavContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
 `;
 
-export const Logo = styled.h1`
-  font-size: 18px;
-  font-weight: 500;
-  margin: 0;
+export const Logo = styled.div`
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
 `;
 
 export const NavMenu = styled.nav`
-  display: flex;
-  gap: 32px;
+    display: flex;
+    gap: 40px;
+    @media (max-width: 768px) {
+        display: none;
+    }
 `;
 
 export const NavItem = styled.a`
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  font-size: 14px;
-  transition: color 0.2s;
-  cursor: pointer;
-  &.active {
     color: white;
+    text-decoration: none;
+    font-size: 18px;
     font-weight: 500;
-  }
+    transition: color 0.3s ease;
+    &:hover {
+        color: #e1f5fe;
+    }
 `;
 
 export const LoginBtn = styled.a`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #fff;
-  text-decoration: none;
-  font-size: 14px;
-  cursor: pointer;
-  & span {
-    font-size: 18px;
-  }
+    background: rgba(255,255,255,0.2);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.3s ease;
+    &:hover {
+        background: rgba(255,255,255,0.3);
+    }
 `;
 
 export const UserAvatar = styled.div`
@@ -70,11 +76,6 @@ export const UserAvatar = styled.div`
   border-radius: 50%;
   align-items: center;
   justify-content: center;
-`;
-
-export const LoginText = styled.span`
-  font-size: 14px;
-  color: #fff;
 `;
 
 // 메인 컨테이너
@@ -172,16 +173,6 @@ export const ContactTime = styled.div`
   font-size: 12px;
   color: #9ca3af;
   flex-shrink: 0;
-`;
-
-export const UnreadDot = styled.div`
-  width: 10px;
-  height: 10px;
-  background-color: #ff4d4f;
-  border-radius: 50%;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
 `;
 
 // 채팅 영역

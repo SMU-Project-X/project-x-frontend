@@ -21,6 +21,7 @@ export const Header = styled.header`
     background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 50%, #2196f3 100%);
     padding: 15px 0;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    height: 60px;
 `;
 
 export const NavContainer = styled.div`

@@ -17,11 +17,10 @@ import {
   DislikeButton
 } from '../styled/ChatApp.js';
 
-const MessageArea = ({ selectedChat, contacts, messagesEndRef, handleFeedback }) => {
-  // 메시지가 추가될 때마다 자동으로 스크롤
+const MessageArea = ({ selectedChat, contacts, messagesEndRef, onToggleLike, onToggleDislike, isLoading }) => { // isLoading props 추가
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [selectedChat.messages]);
+  }, [selectedChat.messages, isLoading]); // isLoading 상태가 변경될 때도 스크롤
 
   const getSenderAvatar = (senderEnglishName) => {
     const sender = contacts.find(contact => contact.englishName === senderEnglishName);
@@ -46,7 +45,7 @@ const MessageArea = ({ selectedChat, contacts, messagesEndRef, handleFeedback })
                   {avatarUrl ? (
                     <AvatarImg size="50px" src={avatarUrl} alt={`${selectedChat.name} Avatar`} />
                   ) : (
-                    '👤' // 아바타 이미지가 없을 경우 기본 아이콘
+                    '👤'
                   )}
                 </MessageAvatar>
               )}
@@ -57,8 +56,20 @@ const MessageArea = ({ selectedChat, contacts, messagesEndRef, handleFeedback })
                   <MessageTime>{message.time}</MessageTime>
                   {!isUser && (
                     <LikeDislikeButtons>
-                      <LikeButton onClick={() => handleFeedback('like')}>👍</LikeButton>
-                      <DislikeButton onClick={() => handleFeedback('dislike')}>👎</DislikeButton>
+                      <LikeButton
+                        onClick={() => onToggleLike(message.id)}
+                        $isLiked={message.isLiked}
+                      >
+                        <span role="img" aria-label="like">{message.isLiked ? '❤️' : '♡'}</span>
+                        <span>{message.likes > 0 ? message.likes : ''}</span>
+                      </LikeButton>
+                      <DislikeButton
+                        onClick={() => onToggleDislike(message.id)}
+                        $isDisliked={message.isDisliked}
+                      >
+                        <span role="img" aria-label="dislike">{message.isDisliked ? '👎' : '👎'}</span>
+                        <span>{message.dislikes > 0 ? message.dislikes : ''}</span>
+                      </DislikeButton>
                     </LikeDislikeButtons>
                   )}
                 </MessageFooter>
@@ -67,6 +78,21 @@ const MessageArea = ({ selectedChat, contacts, messagesEndRef, handleFeedback })
           </Message>
         );
       })}
+      
+      {/* 로딩 상태일 때 '입력 중...' 메시지 표시 */}
+      {isLoading && (
+        <Message $isUser={false}>
+          <MessageContent $isUser={false}>
+            <MessageAvatar>
+              <AvatarImg size="50px" src={getSenderAvatar(selectedChat.englishName)} alt={`${selectedChat.name} Avatar`} />
+            </MessageAvatar>
+            <MessageBubble $isUser={false}>
+              <span role="img" aria-label="typing">...</span>
+            </MessageBubble>
+          </MessageContent>
+        </Message>
+      )}
+
       <div ref={messagesEndRef} />
     </MessagesArea>
   );

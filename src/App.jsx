@@ -12,10 +12,9 @@ import FandomTalk from './pages/CommunityPage/Community.FandomTalk';
 import Vote from './pages/CommunityPage/Community.Vote';
 import SelectMember from './pages/CommunityPage/Community.SelectMember';
 import ViewPage from './pages/RandingPage/RandingPage.SelectMemberPage.ViewPage';
+
 import ChatApp from './pages/ChatbotPage/Chatbot.Chatapp';
-
-
-
+import ChatChoice from './pages/ChatbotPage/Chatbot.ChatChoice';
 
 export default function App() {
   return (
@@ -34,8 +33,8 @@ export default function App() {
         <Route path="/Community/FandomTalk" element={<FandomTalk />} />
 
         {/* 챗봇 path */}
-        <Route path="/ChatApp" element={<ChatApp/>} />
-        <Route path="/ChatApp/Daon" element={<ChatApp/>} />
+        <Route path="/ChatChoice" element={<ChatChoice/>} />
+        <Route path="/ChatApp/:chatName" element={<ChatApp />} />
       </Routes>
     </>
   )
