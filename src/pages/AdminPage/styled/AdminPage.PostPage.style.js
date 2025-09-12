@@ -108,13 +108,14 @@ export const DashTop = styled.div`
 
 export const Box = styled.div`
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   margin: 20px 0;
 `;
 
 export const BoxItem = styled.div`
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   width: 250px;
   height: 120px;
@@ -188,7 +189,8 @@ export const TableControls = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 20px 0;
+  width: 85%;
+  margin: 20px auto;
 
   h3 {
     font-size: 16px;
@@ -208,7 +210,7 @@ export const ActionButtons = styled.div`
 
 export const ActionBtn = styled.button`
   position: relative;
-  margin-right: 35px;
+  /* margin-right: 35px; */
   padding: 10px 20px;
   font-size: 14px;
   font-weight: 600;

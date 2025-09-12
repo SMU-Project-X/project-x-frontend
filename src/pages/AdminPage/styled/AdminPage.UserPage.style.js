@@ -83,7 +83,7 @@ export const HomeButton = styled.a`
 `;
 
 export const Content = styled.main`
-  width: 100%;
+  width: 73%;
   min-height: 800px;
   background: rgba(255,255,255,0.95);
   border-radius: 25px;
