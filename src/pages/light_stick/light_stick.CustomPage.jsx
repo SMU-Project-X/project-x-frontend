@@ -1,5 +1,5 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom"; // ← 글쓰기(혹은 중간 핸들러) 페이지로 이동
+import { useNavigate } from "react-router-dom";
 import {
   PageRoot, Header, HeaderLeft, Logo, Button, Content,
   ViewerCard, ViewerStage, ViewerActions, Sidebar, Panel, PanelTitle, SubTitle,
@@ -7,21 +7,18 @@ import {
   UploadCard
 } from "./styled/light_stick.CustomPage.style.js";
 
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Environment } from "@react-three/drei";
-import MyElement3D from "./MyElement3D";
+import { Canvas } from "@react-three/fiber"; // 3D 그림 그릴 곳
+import { OrbitControls, Environment } from "@react-three/drei"; // 카메라 제어, 환경 이미지
+import MyElement3D from "./light_stick.MyElement3D.jsx";
+import { useLightstickShare } from "./light_stick.ShareHandler.jsx"; // 모듈 훅
 
 /* ===========================
  * HEX 유틸
- * - #RGB → #RRGGBB로 정규화
- * - #RRGGBB 형식 검사
- * - clamp01: 0~1 범위 제한
  * =========================== */
-
 const HEX6 = /^#([0-9a-fA-F]{6})$/;
 const HEX3 = /^#([0-9a-fA-F]{3})$/;
 
-/** 사용자가 #을 빼먹거나 #RGB로 입력해도 안전하게 #RRGGBB로 맞춤 */
+/** #RGB → #RRGGBB, # 누락 보정 */
 function normalizeHex(v) {
   let s = (v ?? "").trim();
   if (!s.startsWith("#")) s = "#" + s;
@@ -36,11 +33,8 @@ const isHex6 = (v) => HEX6.test(normalizeHex(v));
 const clamp01 = (n) => Math.min(1, Math.max(0, n));
 
 /* ===========================
- * 카메라 / 오빗 설정
- * - preserveDrawingBuffer: 캡처(toBlob) 위해 필요
- * - OrbitControls: 팬 비활성, 댐핑 활성화
+ * 카메라 / 오빗
  * =========================== */
-
 const CAMERA_INIT = { fov: 40, near: 0.05, far: 40, position: [1.5, 1.5, 2.7] };
 const ORBIT_CFG = {
   enablePan: false,
@@ -50,60 +44,53 @@ const ORBIT_CFG = {
   maxDistance: 6,
   minPolarAngle: 0.01,
   maxPolarAngle: Math.PI - 0.01,
-  target: [0, 0.7, 0], // 카메라가 바라보는 지점(응원봉 상단 근처로 조정)
+  target: [0, 0.7, 0],
   zoomSpeed: 0.8,
   rotateSpeed: 0.9,
 };
 
 export default function LightStickCustomPage() {
-  const navigate = useNavigate(); // 라우팅 훅
+  const navigate = useNavigate();
 
-  /* =============== 형태 관련 상태 =============== */
-  const [capShape, setCapShape] = useState("sphere"); // 캡 모양
-  const [thickness, setThickness] = useState("thin"); // 바디 두께
-  const [bodyLength, setBodyLength] = useState("short"); // 바디 길이
+  // 게시판 글쓰기 경로
+  const { share } = useLightstickShare({
+    boardWritePath: "/community/write",  // ← 실제 게시판 글쓰기 라우트 경로로 맞추세요
+  });
 
-  /* =============== 색상 상태 (#RRGGBB) =============== */
+  /* =============== 형태 상태 =============== */
+  const [capShape, setCapShape] = useState("sphere");
+  const [thickness, setThickness] = useState("thin");
+  const [bodyLength, setBodyLength] = useState("short");
+
+  /* =============== 색상 상태 =============== */
   const [bodyColor, setBodyColor] = useState("#ffffff");
   const [capColor, setCapColor] = useState("#ffffff");
-  // 텍스트 입력값(검증 전)을 별도 보관 → 즉시 미러링 + 검증 UX
   const [bodyColorText, setBodyColorText] = useState(bodyColor);
   const [capColorText, setCapColorText] = useState(capColor);
+  const bodyInvalid = useMemo(() => bodyColorText.trim() !== "" && !isHex6(bodyColorText), [bodyColorText]);
+  const capInvalid = useMemo(() => capColorText.trim() !== "" && !isHex6(capColorText), [capColorText]);
 
-  // 유효성: 비어있지 않고, 정규화 후 #RRGGBB가 아니면 invalid
-  const bodyInvalid = useMemo(
-    () => bodyColorText.trim() !== "" && !isHex6(bodyColorText),
-    [bodyColorText]
-  );
-  const capInvalid = useMemo(
-    () => capColorText.trim() !== "" && !isHex6(capColorText),
-    [capColorText]
-  );
-
-  /* =============== 재질(물리 기반 파라미터) =============== */
+  /* =============== 재질 상태 =============== */
   const [metallic, setMetallic] = useState(0.25);
   const [roughness, setRoughness] = useState(0.0);
   const [transmission, setTransmission] = useState(0.5);
 
-  /* =============== 스티커(데칼) =============== */
+  /* =============== 스티커/피규어 =============== */
   const [stickerUrl, setStickerUrl] = useState("");
-  const [stickerScale, setStickerScale] = useState(0.3); // 크기
-  const [stickerY, setStickerY] = useState(0.5);         // 높이(0~1)
-
-  /* =============== 피규어(GLTF) =============== */
+  const [stickerScale, setStickerScale] = useState(0.3);
+  const [stickerY, setStickerY] = useState(0.5);
   const [figureUrl, setFigureUrl] = useState("");
 
-  /* =============== Blob 정리: 업로드 URL revoke =============== */
+  /* =============== blob 정리 =============== */
   useEffect(() => {
     return () => {
-      // 사용자가 업로드한 blob: URL을 페이지 떠날 때 해제하여 메모리 누수 방지
       if (stickerUrl && stickerUrl.startsWith("blob:")) {
         URL.revokeObjectURL(stickerUrl);
       }
     };
   }, [stickerUrl]);
 
-  /* =============== 전체 상태 초기화(초기화 버튼) =============== */
+  /* =============== 초기화 =============== */
   const resetAll = useCallback(() => {
     setCapShape("sphere");
     setThickness("thin");
@@ -121,16 +108,11 @@ export default function LightStickCustomPage() {
     setFigureUrl("");
   }, []);
 
-  /* =============== 캡처(이미지 저장/공유) 참조 =============== */
+  /* =============== 캡처 toBlob =============== */
   const glRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
 
-  /**
-   * 현재 프레임을 강제 렌더링 후 canvas.toBlob 으로 PNG 생성
-   * - preserveDrawingBuffer: true 여야 toBlob 가능
-   * - requestAnimationFrame 내부에서 호출하여 최신 프레임 보장
-   */
   const captureBlob = useCallback(
     () =>
       new Promise((resolve) => {
@@ -144,7 +126,6 @@ export default function LightStickCustomPage() {
     []
   );
 
-  /** 파일로 저장(a[download]) */
   const handleSaveImage = useCallback(async () => {
     const blob = await captureBlob();
     if (!blob) return;
@@ -161,41 +142,33 @@ export default function LightStickCustomPage() {
     }
   }, [captureBlob]);
 
-  /**
-   * (새로운) 공유하기 버튼 동작 — "페이지 이동" 버전
-   * - 스티커 관련(이미지/스케일/Y)은 제외하고 현재 설정만 페이로드로 구성
-   * - 전담 핸들러 라우트(/lightstick/share)로 이동하며 state로 전달
-   *   → 전담 페이지가 서버 저장(POST) → code 수신 → 글쓰기로 redirect 수행
-   */
+  /* =============== 공유하기(스티커 제외 페이로드 생성 → 모듈 훅 호출) =============== */
   const buildSharePayload = useCallback(() => {
     return {
       schemaVersion: 1,
       clientTs: Date.now(),
-
       // 형태
-      capShape,
-      thickness,
-      bodyLength,
-
+      capShape, thickness, bodyLength,
       // 색상
-      bodyColor,
-      capColor,
-
-      // 재질 (0~1 범위 보정)
+      bodyColor, capColor,
+      // 재질
       metallic: clamp01(metallic),
       roughness: clamp01(roughness),
       transmission: clamp01(transmission),
-
       // 피규어
       figureUrl: figureUrl || null,
     };
   }, [capShape, thickness, bodyLength, bodyColor, capColor, metallic, roughness, transmission, figureUrl]);
 
-  const handleShare = useCallback(() => {
-    const payload = buildSharePayload();
-    // 라우터 state로 전달 → LightstickShareHandler에서 서버 저장/리다이렉트 담당
-    navigate("/lightstick/share", { state: payload });
-  }, [buildSharePayload, navigate]);
+  const handleShare = useCallback(async () => {
+    try {
+      const payload = buildSharePayload();
+      await share(payload); // 서버 저장 → code → 글쓰기 페이지로 이동
+    } catch (e) {
+      console.error(e);
+      alert(e.message || "공유에 실패했습니다.");
+    }
+  }, [buildSharePayload, share]);
 
   return (
     <PageRoot>
@@ -212,16 +185,15 @@ export default function LightStickCustomPage() {
         <ViewerCard>
           <ViewerStage>
             <Canvas
-              dpr={[1, 2]}                             /* 레티나 대응(DPR 1~2) */
+              dpr={[1, 2]}
               camera={CAMERA_INIT}
-              gl={{ antialias: true, preserveDrawingBuffer: true }} /* ← 캡처 필요 */
+              gl={{ antialias: true, preserveDrawingBuffer: true }} // 캡처 필요
               onCreated={({ gl, scene, camera }) => {
                 glRef.current = gl;
                 sceneRef.current = scene;
                 cameraRef.current = camera;
               }}
             >
-              {/* GLTF/텍스처 로딩 중에도 전체가 멈추지 않도록 Suspense 사용 */}
               <Suspense fallback={null}>
                 <MyElement3D
                   capShape={capShape}
@@ -238,12 +210,12 @@ export default function LightStickCustomPage() {
                   figureUrl={figureUrl}
                 />
                 <OrbitControls makeDefault {...ORBIT_CFG} />
-                <Environment preset="city" /> {/* 실내/도시 HDRI */}
+                <Environment preset="city" />
               </Suspense>
             </Canvas>
           </ViewerStage>
 
-          {/* 하단 액션 바: 초기화/공유/저장 */}
+          {/* 하단 액션 바 */}
           <ViewerActions>
             <Button onClick={resetAll}>초기화</Button>
             <div className="spacer" />
@@ -257,7 +229,7 @@ export default function LightStickCustomPage() {
           <Panel className="wide">
             <PanelTitle>커스터마이즈</PanelTitle>
 
-            {/* 캡 모양 선택 */}
+            {/* 캡 모양 */}
             <SubTitle>캡 모양</SubTitle>
             <IconGrid>
               <CapBtn className={capShape==="sphere" ? "active" : ""} onClick={()=>setCapShape("sphere")}>구</CapBtn>
@@ -275,7 +247,7 @@ export default function LightStickCustomPage() {
               <GripBtn className={`long  ${bodyLength==="long"  ? "active" : ""}`} onClick={()=>setBodyLength("long")}><span className="label">길게</span></GripBtn>
             </IconRow>
 
-            {/* 바디 색상 (텍스트 + 컬러 픽커 동기화) */}
+            {/* 바디 색상 */}
             <Field>
               <span>바디 색상</span>
               <ColorField>
@@ -359,7 +331,7 @@ export default function LightStickCustomPage() {
               )}
             </Field>
 
-            {/* 재질 (메탈릭/러프니스/투명도) */}
+            {/* 재질 */}
             <SubTitle>재질 속성</SubTitle>
             <SliderField>
               <label>메탈릭</label>
@@ -383,22 +355,21 @@ export default function LightStickCustomPage() {
               </div>
             </SliderField>
 
-            {/* 피규어 선택(GLTF 경로를 옵션으로 제공) */}
+            {/* 피규어 선택 */}
             <SubTitle>피규어 선택</SubTitle>
             <select value={figureUrl} onChange={(e) => setFigureUrl(e.target.value)}>
               <option value="">없음</option>
               <option value="/models/scene.gltf">류하</option>
-              {/* 다른 모델도 있으면 여기에 추가 */}
             </select>
 
-            {/* 스티커 업로드 & 파라미터 */}
+            {/* 스티커 */}
             <SubTitle>스티커 & 데칼</SubTitle>
             <UploadCard>
               <div className="title">꾸미기 업로드</div>
               <input type="file" accept="image/*" onChange={(e)=>{
                 const f = e.target.files?.[0];
                 if (!f) return;
-                const url = URL.createObjectURL(f); // 임시 URL 생성
+                const url = URL.createObjectURL(f);
                 setStickerUrl(url);
               }}/>
               <SliderField>

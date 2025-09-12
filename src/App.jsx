@@ -6,7 +6,6 @@ import { Route, Routes, Link } from "react-router-dom";
 import SplashPage from './pages/RandingPage/RandingPage.SplashPage';
 import SelectMemberPage from './pages/RandingPage/RandingPage.SelectMemberPage';
 import LightStickCustomPage from "./pages/light_stick/light_stick.CustomPage.jsx";
-import LightstickShareHandler from "./pages/light_stick/LightstickShareHandler.jsx";
 
 // import CommunityHome from './pages/CommunityPage/CommunityHome';
 // import CheerArtist from './pages/CommunityPage/Community.CheerArtist';
@@ -37,7 +36,6 @@ export default function App() {
 
         {/* 응원봉 path */}
         <Route path="/" element={<LightStickCustomPage />} />  {/* 응원봉 작업용 임시*/}
-        <Route path="/lightstick/share" element={<LightstickShareHandler />} />
       </Routes>
     </>
   )
