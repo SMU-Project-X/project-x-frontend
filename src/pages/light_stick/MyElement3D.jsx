@@ -1,20 +1,12 @@
-// MyElement3D.jsx — 방법 B(그룹 회전 제거) + 바디 월드 오프셋(bodyBaseY) 적용 + 받침 원반(바디 자식)
-
 import React, { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { Decal, useTexture } from "@react-three/drei";
 import FigureModel from "./FigureModel";
 
-/**
- * 변경 요약
- * - 바디/받침을 한 번에 내리기: bodyBaseY 추가 → 바디 월드 위치/바디 꼭대기 계산에 반영
- * - 캡은 bodyTopY(월드) 기준으로 배치되어 바디를 내려도 항상 따라옴
- * - 받침 원반은 바디 '자식'이라 같이 이동
- */
-
 const BLANK_1x1 =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9WfYv9kAAAAASUVORK5CYII=";
 
+/** 캡별 바디 꼭대기 기준 추가 높이(월드 기준 y 오프셋) */
 const CAP_OFFSETS = {
   sphere: 0.26,
   star: 0.22,
@@ -24,11 +16,12 @@ const CAP_OFFSETS = {
 
 const clamp01 = (n) => Math.min(1, Math.max(0, n));
 
+/** 기본 조명: 단순 방향광 */
 function SceneSetup() {
   return <directionalLight position={[5, 6, 4]} intensity={0.5} />;
 }
 
-/** 하트 Geometry */
+/** 하트 Geometry: 2D Shape를 Extrude하여 볼륨 생성 → 중심 정렬 후 스케일 조정 */
 function useHeartGeometry() {
   return useMemo(() => {
     const x = 0, y = 0;
@@ -45,13 +38,13 @@ function useHeartGeometry() {
       depth: 18, steps: 3, bevelEnabled: true,
       bevelSegments: 4, bevelSize: 5, bevelThickness: 5, curveSegments: 32,
     });
-    geo.center();
-    geo.scale(0.0060, 0.0060, 0.0060 * 1.35);
+    geo.center();                      // 중심 (0,0,0)으로 이동
+    geo.scale(0.0060, 0.0060, 0.0060 * 1.35); // 전체 스케일 조정(두께 z축 보정)
     return geo;
   }, []);
 }
 
-/** 별 Geometry */
+/** 별 Geometry: 톱니형(outer/inner) 꼭짓점을 연결 → Extrude */
 function useStarGeometry() {
   return useMemo(() => {
     const outer = 50, inner = 20, spikes = 5;
@@ -92,19 +85,26 @@ export default function MyElement3D({
   const heartGeo = useHeartGeometry();
   const starGeo = useStarGeometry();
 
-  // 바디 파라미터
+  /* ===== 바디 파라미터: 두께/길이 → 반지름/높이 계산 ===== */
   const bodyRadius = useMemo(() => (thickness === "wide" ? 0.11 : 0.07), [thickness]);
   const bodyHeight = useMemo(() => (bodyLength === "short" ? 0.7 : 1.0), [bodyLength]);
 
-  // ✅ 바디 월드 오프셋(여기만 바꾸면 바디+받침이 함께 내려감)
+  /* ===== 바디 월드 오프셋(바디와 받침을 함께 이동) =====
+   * - bodyBaseY만 조절하면 전체가 더 낮아지거나 높아짐
+   * - 장면 내 다른 객체와의 상대적인 높이를 맞출 때 유용
+   */
   const bodyBaseY = -0.06; // ↓ 더 내리고 싶으면 음수 절댓값을 키우세요
 
-  // 바디의 로컬/월드 위치 계산
-  const bodyCenterLocalY = bodyHeight / 2;                 // 로컬 중심(+y가 위)
-  const bodyCenterWorldY = bodyBaseY + bodyCenterLocalY;   // 월드에서 바디 중심
-  const bodyTopY         = bodyHeight;
+  /* ===== 바디의 로컬/월드 위치 계산 =====
+   * - Three의 cylinderGeometry는 중심 기준으로 위/아래가 ±height/2
+   */
+  const bodyCenterLocalY = bodyHeight / 2;               // 로컬 중심(+y가 위)
+  const bodyCenterWorldY = bodyBaseY + bodyCenterLocalY; // 월드에서 바디 중심
+  const bodyTopY         = bodyHeight;                   // 바디 꼭대기(월드 기준 offset 포함 반영됨)
 
-  // 유리 재질 (당신 값 유지)
+  /* ===== 캡(유리) 물리 재질 =====
+   * - transmission, ior, clearcoat 등을 활용한 간단한 유리 같은 느낌
+   */
   const capPhysMatProps = useMemo(() => ({
     color: capColor,
     metalness: clamp01(metallic),
@@ -116,7 +116,10 @@ export default function MyElement3D({
     clearcoatRoughness: 0.2,
   }), [capColor, metallic, roughness, transmission]);
 
-  // 데칼 텍스처
+  /* ===== 데칼 텍스처 =====
+   * - 업로드 없을 때는 1x1 투명 PNG로 대체
+   * - 색 공간/래핑/이방성 설정
+   */
   const texSrc = stickerUrl || BLANK_1x1;
   const stickerTex = useTexture(texSrc);
   useEffect(() => {
@@ -126,13 +129,17 @@ export default function MyElement3D({
     stickerTex.colorSpace = THREE.SRGBColorSpace;
   }, [stickerUrl, stickerTex]);
 
-  // 데칼 Y 배치(바디 로컬 기준)
+  /* ===== 데칼 Y 배치(바디 로컬 기준) =====
+   * - 상하 5% 마진을 두고 0~1 값을 -y~+y로 변환
+   */
   const { yLocal } = useMemo(() => {
     const yRange = bodyHeight * 0.9; // 상하 5% 마진
     return { yLocal: (clamp01(stickerY) - 0.5) * yRange };
   }, [bodyHeight, stickerY]);
 
-  // 피규어 위치/스케일 (당신 값 유지)
+  /* ===== 피규어(모델) 위치/스케일 =====
+   * - 캡 모양에 따라 내부 배치를 약간씩 보정
+   */
   const FIGURE_PLACEMENT = useMemo(() => {
     switch (capShape) {
       case "sphere":     return { pos: [0, -0.28, 0], scale: 0.1 };
@@ -143,10 +150,12 @@ export default function MyElement3D({
     }
   }, [capShape]);
 
-  // ✅ 받침 원반 치수(바디 로컬 기준, 바디의 '자식'으로 배치)
-  const PLATE_R_FACTOR = 1.5;
-  const PLATE_T        = 0.045;
-  const PLATE_EPS      = 0.001;
+  /* ===== 받침 원반(바디의 자식) =====
+   * - 바디 로컬 기준으로 바로 위에 얹는 얇은 디스크
+   */
+  const PLATE_R_FACTOR = 1.5;     // 바디 반지름 대비 확대 비율
+  const PLATE_T        = 0.045;   // 두께
+  const PLATE_EPS      = 0.001;   // z-fighting 방지용 미세 오프셋
 
   const plateR = bodyRadius * PLATE_R_FACTOR;
   const plateY = bodyHeight / 2 + PLATE_T / 2 + PLATE_EPS; // 바디 로컬 상단 바로 위
@@ -157,6 +166,7 @@ export default function MyElement3D({
 
       {/* Body (받침 원반은 바디의 '자식') */}
       <mesh position={[0, bodyCenterWorldY, 0]}>
+        {/* 원통(바디) */}
         <cylinderGeometry args={[bodyRadius, bodyRadius, bodyHeight, 40]} />
         <meshStandardMaterial
           color={bodyColor}
@@ -164,6 +174,7 @@ export default function MyElement3D({
           roughness={clamp01(roughness)}
         />
 
+        {/* 스티커 데칼: 바디 표면 정면에 투영 */}
         {stickerUrl && (
           <Decal
             position={[0, yLocal, bodyRadius + 0.001]}
@@ -175,7 +186,7 @@ export default function MyElement3D({
           />
         )}
 
-        {/* 받침 원반 */}
+        {/* 받침 원반(바디 상단에 얹음) */}
         <mesh position={[0, plateY, 0]}>
           <cylinderGeometry args={[plateR, plateR, PLATE_T, 64]} />
           <meshStandardMaterial
@@ -188,7 +199,7 @@ export default function MyElement3D({
 
       {/* ── Cap Variants (그룹 회전 제거, 메쉬 회전만) ── */}
 
-      {/* sphere */}
+      {/* sphere 캡 */}
       {capShape === "sphere" && (
         <group position={[0, bodyTopY + CAP_OFFSETS.sphere + 0.015, 0]}>
           <mesh>
@@ -205,7 +216,7 @@ export default function MyElement3D({
         </group>
       )}
 
-      {/* star */}
+      {/* star 캡 */}
       {capShape === "star" && (
         <group position={[0, bodyTopY + CAP_OFFSETS.star - 0.03, 0]}>
           <mesh rotation={[0, 0, Math.PI]}>
@@ -222,7 +233,7 @@ export default function MyElement3D({
         </group>
       )}
 
-      {/* heart */}
+      {/* heart 캡 */}
       {capShape === "heart" && (
         <group position={[0, bodyTopY + CAP_OFFSETS.heart, 0]}>
           <mesh rotation={[0, 0, Math.PI]}>
@@ -239,7 +250,7 @@ export default function MyElement3D({
         </group>
       )}
 
-      {/* hemisphere */}
+      {/* hemisphere 캡(반구 + 덮개 원판) */}
       {capShape === "hemisphere" && (
         <group position={[0, bodyTopY + CAP_OFFSETS.hemisphere, 0]}>
           <mesh rotation={[Math.PI, 0, 0]}>
