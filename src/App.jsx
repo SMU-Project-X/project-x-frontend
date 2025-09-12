@@ -35,6 +35,9 @@ import ChangePW from './pages/LoginPage/LoginPage.ChangePwPage';
 import TermsPage from './pages/SignUpPage/SignUpPage.TermsPage';
 import InsertInfoPage from './pages/SignUpPage/SignUpPage.InsertInfoPage';
 import CompletePage from './pages/SignUpPage/SignUpPage.CompletePage';
+import AdminPage from './pages/AdminPage/AdminPage.main';
+import AdminPostPage from './pages/AdminPage/AdminPage.PostPage';
+import AdminUserPage from './pages/AdminPage/AdminPage.UserPage';
 
 
 
@@ -73,6 +76,11 @@ export default function App() {
         <Route path='/signup/terms' element={<TermsPage/>} />
         <Route path='/signup/info' element={<InsertInfoPage/>} />
         <Route path='/signup/complete' element={<CompletePage/>} />
+
+        {/* 관리자페이지 */}
+        <Route path='/admin' element={<AdminPage/>} />
+        <Route path='/admin/post' element={<AdminPostPage/>} />
+        <Route path='/admin/user' element={<AdminUserPage/>} />
       </Routes>
     </>
   )
