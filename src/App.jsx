@@ -3,7 +3,13 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
+
 import { Route, Routes, Link,useLocation } from "react-router-dom";
+
+
+
+
+
 
 
 // 랜딩페이지
@@ -24,6 +30,8 @@ import CheerArtist from './pages/CommunityPage/Community.CheerArtist';
 import FandomTalk from './pages/CommunityPage/Community.FandomTalk';
 import Vote from './pages/CommunityPage/Community.Vote';
 import SelectMember from './pages/CommunityPage/Community.SelectMember';
+
+
 
 // 홈페이지
 import Home from './pages/HomePage/Home.main';
@@ -67,8 +75,6 @@ export default function App() {
         <Route path="/Community/CheerArtist" element={<CheerArtist />} />
         <Route path="/Community/SelectMember" element={<SelectMember />} />
         <Route path="/Community/FandomTalk" element={<FandomTalk />} />
-
-
           {/* MD path */}
         <Route path="/MD" element={<MDMain />} />
         <Route path="/MD/products" element={<ProductList />} />
@@ -82,7 +88,6 @@ export default function App() {
         <Route path="/picture/select" element={<PictureSelectMemberPage />} /> 
         <Route path="/picture/deco" element={<MemberDecoPage />} />
         <Route path="/picture/camera" element={<CameraPage />} />
-
       </Routes>
     </>
   )
