@@ -29,8 +29,7 @@ export default function TermsPage() {
                 <S.NavButtons>
                     <S.NavBtn className="active">약관 동의</S.NavBtn>
                     <S.NavBtn>회원 정보</S.NavBtn>
-                    <S.NavBtn>장소 선택</S.NavBtn>
-                    <S.NavBtn>멤버 선택</S.NavBtn>
+                    <S.NavBtn>가입 완료</S.NavBtn>
                 </S.NavButtons>
 
                 <S.Container>

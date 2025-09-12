@@ -4,13 +4,13 @@ import * as S from "@/pages/SignUpPage/styled/SignUpPage.InsertInfoPage.style";
 function InsertInfoPage() {
     return (
         <>
-            <S.GlobalStyle />
+            {/* <S.GlobalStyle /> */}
+            <S.InfoPageContainer>
             <S.Wrapper>
                 <S.NavButtons>
                     <S.NavBtn>약관 동의</S.NavBtn>
                     <S.NavBtn className="active">회원 정보</S.NavBtn>
-                    <S.NavBtn>장소 선택</S.NavBtn>
-                    <S.NavBtn>멤버 선택</S.NavBtn>
+                    <S.NavBtn>가입 완료</S.NavBtn>
                 </S.NavButtons>
 
                 <S.Container>
@@ -73,15 +73,18 @@ function InsertInfoPage() {
                             <S.SuccessMessage>인증 메일이 발송되었습니다.</S.SuccessMessage>
                         </S.FormGroup>
 
-                        <S.EmailVerification style={{ marginTop: "10px" }}>
-                            <input type="text" id="verify-code" placeholder="인증번호 입력" />
-                            <S.VerifyBtn type="button">인증 확인</S.VerifyBtn>
-                        </S.EmailVerification>
+                        <S.FormGroup>
+                            <S.EmailVerification style={{ marginTop: "10px" }}>
+                                <input type="text" id="verify-code" placeholder="인증번호 입력" />
+                                <S.VerifyBtn type="button">인증 확인</S.VerifyBtn>
+                            </S.EmailVerification>
+                        </S.FormGroup>
 
                         <S.PrimaryBtn type="submit">다음</S.PrimaryBtn>
                     </form>
                 </S.Container>
             </S.Wrapper>
+            </S.InfoPageContainer>
         </>
     );
 }

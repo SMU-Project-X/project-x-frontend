@@ -8,7 +8,7 @@ export const GlobalStyle = createGlobalStyle`
   }
   body {
     background: linear-gradient(to bottom, #FAFAF7 0%,#D7E5F3 80%,#B3D1F0 100%);
-    min-height: 100vh;
+    /* min-height: 100vh; */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -17,15 +17,22 @@ export const GlobalStyle = createGlobalStyle`
   }
 `;
 
+export const InfoPageContainer = styled.div`
+    background: linear-gradient(to bottom, #FAFAF7 0%,#D7E5F3 80%,#B3D1F0 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+`
+
 export const Wrapper = styled.div`
-  background: rgba(255, 255, 255, 0.1);
+  /* background: rgba(255, 255, 255, 0.1); */
   border-radius: 25px;
   padding: 1rem 1rem 0.5rem;
   transform: scale(0.86);
   backdrop-filter: blur(6px);
   box-shadow: 0 20px 30px rgba(0, 0, 0, 0.08);
   max-width: 500px;
-  width: 100%;
   position: relative;
 `;
 
@@ -39,7 +46,7 @@ export const NavButtons = styled.div`
 export const NavBtn = styled.button`
   padding: 0.5rem 1rem;
   background: rgba(255, 255, 255, 0.25);
-  color: white;
+  color: #172031;
   border: 2px solid rgba(255, 255, 255, 0.4);
   border-radius: 20px;
   font-size: 0.9rem;
@@ -56,8 +63,8 @@ export const NavBtn = styled.button`
   }
 
   &.active {
-    background: white;
-    color: #667eea;
+    background: #667eea;
+    color: white;
     border-color: white;
     font-weight: 700;
   }
@@ -97,6 +104,7 @@ export const Subtitle = styled.h3`
   font-weight: 500;
   color: #BFB2D6;
   text-align: center;
+  padding-bottom: 30px;
 `;
 
 export const FormGroup = styled.div`

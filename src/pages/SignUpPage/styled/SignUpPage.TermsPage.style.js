@@ -2,11 +2,6 @@
 import styled, { createGlobalStyle } from "styled-components";
 
 export const GlobalStyle = createGlobalStyle`
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
   body {
     background: linear-gradient(to bottom, #FAFAF7 0%,#D7E5F3 80%,#B3D1F0 100%);
     min-height: 100vh;
@@ -38,7 +33,7 @@ export const NavButtons = styled.div`
 export const NavBtn = styled.button`
   padding: 0.5rem 1rem;
   background: rgba(255, 255, 255, 0.25);
-  color: white;
+  color: #172031;
   border: 2px solid rgba(255, 255, 255, 0.4);
   border-radius: 20px;
   font-size: 0.9rem;
@@ -54,8 +49,8 @@ export const NavBtn = styled.button`
   }
 
   &.active {
-    background: white;
-    color: #667eea;
+    background: #667eea;
+    color: white;
     border-color: white;
     font-weight: 700;
   }
