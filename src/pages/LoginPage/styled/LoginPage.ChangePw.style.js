@@ -97,7 +97,7 @@ export const Input = styled.input`
 `;
 
 export const FindPWBtn = styled.input`
-  margin-top: 25px;
+  /* margin-top: 25px; */
   width: 100%;
   border: none;
   border-radius: 6px;
@@ -109,7 +109,6 @@ export const FindPWBtn = styled.input`
 `;
 
 export const BackBtn = styled.input`
-  margin-top: -10px;
   width: 100%;
   border: none;
   border-radius: 6px;

@@ -25,7 +25,7 @@ function FindID() {
         <S.Container>
             <S.LoginForm>
                 <S.Top>
-                    <h2>PO-PIN</h2>
+                    <h2>PROJECT-X</h2>
                 </S.Top>
                 <S.Subtitle>아이디를 잊어버리셨나요?</S.Subtitle>
                 <hr />

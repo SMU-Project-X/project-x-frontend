@@ -46,10 +46,11 @@ export const Top = styled.div`
 
 export const Subtitle = styled.div`
   text-align: center;
-  font-size: 15px;
+  font-size: 13px;
   line-height: 1.3;
   padding-bottom: 15px;
   color: #bfb2d6;
+  margin-top: 10px;
 `;
 
 export const Label = styled.label`
@@ -65,7 +66,7 @@ export const Input = styled.input`
   width: 100%;
   border-radius: 6px;
   border: 1px solid #ccc;
-  font-size: 14px;
+  font-size: 12px;
 `;
 
 export const Email = styled.div`
@@ -95,10 +96,11 @@ export const Code = styled.div`
   display: flex;
   gap: 8px;
   margin-bottom: 10px;
+  width: 100%;
 `;
 
 export const Button = styled.button`
-  flex: 1;
+  /* flex: 1; */
   border-radius: 6px;
   border: none;
   background: #8a79af;
