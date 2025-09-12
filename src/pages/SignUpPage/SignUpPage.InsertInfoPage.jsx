@@ -15,7 +15,7 @@ function InsertInfoPage() {
 
                 <S.Container>
                     <S.Header>
-                        <S.Title>PO-PIN</S.Title>
+                        <S.Title>PROJECT-X</S.Title>
                         <S.Subtitle>회원 정보 입력</S.Subtitle>
                         <hr />
                     </S.Header>

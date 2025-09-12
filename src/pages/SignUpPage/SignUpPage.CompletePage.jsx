@@ -25,7 +25,7 @@ const CompletePage = () => {
                 <S.SignupContainer>
                     <S.Logo src="/static/images/login/popin_logo.png" alt="PO-PIN 로고" />
                     <S.PageTitle>가입 완료!</S.PageTitle>
-                    <S.Subtitle>PO-PIN에 오신 걸 환영합니다.</S.Subtitle>
+                    <S.Subtitle>PROJECT-X에 오신 걸 환영합니다.</S.Subtitle>
                     <S.ButtonPrimary onClick={goToHome}>홈으로 가기</S.ButtonPrimary>
                 </S.SignupContainer>
             </S.SignupWrapper>

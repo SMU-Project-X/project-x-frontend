@@ -21,9 +21,9 @@ function Login() {
         <itemS.Container>
             <itemS.LoginForm>
                 <itemS.Top>
-                    <h2>PO-PIN</h2>
+                    <h2>PROJECT-X</h2>
                 </itemS.Top>
-                <itemS.Subtitle>찍는곳이 성지, 포핀에서 덕심 폭발</itemS.Subtitle>
+                <itemS.Subtitle>미래의 감정을 함께하는 네 소녀</itemS.Subtitle>
                 <itemS.Hr />
                 <form method="POST" action="{% url 'login:loginp' %}">
                     <itemS.FormTitle>로그인</itemS.FormTitle>

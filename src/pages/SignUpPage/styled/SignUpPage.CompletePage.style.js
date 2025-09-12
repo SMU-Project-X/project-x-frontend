@@ -1,7 +1,7 @@
 import styled, { keyframes } from "styled-components";
 
 export const Body = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(to bottom, #FAFAF7 0%,#D7E5F3 80%,#B3D1F0 100%);
   min-height: 100vh;
   display: flex;
   justify-content: center;

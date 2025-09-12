@@ -6,7 +6,7 @@ function AdminPostPage() {
         <itemS.Container>
             {/* Banner */}
             <itemS.Banner>
-                <itemS.BannerTitle>PO-PIN</itemS.BannerTitle>
+                <itemS.BannerTitle>PROJECT-X</itemS.BannerTitle>
                 <itemS.Menu>
                     <itemS.MenuItem><a href="#">메인</a></itemS.MenuItem>
                     <itemS.MenuItem><a href="#">공지사항</a></itemS.MenuItem>

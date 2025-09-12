@@ -6,7 +6,7 @@ function AdminPage() {
     return (
         <itemS.PageWrapper>
             <itemS.Banner>
-                <a href="/"><h2>PO-PIN</h2></a>
+                <a href="/"><h2>PROJECT-X</h2></a>
                 <itemS.Menu>
                     <ul>
                         <li className="board"><a href="/admin">메인</a></li>

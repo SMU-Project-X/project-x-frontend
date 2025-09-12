@@ -35,7 +35,7 @@ export default function TermsPage() {
 
                 <S.Container>
                     <S.Header>
-                        <S.PageTitle>PO-PIN</S.PageTitle>
+                        <S.PageTitle>PROJECT-X</S.PageTitle>
                         <S.Subtitle>회원가입</S.Subtitle>
                         <br />
                         <hr />

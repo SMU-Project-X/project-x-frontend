@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 export const Container = styled.div`
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(to bottom, #FAFAF7 0%,#D7E5F3 80%,#B3D1F0 100%);
   min-height: 100vh;
   color: #333;
   padding: 30px 45px 30px 45px;

@@ -7,7 +7,7 @@ function AdminUserPage () {
         <S.Container>
             {/* 상단 배너 */}
             <S.Banner>
-                <a href="#"><S.Title>PO-PIN</S.Title></a>
+                <a href="#"><S.Title>PROJECT-X</S.Title></a>
                 <S.Menu>
                     <ul>
                         <li><a href="#">메인</a></li>
