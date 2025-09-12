@@ -1,27 +1,14 @@
+// MyElement3D.jsx  — 방법 B(그룹 회전 제거, 메쉬에만 회전 적용)
+
 import React, { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { Decal, useTexture } from "@react-three/drei";
+import FigureModel from "./FigureModel";
 
 /**
- * Component: MyElement3D
- * 목적:
- *  - 응원봉의 바디/캡(4종)/필라멘트/데칼을 구성하고, R3F 머티리얼 파라미터를 반영
- * 입력(props):
- *  - capShape: "sphere" | "star" | "heart" | "hemisphere"
- *  - thickness: "thin" | "wide"
- *  - bodyLength: "short" | "long"
- *  - bodyColor, capColor: '#rrggbb'
- *  - metallic, roughness, transmission, emissive: 0~1
- *  - stickerUrl(object URL), stickerScale(0.1~1), stickerY(0~1; 바디 높이 내 정규화)
- *
- * 성능:
- *  - 하트/별 Geometry는 useMemo로 캐시
- *  - 바디 길이/두께 파생 파라미터도 메모
- *  - 데칼 텍스처는 빈 1x1로 대체하여 훅 조건분기 방지
- *
- * 주의:
- *  - transmission 사용을 위해 meshPhysicalMaterial 사용
- *  - texture.colorSpace = SRGBColorSpace로 텍스처 감마 보정
+ * - 필라멘트 제거
+ * - 캡 안 피규어: figureUrl 사용
+ * - heart/hemisphere의 그룹 회전 → 메쉬 회전으로 이동 (자식(피규어) 뒤집힘 방지)
  */
 
 const BLANK_1x1 =
@@ -36,16 +23,11 @@ const CAP_OFFSETS = {
 
 const clamp01 = (n) => Math.min(1, Math.max(0, n));
 
-/** 장면 기본 라이트 **/
 function SceneSetup() {
-  return (
-    <>
-      <directionalLight position={[5, 6, 4]} intensity={0.5} />
-    </>
-  );
+  return <directionalLight position={[5, 6, 4]} intensity={0.5} />;
 }
 
-/** 하트 Geometry 생성(Extrude + 베벨, 크기/정렬 보정) */
+/** 하트 Geometry */
 function useHeartGeometry() {
   return useMemo(() => {
     const x = 0, y = 0;
@@ -63,13 +45,12 @@ function useHeartGeometry() {
       bevelSegments: 4, bevelSize: 5, bevelThickness: 5, curveSegments: 32,
     });
     geo.center();
-    const s = 0.0060, sz = s * 1.35; // 사이즈
-    geo.scale(s, s, sz);
+    geo.scale(0.0060, 0.0060, 0.0060 * 1.35);
     return geo;
   }, []);
 }
 
-/** 별 Geometry 생성(Extrude + 베벨, 스파이크 5개) */
+/** 별 Geometry */
 function useStarGeometry() {
   return useMemo(() => {
     const outer = 50, inner = 20, spikes = 5;
@@ -88,8 +69,7 @@ function useStarGeometry() {
       bevelSegments: 3, bevelSize: 4, bevelThickness: 4, curveSegments: 48,
     });
     geo.center();
-    const s = 0.0062, sz = s * 1.25;
-    geo.scale(s, s, sz);
+    geo.scale(0.0062, 0.0062, 0.0062 * 1.25);
     return geo;
   }, []);
 }
@@ -102,69 +82,58 @@ export default function MyElement3D({
   capColor,
   metallic,
   roughness,
-  transmission,    // 0~1
-  emissive,        // 0~1 (필라멘트 발광 강도)
-  stickerUrl,      // object URL
-  stickerScale,    // 0.1~1.0
-  stickerY,        // 0~1 (정규화된 높이)
+  transmission,
+  stickerUrl,
+  stickerScale,
+  stickerY,
+  figureUrl,
 }) {
-  // ── 준비된 기하 ──
   const heartGeo = useHeartGeometry();
   const starGeo = useStarGeometry();
 
-  // ── 바디 파라미터(두께/길이 파생값) ──
+  // 바디 파라미터
   const bodyRadius = useMemo(() => (thickness === "wide" ? 0.11 : 0.07), [thickness]);
-  const bodyHeight = useMemo(() => {
-    const map = { short: 0.7, long: 1.0 };
-    return map[bodyLength] ?? 1.2;
-  }, [bodyLength]);
-
+  const bodyHeight = useMemo(() => (bodyLength === "short" ? 0.7 : 1.0), [bodyLength]);
   const bodyCenterY = bodyHeight / 2;
   const bodyTopY = bodyHeight;
 
-  // ── 캡 머티리얼(유리 느낌을 위해 PhysicalMaterial 사용) ──
+  // 유리 재질
   const capPhysMatProps = useMemo(() => ({
     color: capColor,
     metalness: clamp01(metallic),
     roughness: clamp01(roughness),
     transmission: clamp01(transmission),
-    thickness: 0.4,     // 유리 두께감(투과)
-    ior: 1.45,          // 굴절률
-    clearcoat: 0.6,     // 외피 코팅
+    thickness: 0.1,
+    ior: 1.1,
+    clearcoat: 0.6,
     clearcoatRoughness: 0.2,
   }), [capColor, metallic, roughness, transmission]);
 
-  // ── 스티커 텍스처(있으면 세팅, 없으면 1x1 투명) ──
+  // 데칼 텍스처
   const texSrc = stickerUrl || BLANK_1x1;
   const stickerTex = useTexture(texSrc);
   useEffect(() => {
-    // 빈 텍스처(1x1)에는 불필요
     if (!stickerUrl) return;
     stickerTex.anisotropy = 8;
     stickerTex.wrapS = stickerTex.wrapT = THREE.ClampToEdgeWrapping;
     stickerTex.colorSpace = THREE.SRGBColorSpace;
   }, [stickerUrl, stickerTex]);
 
-  // ── 필라멘트(발광체): 캡 색상 톤으로 발광 ──
-  const Filament = ({ height = 0.14, offsetY = 0 }) => (
-    <mesh position={[0, offsetY, 0]}>
-      <cylinderGeometry args={[0.035, 0.035, height, 16]} />
-      <meshStandardMaterial
-        color={capColor}
-        emissive={capColor}
-        emissiveIntensity={clamp01(emissive)}
-        metalness={0}
-        roughness={0.4}
-      />
-    </mesh>
-  );
-
-  // ── 데칼 Y 위치(바디 로컬) 계산 ──
+  // 데칼 Y 배치
   const { yLocal } = useMemo(() => {
-    // 위아래 5% 안전 마진 → 90% 범위에만 배치
-    const yRange = bodyHeight * 0.9;
+    const yRange = bodyHeight * 0.9; // 상하 5% 마진
     return { yLocal: (clamp01(stickerY) - 0.5) * yRange };
   }, [bodyHeight, stickerY]);
+
+  // 캡 유형별 피규어 위치/스케일 (회전은 0으로 고정)
+  const FIGURE_PLACEMENT = useMemo(() => {
+    switch (capShape) {
+      case "sphere":     return { pos: [0, -0.256, 0], scale: 0.07 };
+      case "star":       return { pos: [0, -0.19, 0], scale: 0.07 };
+      case "heart":      return { pos: [0,  -0.22, 0], scale: 0.07 };
+      case "hemisphere": return { pos: [0,  -0.36, 0], scale: 0.07 };
+    }
+  }, [capShape]);
 
   return (
     <>
@@ -174,7 +143,6 @@ export default function MyElement3D({
       <mesh position={[0, bodyCenterY, 0]}>
         <cylinderGeometry args={[bodyRadius, bodyRadius, bodyHeight, 40]} />
         <meshStandardMaterial color={bodyColor} metalness={clamp01(metallic)} roughness={clamp01(roughness)} />
-        {/* 스티커/데칼: 정면 투사 (Decal) */}
         {stickerUrl && (
           <Decal
             position={[0, yLocal, bodyRadius + 0.001]}
@@ -187,48 +155,61 @@ export default function MyElement3D({
         )}
       </mesh>
 
-      {/* ── Cap Variants + Filament ───────────────── */}
+      {/* ── Cap Variants (그룹 회전 제거) ── */}
+
+      {/* sphere: 회전 없음 */}
       {capShape === "sphere" && (
         <group position={[0, bodyTopY + CAP_OFFSETS.sphere, 0]}>
           <mesh>
             <sphereGeometry args={[0.32, 40, 40]} />
             <meshPhysicalMaterial {...capPhysMatProps} />
           </mesh>
-          <Filament height={0.1} offsetY={-0.12} />
+          {figureUrl && (
+            <FigureModel url={figureUrl} scale={FIGURE_PLACEMENT.scale} position={FIGURE_PLACEMENT.pos} />
+          )}
         </group>
       )}
 
+      {/* star: 메쉬만 회전 */}
       {capShape === "star" && (
         <group position={[0, bodyTopY + CAP_OFFSETS.star - 0.03, 0]}>
           <mesh rotation={[0, 0, Math.PI]}>
             <primitive attach="geometry" object={starGeo} />
             <meshPhysicalMaterial {...capPhysMatProps} />
           </mesh>
-          <Filament height={0.1} offsetY={-0.15} />
+          {figureUrl && (
+            <FigureModel url={figureUrl} scale={FIGURE_PLACEMENT.scale} position={FIGURE_PLACEMENT.pos} />
+          )}
         </group>
       )}
 
+      {/* heart: 그룹 회전 제거 → 메쉬에만 회전 */}
       {capShape === "heart" && (
-        <group position={[0, bodyTopY + CAP_OFFSETS.heart, 0]} rotation={[0, 0, Math.PI]}>
-          <mesh>
+        <group position={[0, bodyTopY + CAP_OFFSETS.heart, 0]}>
+          <mesh rotation={[0, 0, Math.PI]}>
             <primitive attach="geometry" object={heartGeo} />
             <meshPhysicalMaterial {...capPhysMatProps} />
           </mesh>
-          <Filament height={0.1} offsetY={0.2} />
+          {figureUrl && (
+            <FigureModel url={figureUrl} scale={FIGURE_PLACEMENT.scale} position={FIGURE_PLACEMENT.pos} />
+          )}
         </group>
       )}
 
+      {/* hemisphere: 그룹 회전 제거 → 각 메쉬에 회전 */}
       {capShape === "hemisphere" && (
-        <group position={[0, bodyTopY + CAP_OFFSETS.hemisphere, 0]} rotation={[Math.PI, 0, 0]}>
-          <mesh>
+        <group position={[0, bodyTopY + CAP_OFFSETS.hemisphere, 0]}>
+          <mesh rotation={[Math.PI, 0, 0]}>
             <sphereGeometry args={[0.40, 40, 40, 0, Math.PI * 2, 0, Math.PI / 2]} />
             <meshPhysicalMaterial {...capPhysMatProps} />
           </mesh>
-          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
             <circleGeometry args={[0.40, 48]} />
             <meshPhysicalMaterial {...capPhysMatProps} side={THREE.DoubleSide} />
           </mesh>
-          <Filament height={0.1} offsetY={0.2} />
+          {figureUrl && (
+            <FigureModel url={figureUrl} scale={FIGURE_PLACEMENT.scale} position={FIGURE_PLACEMENT.pos} />
+          )}
         </group>
       )}
     </>
