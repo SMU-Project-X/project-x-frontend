@@ -50,6 +50,7 @@ export default function App() {
         {/* 챗봇 path */}
         <Route path="/ChatChoice" element={<ChatChoice/>} />
         <Route path="/ChatApp/:chatName" element={<ChatApp />} />
+
         {/* 사진촬영 path */}
         <Route path="/picture/select" element={<PictureSelectMemberPage />} /> 
         <Route path="/picture/deco" element={<MemberDecoPage />} />

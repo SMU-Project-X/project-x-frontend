@@ -1,6 +1,8 @@
 import React from "react";
 import * as itemS from "@/pages/PicturePage/styled/PicturePage.CameraPage.style"
 
+import camera from "@/assets/images/PicturePage/camera.png"
+
 const CameraFrame = ({ videoRef, photoRef, imgSrc, handleCapture }) => {
     return (
         <itemS.camera_frame>
@@ -9,7 +11,7 @@ const CameraFrame = ({ videoRef, photoRef, imgSrc, handleCapture }) => {
                 <img ref={photoRef} src={imgSrc} alt="" width="310" height="360" object-fit="cover"/>
             </itemS.photo_container>
         <itemS.capture onClick={handleCapture}>
-            <img src="/images/PicturePage/camera.png" alt=""/>
+            <img src={camera} alt=""/>
         </itemS.capture>
         </itemS.camera_frame>
     );
