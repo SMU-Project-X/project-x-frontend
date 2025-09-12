@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   PageRoot, Header, HeaderLeft, Logo, Button, Content,
   ViewerCard, ViewerStage, ViewerActions, Sidebar, Panel, PanelTitle, SubTitle,
@@ -28,9 +28,18 @@ const clamp01 = (n) => Math.min(1, Math.max(0, n));
 
 // 카메라 / 오빗 설정
 const CAMERA_INIT = { fov: 40, near: 0.05, far: 40, position: [1.5, 1.5, 2.7] };
-const ORBIT_CFG = { 
-  enablePan: false, enableDamping: true, dampingFactor: 0.08, minDistance: 1.2, maxDistance: 6, minPolarAngle: 0.01, 
-  maxPolarAngle: Math.PI - 0.01, target: [0, 0.7, 0], zoomSpeed: 0.8, rotateSpeed: 0.9 }; {/* target : 카메라 위치 */}
+const ORBIT_CFG = {
+  enablePan: false,
+  enableDamping: true,
+  dampingFactor: 0.08,
+  minDistance: 1.2,
+  maxDistance: 6,
+  minPolarAngle: 0.01,
+  maxPolarAngle: Math.PI - 0.01,
+  target: [0, 0.7, 0], // 카메라가 바라보는 지점
+  zoomSpeed: 0.8,
+  rotateSpeed: 0.9,
+};
 
 export default function LightStickCustomPage() {
   // 형태
@@ -44,20 +53,26 @@ export default function LightStickCustomPage() {
   const [bodyColorText, setBodyColorText] = useState(bodyColor);
   const [capColorText, setCapColorText] = useState(capColor);
 
-  const bodyInvalid = useMemo(() => bodyColorText.trim() !== "" && !isHex6(bodyColorText), [bodyColorText]);
-  const capInvalid = useMemo(() => capColorText.trim() !== "" && !isHex6(capColorText), [capColorText]);
+  const bodyInvalid = useMemo(
+    () => bodyColorText.trim() !== "" && !isHex6(bodyColorText),
+    [bodyColorText]
+  );
+  const capInvalid = useMemo(
+    () => capColorText.trim() !== "" && !isHex6(capColorText),
+    [capColorText]
+  );
 
   // 재질
   const [metallic, setMetallic] = useState(0.25);
-  const [roughness, setRoughness] = useState(0.00);
-  const [transmission, setTransmission] = useState(0.50);
+  const [roughness, setRoughness] = useState(0.0);
+  const [transmission, setTransmission] = useState(0.5);
 
   // 스티커
   const [stickerUrl, setStickerUrl] = useState("");
   const [stickerScale, setStickerScale] = useState(0.3);
   const [stickerY, setStickerY] = useState(0.5);
 
-  // ✅ 피규어 선택
+  // 피규어
   const [figureUrl, setFigureUrl] = useState("");
 
   // blob 정리
@@ -91,15 +106,18 @@ export default function LightStickCustomPage() {
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
 
-  const captureBlob = useCallback(() =>
-    new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        const gl = glRef.current, scene = sceneRef.current, camera = cameraRef.current;
-        if (!gl || !scene || !camera) return resolve(null);
-        gl.render(scene, camera);
-        gl.domElement.toBlob((blob) => resolve(blob), "image/png");
-      });
-    }), []);
+  const captureBlob = useCallback(
+    () =>
+      new Promise((resolve) => {
+        requestAnimationFrame(() => {
+          const gl = glRef.current, scene = sceneRef.current, camera = cameraRef.current;
+          if (!gl || !scene || !camera) return resolve(null);
+          gl.render(scene, camera);
+          gl.domElement.toBlob((blob) => resolve(blob), "image/png");
+        });
+      }),
+    []
+  );
 
   const handleSaveImage = useCallback(async () => {
     const blob = await captureBlob();
@@ -130,7 +148,7 @@ export default function LightStickCustomPage() {
     } else {
       handleSaveImage();
     }
-  }, [captureBlob, handleSaveImage]);
+  }, [captureBlob, handleSaveImage]); // ← ❗ handleShare 자신을 의존성에서 제거
 
   return (
     <PageRoot>
@@ -155,22 +173,25 @@ export default function LightStickCustomPage() {
                 cameraRef.current = camera;
               }}
             >
-              <MyElement3D
-                capShape={capShape}
-                thickness={thickness}
-                bodyLength={bodyLength}
-                bodyColor={bodyColor}
-                capColor={capColor}
-                metallic={clamp01(metallic)}
-                roughness={clamp01(roughness)}
-                transmission={clamp01(transmission)}
-                stickerUrl={stickerUrl}
-                stickerScale={stickerScale}
-                stickerY={stickerY}
-                figureUrl={figureUrl} // ✅ 전달
-              />
-              <OrbitControls makeDefault {...ORBIT_CFG} />
-              <Environment preset="city" />
+              {/* 🔹 GLTF 로딩 대기/실패 시 전체 멈춤 방지 */}
+              <Suspense fallback={null}>
+                <MyElement3D
+                  capShape={capShape}
+                  thickness={thickness}
+                  bodyLength={bodyLength}
+                  bodyColor={bodyColor}
+                  capColor={capColor}
+                  metallic={clamp01(metallic)}
+                  roughness={clamp01(roughness)}
+                  transmission={clamp01(transmission)}
+                  stickerUrl={stickerUrl}
+                  stickerScale={stickerScale}
+                  stickerY={stickerY}
+                  figureUrl={figureUrl}
+                />
+                <OrbitControls makeDefault {...ORBIT_CFG} />
+                <Environment preset="city" />
+              </Suspense>
             </Canvas>
           </ViewerStage>
 
@@ -223,13 +244,28 @@ export default function LightStickCustomPage() {
                     setBodyColorText(HEX6.test(n) ? n.toLowerCase() : bodyColor);
                   }}
                   placeholder="#RRGGBB"
+                  spellCheck={false}
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  autoCorrect="off"
                   aria-invalid={bodyInvalid}
+                  aria-describedby={bodyInvalid ? "bodyColorErr" : undefined}
+                  style={bodyInvalid ? { borderColor:"#ef4444", outlineColor:"#ef4444" } : undefined}
                 />
-                <input type="color" value={bodyColor} onChange={(e)=> {
-                  setBodyColor(e.target.value);
-                  setBodyColorText(e.target.value);
-                }}/>
+                <input
+                  type="color"
+                  value={bodyColor}
+                  onChange={(e)=> {
+                    setBodyColor(e.target.value);
+                    setBodyColorText(e.target.value);
+                  }}
+                />
               </ColorField>
+              {bodyInvalid && (
+                <div id="bodyColorErr" role="alert" style={{ color:"#ef4444", fontSize:12, marginTop:4 }}>
+                  유효한 HEX 색상(예: <code>#1a2b3c</code>)을 입력하세요.
+                </div>
+              )}
             </Field>
 
             {/* 캡 색상 */}
@@ -250,13 +286,28 @@ export default function LightStickCustomPage() {
                     setCapColorText(HEX6.test(n) ? n.toLowerCase() : capColor);
                   }}
                   placeholder="#RRGGBB"
+                  spellCheck={false}
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  autoCorrect="off"
                   aria-invalid={capInvalid}
+                  aria-describedby={capInvalid ? "capColorErr" : undefined}
+                  style={capInvalid ? { borderColor:"#ef4444", outlineColor:"#ef4444" } : undefined}
                 />
-                <input type="color" value={capColor} onChange={(e)=> {
-                  setCapColor(e.target.value);
-                  setCapColorText(e.target.value);
-                }}/>
+                <input
+                  type="color"
+                  value={capColor}
+                  onChange={(e)=> {
+                    setCapColor(e.target.value);
+                    setCapColorText(e.target.value);
+                  }}
+                />
               </ColorField>
+              {capInvalid && (
+                <div id="capColorErr" role="alert" style={{ color:"#ef4444", fontSize:12, marginTop:4 }}>
+                  유효한 HEX 색상(예: <code>#1a2b3c</code>)을 입력하세요.
+                </div>
+              )}
             </Field>
 
             {/* 재질 */}
@@ -264,41 +315,31 @@ export default function LightStickCustomPage() {
             <SliderField>
               <label>메탈릭</label>
               <div className="slider">
-                <input type="range" min="0" max="1" step="0.01" value={metallic} onChange={e=>setMetallic(parseFloat(e.target.value))}/>
+                <input type="range" min="0" max="1" step="0.01" value={metallic} onChange={(e)=>setMetallic(parseFloat(e.target.value))}/>
                 <span className="value">{metallic.toFixed(2)}</span>
               </div>
             </SliderField>
             <SliderField>
               <label>거칠기</label>
               <div className="slider">
-                <input type="range" min="0" max="1" step="0.01" value={roughness} onChange={e=>setRoughness(parseFloat(e.target.value))}/>
+                <input type="range" min="0" max="1" step="0.01" value={roughness} onChange={(e)=>setRoughness(parseFloat(e.target.value))}/>
                 <span className="value">{roughness.toFixed(2)}</span>
               </div>
             </SliderField>
             <SliderField>
               <label>투명도</label>
               <div className="slider">
-                <input type="range" min="0" max="1" step="0.01" value={transmission} onChange={e=>setTransmission(parseFloat(e.target.value))}/>
+                <input type="range" min="0" max="1" step="0.01" value={transmission} onChange={(e)=>setTransmission(parseFloat(e.target.value))}/>
                 <span className="value">{transmission.toFixed(2)}</span>
               </div>
             </SliderField>
 
             {/* 피규어 선택 */}
             <SubTitle>피규어 선택</SubTitle>
-            <select value={figureUrl} onChange={e => setFigureUrl(e.target.value)}>
+            <select value={figureUrl} onChange={(e) => setFigureUrl(e.target.value)}>
               <option value="">없음</option>
               <option value="/models/scene.gltf">류하</option>
-              {/* <option value="/models/scene.gltf">다온</option>
-              <option value="/models/scene.gltf">채윤</option>
-              <option value="/models/scene.gltf">세라</option>
-              <option value="/models/scene.gltf">수린</option>
-              <option value="/models/scene.gltf">모아</option>
-              <option value="/models/scene.gltf">지원</option>
-              <option value="/models/scene.gltf">세인</option>
-              <option value="/models/scene.gltf">아린</option>
-              <option value="/models/scene.gltf">현</option>
-              <option value="/models/scene.gltf">가온</option>
-              <option value="/models/scene.gltf">유나</option> */}
+              {/* 다른 모델도 있으면 여기에 추가 */}
             </select>
 
             {/* 스티커 */}
@@ -314,14 +355,14 @@ export default function LightStickCustomPage() {
               <SliderField>
                 <label>스티커 크기</label>
                 <div className="slider">
-                  <input type="range" min="0.1" max="1" step="0.01" value={stickerScale} onChange={e=>setStickerScale(parseFloat(e.target.value))}/>
+                  <input type="range" min="0.1" max="1" step="0.01" value={stickerScale} onChange={(e)=>setStickerScale(parseFloat(e.target.value))}/>
                   <span className="value">{stickerScale.toFixed(2)}</span>
                 </div>
               </SliderField>
               <SliderField>
                 <label>스티커 높이(Y)</label>
                 <div className="slider">
-                  <input type="range" min="0" max="1" step="0.01" value={stickerY} onChange={e=>setStickerY(parseFloat(e.target.value))}/>
+                  <input type="range" min="0" max="1" step="0.01" value={stickerY} onChange={(e)=>setStickerY(parseFloat(e.target.value))}/>
                   <span className="value">{Math.round(stickerY*100)}%</span>
                 </div>
               </SliderField>

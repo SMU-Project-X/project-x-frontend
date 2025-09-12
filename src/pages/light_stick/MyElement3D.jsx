@@ -1,4 +1,4 @@
-// MyElement3D.jsx  — 방법 B(그룹 회전 제거, 메쉬에만 회전 적용)
+// MyElement3D.jsx — 방법 B(그룹 회전 제거) + 바디 월드 오프셋(bodyBaseY) 적용 + 받침 원반(바디 자식)
 
 import React, { useEffect, useMemo } from "react";
 import * as THREE from "three";
@@ -6,9 +6,10 @@ import { Decal, useTexture } from "@react-three/drei";
 import FigureModel from "./FigureModel";
 
 /**
- * - 필라멘트 제거
- * - 캡 안 피규어: figureUrl 사용
- * - heart/hemisphere의 그룹 회전 → 메쉬 회전으로 이동 (자식(피규어) 뒤집힘 방지)
+ * 변경 요약
+ * - 바디/받침을 한 번에 내리기: bodyBaseY 추가 → 바디 월드 위치/바디 꼭대기 계산에 반영
+ * - 캡은 bodyTopY(월드) 기준으로 배치되어 바디를 내려도 항상 따라옴
+ * - 받침 원반은 바디 '자식'이라 같이 이동
  */
 
 const BLANK_1x1 =
@@ -94,10 +95,16 @@ export default function MyElement3D({
   // 바디 파라미터
   const bodyRadius = useMemo(() => (thickness === "wide" ? 0.11 : 0.07), [thickness]);
   const bodyHeight = useMemo(() => (bodyLength === "short" ? 0.7 : 1.0), [bodyLength]);
-  const bodyCenterY = bodyHeight / 2;
-  const bodyTopY = bodyHeight;
 
-  // 유리 재질
+  // ✅ 바디 월드 오프셋(여기만 바꾸면 바디+받침이 함께 내려감)
+  const bodyBaseY = -0.06; // ↓ 더 내리고 싶으면 음수 절댓값을 키우세요
+
+  // 바디의 로컬/월드 위치 계산
+  const bodyCenterLocalY = bodyHeight / 2;                 // 로컬 중심(+y가 위)
+  const bodyCenterWorldY = bodyBaseY + bodyCenterLocalY;   // 월드에서 바디 중심
+  const bodyTopY         = bodyHeight;
+
+  // 유리 재질 (당신 값 유지)
   const capPhysMatProps = useMemo(() => ({
     color: capColor,
     metalness: clamp01(metallic),
@@ -119,30 +126,44 @@ export default function MyElement3D({
     stickerTex.colorSpace = THREE.SRGBColorSpace;
   }, [stickerUrl, stickerTex]);
 
-  // 데칼 Y 배치
+  // 데칼 Y 배치(바디 로컬 기준)
   const { yLocal } = useMemo(() => {
     const yRange = bodyHeight * 0.9; // 상하 5% 마진
     return { yLocal: (clamp01(stickerY) - 0.5) * yRange };
   }, [bodyHeight, stickerY]);
 
-  // 캡 유형별 피규어 위치/스케일 (회전은 0으로 고정)
+  // 피규어 위치/스케일 (당신 값 유지)
   const FIGURE_PLACEMENT = useMemo(() => {
     switch (capShape) {
-      case "sphere":     return { pos: [0, -0.256, 0], scale: 0.07 };
-      case "star":       return { pos: [0, -0.19, 0], scale: 0.07 };
-      case "heart":      return { pos: [0,  -0.22, 0], scale: 0.07 };
-      case "hemisphere": return { pos: [0,  -0.36, 0], scale: 0.07 };
+      case "sphere":     return { pos: [0, -0.28, 0], scale: 0.1 };
+      case "star":       return { pos: [0, -0.2,  0], scale: 0.1 };
+      case "heart":      return { pos: [0, -0.23,  0], scale: 0.1 };
+      case "hemisphere": return { pos: [0, -0.364,  0], scale: 0.1 };
+      default:           return { pos: [0, -0.25,  0], scale: 0.1 };
     }
   }, [capShape]);
+
+  // ✅ 받침 원반 치수(바디 로컬 기준, 바디의 '자식'으로 배치)
+  const PLATE_R_FACTOR = 1.5;
+  const PLATE_T        = 0.045;
+  const PLATE_EPS      = 0.001;
+
+  const plateR = bodyRadius * PLATE_R_FACTOR;
+  const plateY = bodyHeight / 2 + PLATE_T / 2 + PLATE_EPS; // 바디 로컬 상단 바로 위
 
   return (
     <>
       <SceneSetup />
 
-      {/* Body */}
-      <mesh position={[0, bodyCenterY, 0]}>
+      {/* Body (받침 원반은 바디의 '자식') */}
+      <mesh position={[0, bodyCenterWorldY, 0]}>
         <cylinderGeometry args={[bodyRadius, bodyRadius, bodyHeight, 40]} />
-        <meshStandardMaterial color={bodyColor} metalness={clamp01(metallic)} roughness={clamp01(roughness)} />
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={clamp01(metallic)}
+          roughness={clamp01(roughness)}
+        />
+
         {stickerUrl && (
           <Decal
             position={[0, yLocal, bodyRadius + 0.001]}
@@ -153,24 +174,38 @@ export default function MyElement3D({
             depthWrite={false}
           />
         )}
+
+        {/* 받침 원반 */}
+        <mesh position={[0, plateY, 0]}>
+          <cylinderGeometry args={[plateR, plateR, PLATE_T, 64]} />
+          <meshStandardMaterial
+            color={bodyColor}
+            metalness={clamp01(metallic)}
+            roughness={Math.max(0.2, clamp01(roughness))}
+          />
+        </mesh>
       </mesh>
 
-      {/* ── Cap Variants (그룹 회전 제거) ── */}
+      {/* ── Cap Variants (그룹 회전 제거, 메쉬 회전만) ── */}
 
-      {/* sphere: 회전 없음 */}
+      {/* sphere */}
       {capShape === "sphere" && (
-        <group position={[0, bodyTopY + CAP_OFFSETS.sphere, 0]}>
+        <group position={[0, bodyTopY + CAP_OFFSETS.sphere + 0.015, 0]}>
           <mesh>
             <sphereGeometry args={[0.32, 40, 40]} />
             <meshPhysicalMaterial {...capPhysMatProps} />
           </mesh>
           {figureUrl && (
-            <FigureModel url={figureUrl} scale={FIGURE_PLACEMENT.scale} position={FIGURE_PLACEMENT.pos} />
+            <FigureModel
+              url={figureUrl}
+              scale={FIGURE_PLACEMENT.scale}
+              position={FIGURE_PLACEMENT.pos}
+            />
           )}
         </group>
       )}
 
-      {/* star: 메쉬만 회전 */}
+      {/* star */}
       {capShape === "star" && (
         <group position={[0, bodyTopY + CAP_OFFSETS.star - 0.03, 0]}>
           <mesh rotation={[0, 0, Math.PI]}>
@@ -178,12 +213,16 @@ export default function MyElement3D({
             <meshPhysicalMaterial {...capPhysMatProps} />
           </mesh>
           {figureUrl && (
-            <FigureModel url={figureUrl} scale={FIGURE_PLACEMENT.scale} position={FIGURE_PLACEMENT.pos} />
+            <FigureModel
+              url={figureUrl}
+              scale={FIGURE_PLACEMENT.scale}
+              position={FIGURE_PLACEMENT.pos}
+            />
           )}
         </group>
       )}
 
-      {/* heart: 그룹 회전 제거 → 메쉬에만 회전 */}
+      {/* heart */}
       {capShape === "heart" && (
         <group position={[0, bodyTopY + CAP_OFFSETS.heart, 0]}>
           <mesh rotation={[0, 0, Math.PI]}>
@@ -191,12 +230,16 @@ export default function MyElement3D({
             <meshPhysicalMaterial {...capPhysMatProps} />
           </mesh>
           {figureUrl && (
-            <FigureModel url={figureUrl} scale={FIGURE_PLACEMENT.scale} position={FIGURE_PLACEMENT.pos} />
+            <FigureModel
+              url={figureUrl}
+              scale={FIGURE_PLACEMENT.scale}
+              position={FIGURE_PLACEMENT.pos}
+            />
           )}
         </group>
       )}
 
-      {/* hemisphere: 그룹 회전 제거 → 각 메쉬에 회전 */}
+      {/* hemisphere */}
       {capShape === "hemisphere" && (
         <group position={[0, bodyTopY + CAP_OFFSETS.hemisphere, 0]}>
           <mesh rotation={[Math.PI, 0, 0]}>
@@ -208,7 +251,11 @@ export default function MyElement3D({
             <meshPhysicalMaterial {...capPhysMatProps} side={THREE.DoubleSide} />
           </mesh>
           {figureUrl && (
-            <FigureModel url={figureUrl} scale={FIGURE_PLACEMENT.scale} position={FIGURE_PLACEMENT.pos} />
+            <FigureModel
+              url={figureUrl}
+              scale={FIGURE_PLACEMENT.scale}
+              position={FIGURE_PLACEMENT.pos}
+            />
           )}
         </group>
       )}
