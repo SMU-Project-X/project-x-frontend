@@ -191,7 +191,7 @@ export default function MyElement3D({
       {capShape === "sphere" && (
         <group position={[0, bodyTopY + CAP_OFFSETS.sphere, 0]}>
           <mesh>
-            <sphereGeometry args={[0.35, 40, 40]} />
+            <sphereGeometry args={[0.32, 40, 40]} />
             <meshPhysicalMaterial {...capPhysMatProps} />
           </mesh>
           <Filament height={0.1} offsetY={-0.12} />
