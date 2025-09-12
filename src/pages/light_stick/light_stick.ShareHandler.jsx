@@ -14,7 +14,7 @@ const clamp01 = (n) => Math.min(1, Math.max(0, Number(n)));
  * @param {string} [opts.endpoint="/api/lightstick/shares"] - API 경로
  * @returns {Promise<string>} code
  */
-export async function postLightstickShare(payload, opts = {}) {
+export async function postLightstickShare(payload, opts = {}) { // API 호출 전담: payload를 안전하게 보정하고 서버에 POST → 응답 JSON에서 code를 꺼내 문자열로 반환.
   const endpoint = opts.endpoint ?? "/api/lightstick/shares";
 
   // 보정(필드 누락 시 기본값 보장)
@@ -65,7 +65,7 @@ export async function postLightstickShare(payload, opts = {}) {
  * @param {string} cfg.boardWritePath - 글쓰기 페이지 라우트 (예: "/community/write")
  * @param {string} [cfg.endpoint] - API 경로 커스터마이징 시
  */
-export function useLightstickShare({ boardWritePath, endpoint } = {}) {
+export function useLightstickShare({ boardWritePath, endpoint } = {}) { // 컴포넌트에서 한 줄로 share(payload) 호출 → 서버 저장 + code 수신 + 이동까지 끝내기.
   const navigate = useNavigate();
 
   const share = useCallback(
