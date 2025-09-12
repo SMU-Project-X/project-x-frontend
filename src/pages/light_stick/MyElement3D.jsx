@@ -115,7 +115,7 @@ export default function MyElement3D({
   // ── 바디 파라미터(두께/길이 파생값) ──
   const bodyRadius = useMemo(() => (thickness === "wide" ? 0.11 : 0.07), [thickness]);
   const bodyHeight = useMemo(() => {
-    const map = { short: 0.8, long: 1.1 };
+    const map = { short: 0.7, long: 1.0 };
     return map[bodyLength] ?? 1.2;
   }, [bodyLength]);
 
