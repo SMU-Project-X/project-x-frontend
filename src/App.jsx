@@ -25,6 +25,12 @@ import SelectMember from './pages/CommunityPage/Community.SelectMember';
 // 홈페이지
 import Home from './pages/HomePage/Home.main';
 
+// 로그인
+import Login from './pages/LoginPage/LoginPage.main';
+import FindID from './pages/LoginPage/LoginPage.FindIdPage';
+import FindPW from './pages/LoginPage/LoginPage.FindPwPage';
+import ChangePW from './pages/LoginPage/LoginPage.ChangePwPage';
+
 
 
 
@@ -51,6 +57,12 @@ export default function App() {
         <Route path="/picture/select" element={<PictureSelectMemberPage />} /> 
         <Route path="/picture/deco" element={<MemberDecoPage />} />
         <Route path="/picture/camera" element={<CameraPage />} />
+
+        {/* 로그인 */}
+        <Route path="/login" element={<Login />} /> 
+        <Route path="/login/findid" element={<FindID/>} />
+        <Route path="/login/findpw" element={<FindPW/>} />
+        <Route path='/login/changepw' element={<ChangePW/>} />
       </Routes>
     </>
   )
