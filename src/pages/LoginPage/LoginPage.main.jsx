@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import * as itemS from "@/pages/LoginPage/styled/LoginPage.main.style"
+import kakaoLogin from "@/assets/images/LoginPage/kakao_login_large_wide.png"
 
 function Login() {
     const [savedId, setSavedId] = useState("");
@@ -67,7 +68,7 @@ function Login() {
                 </form>
 
                 <a href="{% url 'login:kakao_login' %}">
-                    <itemS.KakaoBtn alt="카카오톡 로그인" />
+                    <itemS.KakaoBtn src={kakaoLogin} alt="카카오톡 로그인" />
                 </a>
 
                 <itemS.Signup>
