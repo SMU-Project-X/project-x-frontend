@@ -31,6 +31,11 @@ import FindID from './pages/LoginPage/LoginPage.FindIdPage';
 import FindPW from './pages/LoginPage/LoginPage.FindPwPage';
 import ChangePW from './pages/LoginPage/LoginPage.ChangePwPage';
 
+// 회원가입
+import TermsPage from './pages/SignUpPage/SignUpPage.TermsPage';
+import InsertInfoPage from './pages/SignUpPage/SignUpPage.InsertInfoPage';
+import CompletePage from './pages/SignUpPage/SignUpPage.CompletePage';
+
 
 
 
@@ -63,6 +68,11 @@ export default function App() {
         <Route path="/login/findid" element={<FindID/>} />
         <Route path="/login/findpw" element={<FindPW/>} />
         <Route path='/login/changepw' element={<ChangePW/>} />
+
+        {/* 회원가입 */}
+        <Route path='/signup/terms' element={<TermsPage/>} />
+        <Route path='/signup/info' element={<InsertInfoPage/>} />
+        <Route path='/signup/complete' element={<CompletePage/>} />
       </Routes>
     </>
   )
