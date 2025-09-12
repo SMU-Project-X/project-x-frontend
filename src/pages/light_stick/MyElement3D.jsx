@@ -36,11 +36,10 @@ const CAP_OFFSETS = {
 
 const clamp01 = (n) => Math.min(1, Math.max(0, n));
 
-/** 장면 기본 라이트: 주변광 + 방향광(은은한 하이라이트) */
+/** 장면 기본 라이트 **/
 function SceneSetup() {
   return (
     <>
-      <ambientLight intensity={0.4} />
       <directionalLight position={[5, 6, 4]} intensity={0.5} />
     </>
   );
@@ -114,7 +113,7 @@ export default function MyElement3D({
   const starGeo = useStarGeometry();
 
   // ── 바디 파라미터(두께/길이 파생값) ──
-  const bodyRadius = useMemo(() => (thickness === "wide" ? 0.12 : 0.08), [thickness]);
+  const bodyRadius = useMemo(() => (thickness === "wide" ? 0.11 : 0.07), [thickness]);
   const bodyHeight = useMemo(() => {
     const map = { short: 0.8, long: 1.1 };
     return map[bodyLength] ?? 1.2;
