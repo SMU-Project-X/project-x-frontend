@@ -11,20 +11,19 @@ import ViewPage from './pages/RandingPage/RandingPage.SelectMemberPage.ViewPage'
 
 // 사진촬영 페이지
 import PictureSelectMemberPage from './pages/PicturePage/PicturePage.SelectMemberPage';
-import MemberDecoPage from './pages/PicturePage/PicturePage.MemberDecoPage';
+// import MemberDecoPage from './pages/PicturePage/PicturePage.MemberDecoPage';
 import CameraPage from './pages/PicturePage/PicturePage.CameraPage';
 
 
 // 커뮤니티페이지
 import CommunityHome from './pages/CommunityPage/CommunityPage.CommunityHome';
 import CheerArtist from './pages/CommunityPage/CommunityPage.CheerArtist';
-import VotePage from './pages/CommunityPage/CommunityPage.VotePage';
 import SelectMember from './pages/CommunityPage/CommunityPage.SelectMember';
 import axios from 'axios';
 // import FandomTalk from './pages/CommunityPage/CommunityPage.FandomTalk';
 
 // 홈페이지
-import Home from './pages/HomePage/Home.main';
+// import Home from './pages/HomePage/Home.main';
 
 import ChatApp from './pages/ChatbotPage/Chatbot.Chatapp';
 import ChatChoice from './pages/ChatbotPage/Chatbot.ChatChoice';
@@ -41,11 +40,10 @@ export default function App() {
         <Route path="/selectMember/view" element={<ViewPage />} />
 
         {/* 홈 path */}
-        <Route path='/home' element={<Home/>} />
+        {/* <Route path='/home' element={<Home/>} /> */}
         
         {/* 커뮤니티 path */}
         <Route path="/Community/" element={<CommunityHome />} />
-        <Route path='/Community/VotePage' element={<VotePage />} />
         <Route path="/Community/CheerArtist" element={<CheerArtist />} />
         <Route path="/Community/SelectMember" element={<SelectMember />} />
         {/* <Route path="/Community/FandomTalk" element={<FandomTalk />} /> */}
@@ -56,7 +54,7 @@ export default function App() {
 
         {/* 사진촬영 path */}
         <Route path="/picture/select" element={<PictureSelectMemberPage />} /> 
-        <Route path="/picture/deco" element={<MemberDecoPage />} />
+        {/* <Route path="/picture/deco" element={<MemberDecoPage />} /> */}
         <Route path="/picture/camera" element={<CameraPage />} />
       </Routes>
     </>
