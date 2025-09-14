@@ -3,20 +3,30 @@ import { useEffect, useState } from "react"
 
 
 // 투표 기능
-export function DoVote(userId) {
+// export function UseVote() {
 
-    const [units, setUnits] = useState([]);
-    const [hasVoted, setHasVoted] = useState(false);
-    const [selectedUnit, setSelectedUnit] = useState(null);
-    const [selectedMember, setSelectedMember] = useState(null);
+//     const [units, setUnits] = useState([]);
+//     const [hasVoted, setHasVoted] = useState(false);
+//     const [selectedUnit, setSelectedUnit] = useState(null);
+//     const [selectedMember, setSelectedMember] = useState(null);
+
+//       useEffect(() => {
+//         axios.get(`http://localhost:8080/api/members`)
+//         .then(res => setUnits(res.data))
+//         .then(res => {setUnits(res.data);
+//         })
+//         .catch(err => {
+//             console.error("유저 정보를 불러오지 못했습니다:", err);
+//         });
+//     });
     
-    useEffect(()=> {
-        axios.get(`http://localhost:8080/api`).then(res => setUnits(res.data));
-        console.log("list : ",units);
-        fetch(`http://localhost:8080/api/votes/${userId}`)
-        .then((res) => res.json())
-        .then((data) => setHasVoted(data.hasVoted));
-    },[userId]);
+    // useEffect(()=> {
+    //     axios.get(`http://localhost:8080/api`).then(res => setUnits(res.data));
+    //      console.log("list : ",units);
+    //     fetch(`http://localhost:8080/api/votes/${userId}`)
+    //     .then((res) => res.json())
+    //     .then((data) => setHasVoted(data.hasVoted));
+    // },[userId]);
 
 
     // // DB에서 유닛/ 투표 불러오기
@@ -65,4 +75,4 @@ export function DoVote(userId) {
     //     setSelectedMember,
     //     handleVote,
     // };
-}
+// }

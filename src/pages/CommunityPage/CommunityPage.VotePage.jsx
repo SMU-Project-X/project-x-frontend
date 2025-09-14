@@ -16,7 +16,7 @@ import 세인 from '/Character/세인.png';
 import 수린 from '/Character/수린.png';
 import 아린 from '/Character/아린.png';
 import CloseBtn from '@/assets/images/CommunityPage/closeBtn.png';
-import { DoVote } from './hooks/CommunityPage.VotePage.DoVote';
+
 
 
 
@@ -82,6 +82,7 @@ export const VotePage = ({isModalOpen, onClose, userId}) => {
                     <VoteModal.VoteContainer>
                     <h1>유닛조합에 투표 해주세요</h1>
                     <VoteModal.CloseBtn onClick={onClose}>닫기</VoteModal.CloseBtn>
+                        <VoteModal.UnitContainer>
                         {dummyUnits.map((unit, idx) => (
                             <Unit 
                                 key={idx} 
@@ -89,15 +90,15 @@ export const VotePage = ({isModalOpen, onClose, userId}) => {
                                 options={unit.options} 
                             />
                         ))}
+                        </VoteModal.UnitContainer> 
                         {/* 투표가 이미 완료된 경우 안내 */}
-                            <VoteModal.VoteBlock>
+                            {/* <VoteModal.VoteBlock>
                                 <VoteModal.NoMoreVote>
                                     <p>이미 투표에 참여하셨습니다.</p>
                                     <p>결과를 기다려주세요</p>
                                 </VoteModal.NoMoreVote>
-                            </VoteModal.VoteBlock>
+                            </VoteModal.VoteBlock> */}
                     </VoteModal.VoteContainer> 
-                    <button>투표하기</button> 
                 </VoteModal.ModuleContainer>
             </VoteModal.Overlay>
     );

@@ -1,34 +1,23 @@
-import { div } from 'framer-motion/client';
-import React, { useRef } from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import React, { useRef, useState } from 'react';
+import { BrowserRouter, Routes, Route, Link, useLocation  } from 'react-router-dom';
 
 import * as itemS from './styled/CommunityPage.CheerArtist.style';
 import previous from '@/assets/images/CommunityPage/previous.png';
 import sendImg from '@/assets/images/CommunityPage/sendImg.png';
-import next from '@/assets/images/CommunityPage/next.png';
 import image1 from '@/assets/images/CommunityPage/image1.png';
-import image2 from '@/assets/images/CommunityPage/image2.png';
-import moreicon from '@/assets/images/CommunityPage/moreicon.png';
 import shareicon from '@/assets/images/CommunityPage/shareicon.png';
-import Modal from './CommunityPage.VotePage';
+import { CommentContent } from './components/CommunityPage.Comment.Component';
 
-function CommentContent() {
-  return (
-    <itemS.CommentContents>
-      <itemS.Userwrap>
-        <itemS.UserImg><img src={image1} /></itemS.UserImg>
-        <itemS.UserInfo>
-          <h2>닉네임</h2>
-          <p>댓글 입력 날짜</p>
-        </itemS.UserInfo>
-        <itemS.moreIcon><img src={moreicon} /></itemS.moreIcon>
-      </itemS.Userwrap>
-      <itemS.context><p>댓글 내용</p></itemS.context>
-    </itemS.CommentContents>
-  )
-}
 
-const CheerArtist = () => {
+export const CheerArtist = () => {
+
+
+    const location = useLocation();
+    const query = new URLSearchParams(location.search);
+  
+    const memberId = query.get('memberId');
+    const name = query.get('name');
+
   return (
     <itemS.Maincontainer>
     {/* 상단 헤더 */}
@@ -44,13 +33,13 @@ const CheerArtist = () => {
           </itemS.MenuNav>
           <itemS.UserBox>
             <itemS.UserCircle></itemS.UserCircle>
-            <a href="#"><itemS.UserMenu>로그인</itemS.UserMenu></a>
+            <itemS.UserMenu>로그인</itemS.UserMenu>
           </itemS.UserBox>
         </itemS.Nav>
       </itemS.Header>
       {/* 이전으로 넘어가기 */}
       <itemS.ContentTop>
-        <itemS.prevBtn><img src={previous} /> 이전 </itemS.prevBtn>
+        {/* <itemS.prevBtn ><img src={previous}/> 이전 </itemS.prevBtn> */}
           <itemS.ContentTitle>
             <h1>응원메세지를 적고 퍼즐을 맞춰보세요!</h1>
             <h3>멤버를 선택하고 응원댓글을 입력하면 퍼즐 조각이 모여요!</h3>
@@ -59,16 +48,13 @@ const CheerArtist = () => {
         <itemS.CheerArtistContainer>
           <itemS.CommentContainer>
             <itemS.CommentReply>
-              <input type="text" id="reply" name="replay" placeholder='멤버이름을 넣어 응원메세지를 적어주세요!'></input>
+              <input type="text" id="reply" name="reply" placeholder='멤버이름을 넣어 응원메세지를 적어주세요!'></input>
               <itemS.SendImg>
                 <img src={sendImg} />
               </itemS.SendImg>
             </itemS.CommentReply>
             <itemS.CommentList>
-              <CommentContent />
-              <CommentContent />
-              <CommentContent />
-              <CommentContent />
+              {/* 댓글 컴포넌트 부분 */}
               <CommentContent />
             </itemS.CommentList>
           </itemS.CommentContainer>

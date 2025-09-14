@@ -11,10 +11,10 @@ import image1 from '@/assets/images/CommunityPage/image1.png'
 function Unit({title, options}){
     return (
         <VoteModal.VoteSelect>
-            <VoteModal.RadioInfo>
-                <input type="radio" name="choice" id={title}></input>
+            {/* <VoteModal.RadioInfo>
                 <h3>{title}</h3>
-            </VoteModal.RadioInfo>
+                <input type="hidden" name="choice" id={title}></input>
+            </VoteModal.RadioInfo> */}
             <VoteModal.Unit>
                 {options.map((opt,idx)=>{
                     return (

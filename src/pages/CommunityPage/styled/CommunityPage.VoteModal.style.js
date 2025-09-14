@@ -1,20 +1,26 @@
 import styled from "styled-components";
 
 export const ModuleContainer = styled.div `
-    background-color: #B3D1F0;
-    border: 2px solid #B3D1F0;
     border-radius: 40px;
-    margin-top: 40px;
-    width: 70vw;
-    height: 40vw;
-    max-width: 90%;
-    overflow-y: auto;
+    width: 100%;
+    max-width: 1200px;
+    height: auto;
     position: relative;
+
+    @media (max-width:768px) {
+        height:auto;
+        padding: 20px;
+    }
 `;
+
+// 투표컨테이너 
 export const VoteContainer = styled.div `
-    width: 80%;
-    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin:0 auto;
     position: relative;
+    cursor: pointer;
     h1 {
         width: 100%;
         text-align: center;
@@ -23,11 +29,27 @@ export const VoteContainer = styled.div `
         padding: 20px;
         font-weight: bold;
     }
+    @media (max-width: 1024px) {
+        width: 100%;
+        margin-left: 0;
+        padding: 30px;
+    }
+
+    @media (max-width: 768px) {
+        padding: 20px;
+        h1 {
+            font-size: 24px;
+        }
+    }
 `;
 
 export const VoteSelect = styled.div `
-    display: flex;
+    display: contents;
     align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    background-color: #ffffff;
+
     h3 {
         width: 120px;
         height: 40px;
@@ -36,7 +58,6 @@ export const VoteSelect = styled.div `
 
 export const RadioInfo = styled.div `
     width: 120px;
-    height: 80px;
     max-width: 70%;
     text-align: center;
     input[name="choice"] {
@@ -45,30 +66,73 @@ export const RadioInfo = styled.div `
     }
 `;
 
+// 유닛 전체
+export const UnitContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 20px;
+    width: 100%;
+
+    @media (max-width: 768px)  {
+        display: grid;
+        grid-template-columns: repeat(2,1fr);
+        gap:20px;
+    }
+`;
+
+// 각 유닛(이미지 4개 그리드)
 export const Unit = styled.div `
-    width: 80%;
-    display: flex;
-    gap: 16px;
+    width: 40%;
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 10px;
+    @media (max-width: 1024px) {
+        width: 48%;
+    }
+    @media (max-width: 768px) {
+        width: 100%;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 480px) {
+        grid-template-columns: 1fr; // 세로로 1열
+    }
 `;
 export const VoteCard = styled.div `
-    width: 173px;
-    height: 193px;
+    width: 136px;
+    height: 216px;
     overflow: hidden;
     text-align: center;
     padding-top: 20px;
-    transition: transform 0export const 2s ease;
+    transition: transform  0.2s ease;
     box-shadow: 0 4px 4px #cdcdce;
 `;
 
 export const VoteImg = styled.div `
     img {
-        width: 120px;
-        height: 140px;
+        width: 150px;
+        height: 170px;
+        object-fit: cover;
+
+    @media (max-width: 768px) {
+        width: 100px;
+        height: 120px;
+    }
+
+    @media (max-width: 480px) {
+        width: 100%;
+        height: auto;
+    }
     }
 `;
 
 export const VoteContent = styled.div `
     padding: 5px;
+    font-size: 14px;
+
+    @media (max-width: 480px) {
+        font-size: 12px;
+    }
 `;
 
 
@@ -87,25 +151,25 @@ export const NoMoreVote = styled.div `
 
 /* 모달창 */
 export const Overlay = styled.div`
-    position: absolute;
+    position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.3);
+    background: rgba(68, 68, 68, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100vw;
     height: 100vh;
-    z-index: 1;
+    z-index: 1000;
+    overflow: auot;
 `;
-export const BaseContainer = styled.div`
-    
 
-`;
 export const CloseBtn = styled.div`
-    width: 100%;
+    width: 80px;
     height: 30px;
     display: flex;
     justify-content: end;
+    float: right;
+    padding: 10px;
     cursor: pointer;
     & hover {
         color: #ff4d4f;
