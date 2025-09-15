@@ -49,6 +49,9 @@ const ORBIT_CFG = {
   rotateSpeed: 0.9,
 };
 
+/* ===========================
+ * 백엔드
+ * =========================== */
 export default function LightStickCustomPage() {
   const navigate = useNavigate();
 
@@ -75,10 +78,7 @@ export default function LightStickCustomPage() {
   const [roughness, setRoughness] = useState(0.0);
   const [transmission, setTransmission] = useState(0.5);
 
-  /* =============== 스티커/피규어 =============== */
-  const [stickerUrl, setStickerUrl] = useState("");
-  const [stickerScale, setStickerScale] = useState(0.3);
-  const [stickerY, setStickerY] = useState(0.5);
+  /* =============== 피규어 =============== */
   const [figureUrl, setFigureUrl] = useState("");
 
   /* =============== blob 정리 =============== */
