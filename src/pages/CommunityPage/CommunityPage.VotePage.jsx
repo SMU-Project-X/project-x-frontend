@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
 // modal style
-import * as VoteModal from '@/pages/CommunityPage/styled/CommunityPage.VoteModal.style';
+import * as VoteModal from './styled/CommunityPage.VoteModal.style';
 import Unit from './components/CommunityPage.VotePage.Unit.Component';
 
 // 이미지 임포트

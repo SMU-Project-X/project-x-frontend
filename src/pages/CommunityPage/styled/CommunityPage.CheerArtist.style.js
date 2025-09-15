@@ -175,7 +175,7 @@ export const CommentReply = styled.div`
     width: 700px;
 
     input{
-        width: 540px;
+        width: 60%;
         height: 50px;
         border: 1px solid #B3D1F0;
         border-radius: 10px;
@@ -322,4 +322,8 @@ export const Share = styled.div`
     }
 `;
 
- 
+export const SendBtn = styled.button`
+    width: 3vw;
+    height: 50px;
+    cursor: pointer;
+`;

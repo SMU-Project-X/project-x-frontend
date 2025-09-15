@@ -1,7 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import axios from 'axios';
+import { number } from 'framer-motion';
+import { member } from '@/pages/PicturePage/styled/PicturePage.SelectMemberPage.style';
 
+
+// 댓글 훅
+// @param{number} member_id
+// @param {String} name
 
 
 export const useComment = (memberId, name) => {
@@ -29,5 +34,24 @@ export const useComment = (memberId, name) => {
             seterror(error);
         });
     }, [memberId,name]);
-    return {reply, error};
+
+    // 댓글 저장
+    const saveComment = async (commentText) => {
+        console.log("useComment.saveComment호출됨: ", {memberId,name,commentText})
+        try{
+            const res = await axios.post("http://localhost:8080/api/comments/save",{
+                memberId: memberId,
+                memberName: name,
+                content: commentText
+            });
+            // 새댓글을 reply 바로 반영
+            setReply((prev) => [...prev, res.data]);
+            return res.data;
+        } catch(err) {
+            seterror(err);
+            throw err;
+        }
+    }
+
+    return {reply, error, saveComment};
 };

@@ -6,7 +6,7 @@ export const useSelectMember = () => {
     const [members, setMembers] = useState([]); 
 
     useEffect(() => {
-        axios.get('http://localhost:8080/api/members')
+        axios.get('http://localhost:8080/api/members/select')
         .then((res) => {
             console.log('성공:', res.data);
             setMembers(res.data);

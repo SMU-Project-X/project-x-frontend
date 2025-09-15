@@ -7,18 +7,20 @@ import sendImg from '@/assets/images/CommunityPage/sendImg.png';
 import image1 from '@/assets/images/CommunityPage/image1.png';
 import shareicon from '@/assets/images/CommunityPage/shareicon.png';
 import { CommentContent } from './components/CommunityPage.Comment.Component';
+import { InputComment } from './components/CommunityPage.InputComment.component';
+
 
 
 export const CheerArtist = () => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+
+  const memberId = searchParams.get("memberId");
+  const name = searchParams.get("name");
 
 
-    const location = useLocation();
-    const query = new URLSearchParams(location.search);
-  
-    const memberId = query.get('memberId');
-    const name = query.get('name');
 
-  return (
+    return (
     <itemS.Maincontainer>
     {/* 상단 헤더 */}
       <itemS.Header>
@@ -47,16 +49,15 @@ export const CheerArtist = () => {
       </itemS.ContentTop>
         <itemS.CheerArtistContainer>
           <itemS.CommentContainer>
-            <itemS.CommentReply>
-              <input type="text" id="reply" name="reply" placeholder='멤버이름을 넣어 응원메세지를 적어주세요!'></input>
-              <itemS.SendImg>
-                <img src={sendImg} />
-              </itemS.SendImg>
-            </itemS.CommentReply>
+
+            {/* 댓글 입력창 */}
+            <InputComment memberId={memberId} name={name} />
+
+            {/* 댓글 리스트 */}
             <itemS.CommentList>
-              {/* 댓글 컴포넌트 부분 */}
-              <CommentContent />
+              <CommentContent memberId={memberId} name={name}/>
             </itemS.CommentList>
+
           </itemS.CommentContainer>
         <itemS.PuzzleContainer>
           <itemS.PuzzleImg>

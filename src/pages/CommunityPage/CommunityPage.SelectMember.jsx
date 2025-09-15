@@ -10,14 +10,13 @@ import { useComment } from './hooks/CommunityPage.useComment';
 function MemberCard() {
 
   const members=useSelectMember();
-  console.log('members', members);
 
   return (
     <>
     {members.map((m) => (
         <Link 
-        key={m.member_id}
-        to={`/Community/CheerArtist/?memberId=${m.memberId}&name=${encodeURIComponent(m.name)}`}>
+        key={m.memberId}
+        to={`/Community/CheerArtist?memberId=${m.memberId}&name=${encodeURIComponent(m.name)}`}>
           <itemS.MemberCard>
               <itemS.MemberImg>
                   <img src={m.profile_image_url} alt={m.name}  />
