@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 /** 0~1 범위 고정 */
 const clamp01 = (n) => Math.min(1, Math.max(0, Number(n)));
+const clampRange = (min, max, n) => Math.min(max, Math.max(min, Number(n)));
 
 /**
  * 서버 저장 요청(스티커 제외 payload) → code 반환
@@ -34,6 +35,11 @@ export async function postLightstickShare(payload, opts = {}) { // API 호출 �
     transmission: clamp01(payload?.transmission ?? 0.5),
     // 피규어
     figureUrl: payload?.figureUrl || null,
+    // 스티커 파라미터
+    stickerScale: clampRange(0.1, 1, payload?.stickerScale ?? 0.3),
+    stickerY:     clampRange(0, 1,   payload?.stickerY     ?? 0.5),
+    // stickerAssetUrl: payload?.stickerAssetUrl || null, // 업로드 붙이면 활성화
+    
   };
 
   const res = await fetch(endpoint, {

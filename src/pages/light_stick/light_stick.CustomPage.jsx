@@ -1,5 +1,4 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   PageRoot, Header, HeaderLeft, Logo, Button, Content,
   ViewerCard, ViewerStage, ViewerActions, Sidebar, Panel, PanelTitle, SubTitle,
@@ -7,10 +6,10 @@ import {
   UploadCard
 } from "./styled/light_stick.CustomPage.style.js";
 
-import { Canvas } from "@react-three/fiber"; // 3D 그림 그릴 곳
-import { OrbitControls, Environment } from "@react-three/drei"; // 카메라 제어, 환경 이미지
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Environment } from "@react-three/drei";
 import MyElement3D from "./light_stick.MyElement3D.jsx";
-import { useLightstickShare } from "./light_stick.ShareHandler.jsx"; // 모듈 훅
+import { useLightstickShare } from "./light_stick.ShareHandler.jsx";
 
 /* ===========================
  * HEX 유틸
@@ -50,14 +49,21 @@ const ORBIT_CFG = {
 };
 
 /* ===========================
- * 백엔드
+ * 피규어 카탈로그 (코드→URL)
  * =========================== */
-export default function LightStickCustomPage() {
-  const navigate = useNavigate();
+const FIGURES = [
+  { code: "NONE",  label: "없음", url: "" },
+  { code: "RYUHA", label: "류하", url: "/models/scene.gltf" },
+  // { code: "AAA", label: "다른피규어", url: "/models/aaa/scene.gltf" },
+];
+const FIGURE_URL_BY_CODE = FIGURES.reduce((acc, f) => (acc[f.code] = f.url, acc), {});
 
-  // 게시판 글쓰기 경로
+
+
+export default function LightStickCustomPage() {
+  // 모듈: 저장→code 수신→게시판 이동
   const { share } = useLightstickShare({
-    boardWritePath: "/community/write",  // ← 실제 게시판 글쓰기 라우트 경로로 맞추세요
+    boardWritePath: "/community/write",  // 실제 커뮤니티 응원봉 게시글 작성 라우트에 맞게 조정
   });
 
   /* =============== 형태 상태 =============== */
@@ -78,10 +84,16 @@ export default function LightStickCustomPage() {
   const [roughness, setRoughness] = useState(0.0);
   const [transmission, setTransmission] = useState(0.5);
 
-  /* =============== 피규어 =============== */
-  const [figureUrl, setFigureUrl] = useState("");
+  /* =============== 피규어(코드 선택) =============== */
+  const [figureCode, setFigureCode] = useState("NONE");
+  const figureUrl = useMemo(() => FIGURE_URL_BY_CODE[figureCode] || "", [figureCode]);
 
-  /* =============== blob 정리 =============== */
+  /* =============== 스티커(로컬 전용) =============== */
+  const [stickerUrl, setStickerUrl] = useState("");
+  const [stickerScale, setStickerScale] = useState(0.3);
+  const [stickerY, setStickerY] = useState(0.5);
+
+  // blob 정리(교체/언마운트 시 메모리 해제)
   useEffect(() => {
     return () => {
       if (stickerUrl && stickerUrl.startsWith("blob:")) {
@@ -105,10 +117,10 @@ export default function LightStickCustomPage() {
     setStickerY(0.5);
     setBodyColorText("#ffffff");
     setCapColorText("#ffffff");
-    setFigureUrl("");
+    setFigureCode("NONE");
   }, []);
 
-  /* =============== 캡처 toBlob =============== */
+  /* =============== 캡처 toBlob (이미지 저장 버튼 전용) =============== */
   const glRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -142,37 +154,44 @@ export default function LightStickCustomPage() {
     }
   }, [captureBlob]);
 
-  /* =============== 공유하기(스티커 제외 페이로드 생성 → 모듈 훅 호출) =============== */
-  const buildSharePayload = useCallback(() => {
-    return {
-      schemaVersion: 1,
-      clientTs: Date.now(),
-      // 형태
-      capShape, thickness, bodyLength,
-      // 색상
-      bodyColor, capColor,
-      // 재질
-      metallic: clamp01(metallic),
-      roughness: clamp01(roughness),
-      transmission: clamp01(transmission),
-      // 피규어
-      figureUrl: figureUrl || null,
-    };
-  }, [capShape, thickness, bodyLength, bodyColor, capColor, metallic, roughness, transmission, figureUrl]);
+  /* =============== 공유하기: 페이로드 생성→모듈 호출 =============== */
+  const buildSharePayload = useCallback(() => ({
+    schemaVersion: 1,
+    clientTs: Date.now(),
+    // 형태
+    capShape, thickness, bodyLength,
+    // 색상
+    bodyColor, capColor,
+    // 재질
+    metallic: clamp01(metallic),
+    roughness: clamp01(roughness),
+    transmission: clamp01(transmission),
+    // 피규어: URL은 보내지 않고 코드만
+    figureCode: figureCode === "NONE" ? null : figureCode,
+    // 스티커 파라미터(이미지 자체는 전송 X)
+    stickerScale: Number(stickerScale.toFixed(3)),  // 0.1~1.0
+    stickerY:     Number(stickerY.toFixed(3)),      // 0~1 (정규화)
+  }), [capShape, thickness, bodyLength, bodyColor, capColor, metallic, roughness, transmission, figureCode, stickerScale, stickerY]);
 
   const handleShare = useCallback(async () => {
     try {
+      if (bodyInvalid || capInvalid) {
+        alert("색상 입력을 확인해주세요. (#RRGGBB)");
+        return;
+      }
       const payload = buildSharePayload();
-      await share(payload); // 서버 저장 → code → 글쓰기 페이지로 이동
+      await share(payload); // 서버 저장 → code 수신 → 글쓰기 페이지로 이동
     } catch (e) {
       console.error(e);
       alert(e.message || "공유에 실패했습니다.");
     }
-  }, [buildSharePayload, share]);
+  }, [bodyInvalid, capInvalid, buildSharePayload, share]);
+  
 
+  /* =============== 페이지 =============== */
   return (
     <PageRoot>
-      {/* ---------- 상단 헤더 ---------- */}
+      {/* 헤더 */}
       <Header>
         <HeaderLeft>
           <Logo aria-hidden>✨</Logo>
@@ -181,13 +200,13 @@ export default function LightStickCustomPage() {
       </Header>
 
       <Content>
-        {/* ---------- 좌측 3D 뷰어 ---------- */}
+        {/* 좌: 3D 뷰어 */}
         <ViewerCard>
           <ViewerStage>
             <Canvas
               dpr={[1, 2]}
               camera={CAMERA_INIT}
-              gl={{ antialias: true, preserveDrawingBuffer: true }} // 캡처 필요
+              gl={{ antialias: true, preserveDrawingBuffer: true }}
               onCreated={({ gl, scene, camera }) => {
                 glRef.current = gl;
                 sceneRef.current = scene;
@@ -204,9 +223,11 @@ export default function LightStickCustomPage() {
                   metallic={clamp01(metallic)}
                   roughness={clamp01(roughness)}
                   transmission={clamp01(transmission)}
+                  // 스티커(렌더링 전용)
                   stickerUrl={stickerUrl}
                   stickerScale={stickerScale}
                   stickerY={stickerY}
+                  // 피규어는 URL로 렌더링
                   figureUrl={figureUrl}
                 />
                 <OrbitControls makeDefault {...ORBIT_CFG} />
@@ -215,7 +236,7 @@ export default function LightStickCustomPage() {
             </Canvas>
           </ViewerStage>
 
-          {/* 하단 액션 바 */}
+          {/* 하단 액션 */}
           <ViewerActions>
             <Button onClick={resetAll}>초기화</Button>
             <div className="spacer" />
@@ -224,7 +245,7 @@ export default function LightStickCustomPage() {
           </ViewerActions>
         </ViewerCard>
 
-        {/* ---------- 우측 사이드바 ---------- */}
+        {/* 우: 사이드바 */}
         <Sidebar>
           <Panel className="wide">
             <PanelTitle>커스터마이즈</PanelTitle>
@@ -355,23 +376,28 @@ export default function LightStickCustomPage() {
               </div>
             </SliderField>
 
-            {/* 피규어 선택 */}
+            {/* 피규어 선택(코드 기반) */}
             <SubTitle>피규어 선택</SubTitle>
-            <select value={figureUrl} onChange={(e) => setFigureUrl(e.target.value)}>
-              <option value="">없음</option>
-              <option value="/models/scene.gltf">류하</option>
+            <select value={figureCode} onChange={(e) => setFigureCode(e.target.value)}>
+              {FIGURES.map(f => (
+                <option key={f.code} value={f.code}>{f.label}</option>
+              ))}
             </select>
 
-            {/* 스티커 */}
+            {/* 스티커(렌더링 전용, 서버 전송 X) */}
             <SubTitle>스티커 & 데칼</SubTitle>
             <UploadCard>
               <div className="title">꾸미기 업로드</div>
-              <input type="file" accept="image/*" onChange={(e)=>{
-                const f = e.target.files?.[0];
-                if (!f) return;
-                const url = URL.createObjectURL(f);
-                setStickerUrl(url);
-              }}/>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e)=>{
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  const url = URL.createObjectURL(f);
+                  setStickerUrl(url);
+                }}
+              />
               <SliderField>
                 <label>스티커 크기</label>
                 <div className="slider">
