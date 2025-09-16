@@ -34,7 +34,7 @@ export async function postLightstickShare(payload, opts = {}) { // API 호출 �
     roughness: clamp01(payload?.roughness ?? 0.0),
     transmission: clamp01(payload?.transmission ?? 0.5),
     // 피규어
-    figureUrl: payload?.figureUrl || null,
+    figureCode: payload?.figureCode || null,
     // 스티커 파라미터
     stickerScale: clampRange(0.1, 1, payload?.stickerScale ?? 0.3),
     stickerY:     clampRange(0, 1,   payload?.stickerY     ?? 0.5),
