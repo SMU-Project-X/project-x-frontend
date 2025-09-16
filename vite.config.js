@@ -1,10 +1,20 @@
+// vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: [{ find: '@', replacement: '/src' }],  // '@'를 '/src' 폴더로 대체
+    // 배열 대신 객체 형태도 OK
+    alias: { '@': '/src' },
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080', // 스프링 부트
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 })
