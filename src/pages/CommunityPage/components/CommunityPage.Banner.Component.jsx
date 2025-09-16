@@ -67,8 +67,6 @@ export const Banner = ({onOpenModal}) => {
                     autoplay={{delay:5000}}
                     spaceBetween={6}
                     slidesPerView={3}
-                    onSlideChange={() => console.log('slide change')}
-                    onSwiper={(swiper) => console.log(swiper)} 
                 >
                     <itemS.slide>
                         <SwiperSlide>

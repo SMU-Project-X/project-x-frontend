@@ -1,32 +1,84 @@
 import styled from "styled-components";
 
-export const ModuleContainer = styled.div `
-    border-radius: 40px;
-    width: 100%;
-    max-width: 1200px;
-    height: auto;
-    position: relative;
 
+/* 모달창 */
+export const Overlay = styled.div`
+    position: fixed;
+    inset: 0;
+    background: rgba(68, 68, 68, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100;
+    z-index: 1000;
+`;
+
+export const CloseBtn = styled.div`
+    width: 50px;
+    height: 30px;
+    display: flex;
+    justify-content: flex-end;
+    float: right;
+    cursor: pointer;
+    & hover {
+        color: #ff4d4f;
+    }
+`;
+
+export const top = styled.div`
+    width:100%;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    margin: 0 auto;
+    justify-content: center;
+`;
+
+export const SwiperWrapper  = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px; /* 버튼과 슬라이드 사이 간격 */
+    position: relative;
+    padding: 10px;
+`;
+
+// 모달 본체
+export const ModuleContainer = styled.div `
+    background: #B3D1F0;
+    border-radius: 50px;
+    width: 45vw;
+    height: 50vw;
+    position: relative;
+    padding: 20px;
+    
+    @media (max-width: 1024px) {
+        width: 90%;
+        heigth: auto;
+    }
     @media (max-width:768px) {
         height:auto;
         padding: 20px;
+    }
+    @media (max-width: 480px) {
+        width: 100%;
+        height: 100%;
+        border-radius: 0; 
     }
 `;
 
 // 투표컨테이너 
 export const VoteContainer = styled.div `
     width: 100%;
-    max-width: 100%;
-    height: auto;
-    margin:0 auto;
+    height: 100%;
     position: relative;
     cursor: pointer;
     h1 {
-        width: 100%;
+        width: 60%;
         text-align: center;
-        padding: 20px;
         font-size: 30px; font-family:Arial, Helvetica, sans-serif;
-        padding: 20px;
+        padding: 30px;
         font-weight: bold;
     }
     @media (max-width: 1024px) {
@@ -68,24 +120,33 @@ export const RadioInfo = styled.div `
 
 // 유닛 전체
 export const UnitContainer = styled.div`
-    display: grid;
-    grid-template-columns: repeat(4,1fr);
+    display: flex;
     gap: 20px;
     width: 100%;
-
+    justify-content: center;
+    
     @media (max-width: 768px)  {
         display: grid;
         grid-template-columns: repeat(2,1fr);
         gap:20px;
     }
+    @media (max-width: 480px) {
+        flex-direction: column;
+        align-items: center;
+    }
+    
 `;
 
 // 각 유닛(이미지 4개 그리드)
 export const Unit = styled.div `
-    width: 40%;
     display: grid;
     grid-template-columns: repeat(2,1fr);
-    gap: 10px;
+    padding: 20px;
+    justify-items: center;
+    align-items: center;
+    &:hover{
+        transform: scale(1.05);
+    }
     @media (max-width: 1024px) {
         width: 48%;
     }
@@ -99,8 +160,8 @@ export const Unit = styled.div `
     }
 `;
 export const VoteCard = styled.div `
-    width: 136px;
-    height: 216px;
+    width: 150px;
+    height: 220px;
     overflow: hidden;
     text-align: center;
     padding-top: 20px;
@@ -110,7 +171,7 @@ export const VoteCard = styled.div `
 
 export const VoteImg = styled.div `
     img {
-        width: 150px;
+        width: 100%;
         height: 170px;
         object-fit: cover;
 
@@ -129,7 +190,7 @@ export const VoteImg = styled.div `
 export const VoteContent = styled.div `
     padding: 5px;
     font-size: 14px;
-
+    
     @media (max-width: 480px) {
         font-size: 12px;
     }
@@ -145,34 +206,6 @@ export const NoMoreVote = styled.div `
     p{
         font-size: 40px;
         font-weight: bold;
-    }
-`;
-
-
-/* 모달창 */
-export const Overlay = styled.div`
-    position: fixed;
-    inset: 0;
-    background: rgba(68, 68, 68, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100vw;
-    height: 100vh;
-    z-index: 1000;
-    overflow: auot;
-`;
-
-export const CloseBtn = styled.div`
-    width: 80px;
-    height: 30px;
-    display: flex;
-    justify-content: end;
-    float: right;
-    padding: 10px;
-    cursor: pointer;
-    & hover {
-        color: #ff4d4f;
     }
 `;
 

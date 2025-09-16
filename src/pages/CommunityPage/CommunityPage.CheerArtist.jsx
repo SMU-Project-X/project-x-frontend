@@ -6,7 +6,7 @@ import previous from '@/assets/images/CommunityPage/previous.png';
 import sendImg from '@/assets/images/CommunityPage/sendImg.png';
 import image1 from '@/assets/images/CommunityPage/image1.png';
 import shareicon from '@/assets/images/CommunityPage/shareicon.png';
-import { CommentContent } from './components/CommunityPage.Comment.Component';
+import { CommentContent } from './components/CommunityPage.CommentContent.Component';
 import { InputComment } from './components/CommunityPage.InputComment.component';
 
 
@@ -40,34 +40,34 @@ export const CheerArtist = () => {
         </itemS.Nav>
       </itemS.Header>
       {/* 이전으로 넘어가기 */}
-      <itemS.ContentTop>
+      {/* <itemS.ContentTop> */}
         {/* <itemS.prevBtn ><img src={previous}/> 이전 </itemS.prevBtn> */}
           <itemS.ContentTitle>
-            <h1>응원메세지를 적고 퍼즐을 맞춰보세요!</h1>
-            <h3>멤버를 선택하고 응원댓글을 입력하면 퍼즐 조각이 모여요!</h3>
+            <h1>멤버들에게 응원 메세지를 적어주세요!</h1>
+            <h3>멤버에게 응원메세지를 보내고 팬들과 소통해요!</h3>
           </itemS.ContentTitle>
-      </itemS.ContentTop>
-        <itemS.CheerArtistContainer>
-          <itemS.CommentContainer>
+      {/* </itemS.ContentTop> */}
 
-            {/* 댓글 입력창 */}
-            <InputComment memberId={memberId} name={name} />
-
-            {/* 댓글 리스트 */}
-            <itemS.CommentList>
-              <CommentContent memberId={memberId} name={name}/>
-            </itemS.CommentList>
-
-          </itemS.CommentContainer>
+      {/* 본문 */}
+      <itemS.CheerArtistContainer>
         <itemS.PuzzleContainer>
           <itemS.PuzzleImg>
             <img src={image1} />
           </itemS.PuzzleImg>
           <itemS.PuzzleCongress>
-            <span>[ 퍼즐 완성률: 1000/1000 ]</span>
-            <itemS.Share><img src={shareicon} /></itemS.Share>
+            {/* <span>[ 퍼즐 완성률: 1000/1000 ]</span>
+            <itemS.Share><img src={shareicon} /></itemS.Share> */}
+            {/* 댓글 입력창 */}
+            <InputComment memberId={memberId} name={name} />
           </itemS.PuzzleCongress>
         </itemS.PuzzleContainer>
+
+          <itemS.CommentContainer>
+          {/* 댓글 리스트 */}
+          <itemS.CommentList>
+            <CommentContent memberId={memberId} name={name}/>
+          </itemS.CommentList>
+        </itemS.CommentContainer>
       </itemS.CheerArtistContainer>
     </itemS.Maincontainer>
   );

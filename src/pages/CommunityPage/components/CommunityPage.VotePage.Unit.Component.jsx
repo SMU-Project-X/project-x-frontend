@@ -16,17 +16,15 @@ function Unit({title, options}){
                 <input type="hidden" name="choice" id={title}></input>
             </VoteModal.RadioInfo> */}
             <VoteModal.Unit>
-                {options.map((opt,idx)=>{
-                    return (
-                        <VoteCard
-                        title={title}
+                {options.map((opt,idx)=>(
+                    <VoteCard
                         key={idx}
-                        img={opt.img || image1}
+                        title={title}
+                        img={opt.img || "이미지 없음"}
                         CharacterName={opt.CharacterName}
                         Personality={opt.Personality}
-                        />
-                    );
-                })}
+                    />
+                ))}
             </VoteModal.Unit>
             {/* <button onClick={onVote}>투표하기</button> */}
         </VoteModal.VoteSelect>

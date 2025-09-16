@@ -13,20 +13,24 @@ export const useComment = (memberId, name) => {
     const [reply, setReply] = useState([]); 
     const [error, seterror] = useState(null);
 
+    const [commentList, setCommentList] = useState([]);
+    const refreshComments = (newComment) => 
+        {setCommentList(prev=>prev.concat(newComment))}
+
 
     // 댓글 목록
     useEffect(() => {
         if(!memberId || !name) return;
 
         axios.get('http://localhost:8080/api/comments/search',{
-            params: {
-                memberId,
-                name
-            }
+            params: {memberId, name}
         })
         .then((res) => {
             console.log('성공:', res.data);
-            setReply(res.data);
+            const sortReply = res.data.sort(
+                (a,b) => new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime()
+            );
+            setReply(sortReply);
             seterror(null);
         })
         .catch((error) => {
@@ -40,18 +44,24 @@ export const useComment = (memberId, name) => {
         console.log("useComment.saveComment호출됨: ", {memberId,name,commentText})
         try{
             const res = await axios.post("http://localhost:8080/api/comments/save",{
+                // 컬럼명: 변수명(컬럼명과 꼭 맞춰주기)
                 memberId: memberId,
                 memberName: name,
                 content: commentText
             });
+            // 저장 후 최신 댓글 목록 다시 불러오기
+            // await fetchComments();
+            
             // 새댓글을 reply 바로 반영
-            setReply((prev) => [...prev, res.data]);
+            setReply(prev => [res.data, ...prev]);
             return res.data;
+
         } catch(err) {
             seterror(err);
             throw err;
         }
-    }
-
+    };
+    
+    
     return {reply, error, saveComment};
 };

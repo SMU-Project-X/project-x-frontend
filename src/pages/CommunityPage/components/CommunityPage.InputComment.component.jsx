@@ -1,17 +1,28 @@
 import React,{ useState } from "react"
 import * as itemS from '@/pages/CommunityPage/styled/CommunityPage.CheerArtist.style';
 import { useComment } from "../hooks/CommunityPage.useComment";
-import { SendImg } from "@/pages/CommunityPage/styled/CommunityPage.CheerArtist.style";
+import SendImg from "@/assets/images/CommunityPage/sendImg.png";
 
 
-export const InputComment = ({memberId,name}) => {
+export const InputComment = ({ memberId, name }) => {
 
     const [commentText, setCommentText ] = useState("");
     const {saveComment } = useComment(memberId, name);
 
-    const handleSave = async() => {
-        if (!commentText.trim()) return;
+    const [text, setText] = useState('');
+    const KeyDown = async (e) => {
+        if(e.key === 'Enter' && !e.shiftKey ) {
+            e.preventDefault();
+            if(text.trim() ==='') return;
+            await saveComment(text.trim());
+            setText('');
+        } 
+    }
 
+    const handleSave = async() => {
+        if(commentText.length === 0) {
+            alert("댓글을 입력해주세요!");
+        }
         try {
             await saveComment(commentText);
             console.log("입력한 댓글:",commentText);
@@ -20,14 +31,15 @@ export const InputComment = ({memberId,name}) => {
             console.error("댓글 저장 실패: ", err);
         }
     };
+    
 
     return (
         <itemS.CommentReply>
         <input 
-        type={"text"} id={"reply"} name={"reply"}
-        placeholder='멤버이름을 넣어 응원메세지를 적어주세요!'
-        value={commentText}
-        onChange={(e) => setCommentText(e.target.value)}
+            type={"text"} id={"reply"} name={"reply"}
+            placeholder='멤버이름을 넣어 응원메세지를 적어주세요!'
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
         />
         <itemS.SendBtn onClick={handleSave}>
             <itemS.SendImg>
