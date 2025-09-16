@@ -10,11 +10,8 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': {
-        target: 'http://localhost:8080', // 스프링 부트
-        changeOrigin: true,
-        secure: false,
-      },
+      '/api':  { target: 'http://localhost:8080', changeOrigin: true, secure: false },
+      '/files':{ target: 'http://localhost:8080', changeOrigin: true, secure: false },
     },
   },
 })

@@ -9,7 +9,8 @@ import {
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
 import MyElement3D from "./light_stick.MyElement3D.jsx";
-import { useLightstickShare } from "./light_stick.ShareHandler.jsx";
+import { useLightstickShare, fetchLightstickByCode } from "./light_stick.ShareHandler.jsx";
+import { useLocation } from "react-router-dom";
 
 /* ===========================
  * HEX 유틸
@@ -58,13 +59,13 @@ const FIGURES = [
 ];
 const FIGURE_URL_BY_CODE = FIGURES.reduce((acc, f) => (acc[f.code] = f.url, acc), {});
 
-
-
 export default function LightStickCustomPage() {
   // 모듈: 저장→code 수신→게시판 이동
   const { share } = useLightstickShare({
     boardWritePath: "/community/write",  // 실제 커뮤니티 응원봉 게시글 작성 라우트에 맞게 조정
   });
+
+  const location = useLocation();
 
   /* =============== 형태 상태 =============== */
   const [capShape, setCapShape] = useState("sphere");
@@ -92,6 +93,10 @@ export default function LightStickCustomPage() {
   const [stickerUrl, setStickerUrl] = useState("");
   const [stickerScale, setStickerScale] = useState(0.3);
   const [stickerY, setStickerY] = useState(0.5);
+  const [stickerAssetUrl, setStickerAssetUrl] = useState("");
+
+  /* =============== 코드 불러오기 입력 =============== */
+  const [loadCode, setLoadCode] = useState("");
 
   // blob 정리(교체/언마운트 시 메모리 해제)
   useEffect(() => {
@@ -115,9 +120,11 @@ export default function LightStickCustomPage() {
     setStickerUrl("");
     setStickerScale(0.3);
     setStickerY(0.5);
+    setStickerAssetUrl("");
     setBodyColorText("#ffffff");
     setCapColorText("#ffffff");
     setFigureCode("NONE");
+    setLoadCode("");
   }, []);
 
   /* =============== 캡처 toBlob (이미지 저장 버튼 전용) =============== */
@@ -154,6 +161,23 @@ export default function LightStickCustomPage() {
     }
   }, [captureBlob]);
 
+  // 스티커 파일 서버 업로드 → 공개 URL 반환
+  const uploadSticker = useCallback(async (file) => {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch("/api/lightstick/stickers", {
+      method: "POST",
+      body: form,
+      credentials: "include",
+    });
+    if (!res.ok) {
+      const t = await res.text().catch(()=>"");
+      throw new Error(t || "스티커 업로드 실패");
+    }
+    const data = await res.json();
+    return data?.url; // 예) "/files/2025-09-16/xxxx.png"
+  }, []);
+
   /* =============== 공유하기: 페이로드 생성→모듈 호출 =============== */
   const buildSharePayload = useCallback(() => ({
     schemaVersion: 1,
@@ -171,7 +195,9 @@ export default function LightStickCustomPage() {
     // 스티커 파라미터(이미지 자체는 전송 X)
     stickerScale: Number(stickerScale.toFixed(3)),  // 0.1~1.0
     stickerY:     Number(stickerY.toFixed(3)),      // 0~1 (정규화)
-  }), [capShape, thickness, bodyLength, bodyColor, capColor, metallic, roughness, transmission, figureCode, stickerScale, stickerY]);
+    // 서버 업로드된 파일 접근 URL (DB 저장용)
+    stickerAssetUrl: stickerAssetUrl || null,
+  }), [capShape, thickness, bodyLength, bodyColor, capColor, metallic, roughness, transmission, figureCode, stickerScale, stickerY, stickerAssetUrl]);
 
   const handleShare = useCallback(async () => {
     try {
@@ -186,7 +212,57 @@ export default function LightStickCustomPage() {
       alert(e.message || "공유에 실패했습니다.");
     }
   }, [bodyInvalid, capInvalid, buildSharePayload, share]);
-  
+
+  /* =============== 코드로 프리셋 적용 =============== */
+
+  const applyPreset = useCallback((d) => {
+    const num = (v, def=0) => (v == null ? def : Number(v));
+    const str = (v, def="") => (v == null ? def : String(v));
+
+    setCapShape(str(d.capShape, "sphere"));
+    setThickness(str(d.thickness, "thin"));
+    setBodyLength(str(d.bodyLength, "short"));
+
+    const bc = str(d.bodyColor, "#ffffff").toLowerCase();
+    const cc = str(d.capColor, "#ffffff").toLowerCase();
+    setBodyColor(bc);
+    setCapColor(cc);
+    setBodyColorText(bc);
+    setCapColorText(cc);
+
+    setMetallic(Math.min(1, Math.max(0, num(d.metallic, 0.25))));
+    setRoughness(Math.min(1, Math.max(0, num(d.roughness, 0.0))));
+    setTransmission(Math.min(1, Math.max(0, num(d.transmission, 0.5))));
+
+    setFigureCode(d.figureCode ? d.figureCode : "NONE");
+
+    setStickerScale(Math.min(1, Math.max(0.1, num(d.stickerScale, 0.3))));
+    setStickerY(Math.min(1, Math.max(0, num(d.stickerY, 0.5))));
+    const assetUrl = str(d.stickerAssetUrl, "");
+    setStickerAssetUrl(assetUrl);
+    if (assetUrl) setStickerUrl(assetUrl); // 미리보기도 서버 URL 사용
+  }, []);
+
+  const handleLoadByCode = useCallback(async (code) => {
+    try {
+      const data = await fetchLightstickByCode(code);
+      applyPreset(data);
+    } catch (e) {
+      console.error(e);
+      alert(e.message || "불러오기에 실패했습니다.");
+    }
+  }, [applyPreset]);
+
+  // 주소창 ?code=... 있으면 자동 적용
+  useEffect(() => {
+    const q = new URLSearchParams(location.search);
+    const c = q.get("code");
+    if (c) {
+      setLoadCode(c);
+      handleLoadByCode(c);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 최초 1회
 
   /* =============== 페이지 =============== */
   return (
@@ -240,6 +316,16 @@ export default function LightStickCustomPage() {
           <ViewerActions>
             <Button onClick={resetAll}>초기화</Button>
             <div className="spacer" />
+            <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+            <input
+              type="text"
+              value={loadCode}
+              onChange={(e)=>setLoadCode(e.target.value)}
+              placeholder="예: CLDE4ZU7B9"
+              style={{ width:200, padding:"8px 10px", border:"1px solid #ddd", borderRadius:8 }}
+            />
+            <Button onClick={()=> loadCode && handleLoadByCode(loadCode)}>불러오기</Button>
+            </div>
             <Button className="dark" onClick={handleShare}>공유하기</Button>
             <Button onClick={handleSaveImage}>이미지 저장</Button>
           </ViewerActions>
@@ -249,7 +335,6 @@ export default function LightStickCustomPage() {
         <Sidebar>
           <Panel className="wide">
             <PanelTitle>커스터마이즈</PanelTitle>
-
             {/* 캡 모양 */}
             <SubTitle>캡 모양</SubTitle>
             <IconGrid>
@@ -391,11 +476,21 @@ export default function LightStickCustomPage() {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e)=>{
+                onChange={async (e)=>{
                   const f = e.target.files?.[0];
                   if (!f) return;
+                  // 미리보기(로컬)
                   const url = URL.createObjectURL(f);
                   setStickerUrl(url);
+                  // 서버 업로드 → DB 저장용 URL 확보
+                  try {
+                    const uploaded = await uploadSticker(f);
+                    setStickerAssetUrl(uploaded);
+                  } catch (err) {
+                    console.error(err);
+                    alert("스티커 업로드에 실패했습니다.");
+                    setStickerAssetUrl("");
+                  }
                 }}
               />
               <SliderField>

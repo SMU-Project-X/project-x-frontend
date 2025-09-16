@@ -38,7 +38,7 @@ export async function postLightstickShare(payload, opts = {}) { // API 호출 �
     // 스티커 파라미터
     stickerScale: clampRange(0.1, 1, payload?.stickerScale ?? 0.3),
     stickerY:     clampRange(0, 1,   payload?.stickerY     ?? 0.5),
-    // stickerAssetUrl: payload?.stickerAssetUrl || null, // 업로드 붙이면 활성화
+    stickerAssetUrl: payload?.stickerAssetUrl || null, // 업로드 붙이면 활성화
     
   };
 
@@ -62,6 +62,20 @@ export async function postLightstickShare(payload, opts = {}) { // API 호출 �
   const code = data?.code;
   if (!code) throw new Error("공유 코드가 응답에 없습니다.");
   return code;
+}
+
+export async function fetchLightstickByCode(code, opts = {}) {
+  const endpoint = opts.endpoint ?? "/api/lightstick/shares";
+  const res = await fetch(`${endpoint}/${encodeURIComponent(code)}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    let msg = "코드를 불러오지 못했습니다.";
+    try { const e = await res.json(); msg = e?.message || msg; } catch {}
+    throw new Error(msg);
+  }
+  return await res.json(); // ShareDetail
 }
 
 /**
