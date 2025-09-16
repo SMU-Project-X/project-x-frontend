@@ -9,19 +9,20 @@ export const InputComment = ({ memberId, name }) => {
     const [commentText, setCommentText ] = useState("");
     const {saveComment } = useComment(memberId, name);
 
-    const [text, setText] = useState('');
-    const KeyDown = async (e) => {
-        if(e.key === 'Enter' && !e.shiftKey ) {
+    // const [text, setText] = useState('');
+    // 엔터시 댓글입력
+    const handlerEnter = (e) => {
+        if (e.key ==="Enter"){
             e.preventDefault();
-            if(text.trim() ==='') return;
-            await saveComment(text.trim());
-            setText('');
-        } 
+            handleSave();
+        }
     }
 
+    // 댓글 저장버튼
     const handleSave = async() => {
-        if(commentText.length === 0) {
+        if(commentText.trim().length === 0) {
             alert("댓글을 입력해주세요!");
+            return;
         }
         try {
             await saveComment(commentText);
@@ -40,6 +41,7 @@ export const InputComment = ({ memberId, name }) => {
             placeholder='멤버이름을 넣어 응원메세지를 적어주세요!'
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
+            onKeyDown={handlerEnter}
         />
         <itemS.SendBtn onClick={handleSave}>
             <itemS.SendImg>

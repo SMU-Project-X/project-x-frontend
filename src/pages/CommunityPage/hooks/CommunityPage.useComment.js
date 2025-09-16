@@ -13,9 +13,9 @@ export const useComment = (memberId, name) => {
     const [reply, setReply] = useState([]); 
     const [error, seterror] = useState(null);
 
-    const [commentList, setCommentList] = useState([]);
-    const refreshComments = (newComment) => 
-        {setCommentList(prev=>prev.concat(newComment))}
+    // const [commentList, setCommentList] = useState([]);
+    // const refreshComments = (newComment) => 
+    //     {setCommentList(prev=>prev.concat(newComment))}
 
 
     // 댓글 목록
@@ -49,11 +49,12 @@ export const useComment = (memberId, name) => {
                 memberName: name,
                 content: commentText
             });
-            // 저장 후 최신 댓글 목록 다시 불러오기
-            // await fetchComments();
             
+            
+
             // 새댓글을 reply 바로 반영
             setReply(prev => [res.data, ...prev]);
+            console.log("res.data 반환 데이터:"+res.data)
             return res.data;
 
         } catch(err) {

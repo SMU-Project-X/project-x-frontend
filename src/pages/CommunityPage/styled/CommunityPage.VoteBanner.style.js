@@ -80,6 +80,7 @@ export const vote_card = styled.div`
     justify-content: space_between;
     gap:5px;
     align-items: center;
+    cursor: pointer;
 
     @media (max-width: 1024px) {
         width: 280px;
