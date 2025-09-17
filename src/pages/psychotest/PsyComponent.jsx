@@ -1,5 +1,5 @@
 // src/pages/psychotest/PsyComponent.jsx
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import styled, { keyframes } from "styled-components"; // [CHANGED] 로딩 스피너용 keyframes/스타일 추가
 
 import {
@@ -16,7 +16,7 @@ import {
 /* =========================================
  * 페이지 컴포넌트
  * - Start / Question / Result
- * - PsyControl.jsx에서 단계 전환 로직으로 렌더
+ * - PsyInlineControl.jsx에서 단계 전환 로직으로 렌더
  * ========================================= */
 
 /** Start: 소개 + CTA */
@@ -49,7 +49,7 @@ export function StartPage({ onStart, onClose }) {
 
 /** Questions: 질문/선택/진행도/내비게이션 */
 export function QuestionPage({ onClose, onComplete }) {
-  // [CHANGED] 질문 스키마를 2지선다 → **options 배열(5지선다)** 로 변경
+  // [CHANGED] 질문 스키마: 5지선다 (문항 11개)
   const questions = useMemo(() => ([
     {
       id: 1,
@@ -176,18 +176,18 @@ export function QuestionPage({ onClose, onComplete }) {
   const totalQuestions = questions.length;
 
   // 진행 상태/선택/답안 스토리지
-  // [CHANGED] selected를 'A/B' 대신 **옵션 인덱스(number)** 로 관리
+  // [CHANGED] selected를 옵션 인덱스(number)로 관리
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState(null);
   const [answers, setAnswers] = useState([]);
 
-  // [CHANGED] 결과 전 **로딩 단계** 컨트롤
+  // [CHANGED] 결과 전 로딩 단계 컨트롤
   const [isLoading, setIsLoading] = useState(false);
 
   const current = questions[index];
   const progress = Math.round(((index + 1) / totalQuestions) * 100);
 
-  // [CHANGED] 마지막 문항에서 '다음' 클릭 시 → 로딩 표시 → onComplete 호출
+  // [CHANGED] 다음 버튼 핸들러
   const handleNext = () => {
     if (selected === null || selected === undefined) return;
     const newAnswers = [...answers];
@@ -198,18 +198,17 @@ export function QuestionPage({ onClose, onComplete }) {
       setIndex((i) => i + 1);
       setSelected(newAnswers[index + 1]?.choice ?? null);
     } else {
-      // 마지막 문항 → 로딩 시작
+      // 마지막 문항 → 로딩 표시 후 onComplete
       setIsLoading(true);
-      // 짧은 연출 후 결과 계산 콜백
       setTimeout(() => {
-        onComplete?.({ answers: newAnswers });
-      }, 2300); // [CHANGED] 로딩 시간 필요시 조절
+        onComplete?.({ answers: newAnswers }); // 프론트에서 전부 계산 (스프링엔 선택/추천만 보낼 예정)
+      }, 800); // 필요 시 연출 시간 조절
     }
   };
 
-  // 이전: 인덱스 감소 + 이전 선택 복원
+  // 이전
   const handlePrev = () => {
-    if (index === 0 || isLoading) return; // [CHANGED] 로딩 중에는 뒤로가기 금지
+    if (index === 0 || isLoading) return;
     const prev = index - 1;
     setIndex(prev);
     setSelected(answers[prev]?.choice ?? null);
@@ -224,7 +223,6 @@ export function QuestionPage({ onClose, onComplete }) {
         right={`질문 ${index + 1}/${totalQuestions}`}
       />
       <Content>
-        {/* [CHANGED] 로딩 중에는 질문 대신 로딩 화면 표시 */}
         {isLoading ? (
           <LoadingScreen />
         ) : (
@@ -234,7 +232,6 @@ export function QuestionPage({ onClose, onComplete }) {
               <QuestionText>{current.question}</QuestionText>
             </QuestionSection>
             <OptionsCol>
-              {/* [CHANGED] 5지선다 렌더링 */}
               {current.options.map((opt, idx) => (
                 <OptionButton
                   key={idx}
@@ -249,7 +246,7 @@ export function QuestionPage({ onClose, onComplete }) {
         )}
       </Content>
       <FooterBar style={{ display: "flex", gap: 8 }}>
-        <NavButton onClick={handlePrev} disabled={index === 0 || isLoading /* [CHANGED] 로딩 중 비활성화 */}>
+        <NavButton onClick={handlePrev} disabled={index === 0 || isLoading}>
           이전
         </NavButton>
         <PageIndicator style={{ marginLeft: "auto", marginRight: "auto" }}>
@@ -257,7 +254,7 @@ export function QuestionPage({ onClose, onComplete }) {
         </PageIndicator>
         <NavButton
           onClick={handleNext}
-          disabled={selected === null || isLoading /* [CHANGED] 로딩 중 비활성화 */}
+          disabled={selected === null || isLoading}
         >
           {index === totalQuestions - 1 ? "결과" : "다음"}
         </NavButton>
@@ -268,12 +265,17 @@ export function QuestionPage({ onClose, onComplete }) {
 
 /** Result: 결과 이미지/설명/재시작 */
 export function ResultPage({ result, onRetry, onClose }) {
-  // 결과가 없을 때의 기본 값(디자인 확인용)
+  // [CHANGED] 결과 데이터 구조 업데이트:
+  // - characterImage: "/Character/아이돌이름.png"
+  // - characterName: 아이돌 이름
+  // - personality: 1순위 성격
+  // - topTraits: [1순위, 2순위] (그냥 나열)
   const data = result ?? {
     characterImage: "",
-    characterName: "에리나",
-    personality: "상냥함",
-    description: "항상 밝고 다정하다.",
+    characterName: "Ironmouse",
+    personality: "열정",
+    topTraits: ["열정", "카리스마"],
+    description: "",
     details: [],
   };
 
@@ -287,6 +289,7 @@ export function ResultPage({ result, onRetry, onClose }) {
         <ResultInfo
           name={data.characterName}
           personality={data.personality}
+          topTraits={data.topTraits}       // [CHANGED] TOP2 전달
           description={data.description}
           details={data.details}
           compatibility={data.compatibility}
@@ -352,6 +355,7 @@ function StartCtaButton({ onClick, label="테스트 시작하기" }) {
   );
 }
 
+// [NOTE] ResultPage에서 사용하는 내부 프리젠테이션 컴포넌트
 function CharacterImage({ src, alt }) {
   const has = src && src.trim().length > 0;
   return (
@@ -361,13 +365,20 @@ function CharacterImage({ src, alt }) {
   );
 }
 
-function ResultInfo({ name, personality, description, details=[], compatibility, similar, others }) {
+function ResultInfo({ name, personality, topTraits=[], description, details=[], compatibility, similar, others }) {
   return (
     <div>
       <CharacterInfo>
         <CharacterName>{name}</CharacterName>
-        {personality ? <PersonalityTag>☆ 나의 최애 성격 : {personality}</PersonalityTag> : null}
+        {personality ? <PersonalityTag>당신에 최애 성격은 : {topTraits.join(" / ")}</PersonalityTag> : null}
       </CharacterInfo>
+
+      
+      {Array.isArray(topTraits) && topTraits.length > 0 && (
+        <ResultDescWrap>
+          
+        </ResultDescWrap>
+      )}
 
       <ResultDescWrap>
         {description ? <ResultDesc>{description}</ResultDesc> : null}
