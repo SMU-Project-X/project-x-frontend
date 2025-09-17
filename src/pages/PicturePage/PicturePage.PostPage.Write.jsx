@@ -54,7 +54,7 @@ function PostWrite() {
                     <itemS.form_section>
                         <itemS.form_content>
                             <itemS.label>게시글 제목<itemS.required>*</itemS.required></itemS.label>
-                            <itemS.input id="title" placeholder="포토카드 제목을 입력해주세요"></itemS.input>
+                            <itemS.input id="title" placeholder="게시글 제목을 입력해주세요"></itemS.input>
                         </itemS.form_content>
 
                         <itemS.form_content>
