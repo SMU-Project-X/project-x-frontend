@@ -1,4 +1,4 @@
-// MDPage.Payment.jsx - 토스페이먼츠 연동 수정 버전
+// MDPage.Payment.jsx - 토스페이먼츠 플로우 완전 수정 버전
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
@@ -267,29 +267,9 @@ function Payment() {
     setShowCoupons(false);
   };
 
-  // 장바구니 비우기 및 카운트 업데이트
-  const clearCartAndUpdateCount = () => {
-    if (purchaseType === 'cart') {
-      localStorage.removeItem('cartItems');
-      localStorage.setItem('cartCount', '0');
-      
-      window.dispatchEvent(new CustomEvent('cartUpdated', { 
-        detail: { count: 0, items: [] } 
-      }));
-      
-      console.log('장바구니가 비워졌고 헤더에 알림 전송됨');
-    }
-    
-    if (purchaseType === 'direct') {
-      sessionStorage.removeItem('directPurchase');
-      localStorage.removeItem('tempDirectPurchase');
-      console.log('바로구매 임시 데이터 정리 완료');
-    }
-  };
-
-  // 🚀 토스페이먼츠 결제 처리 (수정된 부분)
-  const handleTossPayment = async () => {
-    // 필수 입력값 검증
+  // 🔥 핵심 수정: 결제 처리 로직 완전 분리
+  const handlePayment = async () => {
+    // 공통 검증
     if (!formData.recipientName || !formData.recipientPhone || !formData.address) {
       alert('배송 정보를 모두 입력해주세요.');
       return;
@@ -307,11 +287,12 @@ function Payment() {
       return;
     }
 
-    try {
-      setIsProcessing(true);
+    setIsProcessing(true);
 
+    try {
+      // 공통 주문 정보 생성
       const orderInfo = {
-        orderNumber: 'ORD' + Date.now(),
+        orderNumber: 'ORD' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
         items: orderItems,
         purchaseType: purchaseType,
         recipient: {
@@ -324,58 +305,139 @@ function Payment() {
         deliveryRequest: formData.deliveryRequest,
         paymentMethod: formData.paymentMethod,
         userId: loginStatus.userId,
+        createdAt: new Date().toISOString(),
         ...calculateTotals()
       };
 
-      // 주문 정보 저장
-      sessionStorage.setItem('orderInfo', JSON.stringify(orderInfo));
-      localStorage.setItem('tempOrderInfo', JSON.stringify(orderInfo));
+      console.log('💳 결제 처리 시작:', {
+        method: formData.paymentMethod,
+        amount: totalAmount,
+        orderNumber: orderInfo.orderNumber
+      });
 
       if (formData.paymentMethod === 'card') {
-        // 🔥 실제 토스페이먼츠 SDK 호출 (수정된 부분)
-        console.log('토스페이먼츠 결제 시작:', orderInfo);
-
-        // 토스페이먼츠 결제 데이터 구성
-        const paymentData = {
-          amount: totalAmount,
-          orderName: `${orderItems[0]?.name || '상품'} ${orderItems.length > 1 ? `외 ${orderItems.length - 1}개` : ''}`,
-          customerName: formData.recipientName,
-          customerEmail: formData.recipientEmail,
-          customerPhone: formData.recipientPhone,
-          orderId: orderInfo.orderNumber,
-          successUrl: `${window.location.origin}/MD/payment/success`,
-          failUrl: `${window.location.origin}/MD/payment/fail`
-        };
-
-        // 🚀 실제 토스페이먼츠 결제창 호출
-        const result = await tossPaymentsService.requestPayment(paymentData);
-        
-        // 결제창이 취소된 경우 또는 오류가 발생한 경우
-        if (!result.success) {
-          console.log('토스페이먼츠 결제 결과:', result);
-          if (result.code === 'USER_CANCEL') {
-            alert('결제가 취소되었습니다.');
-          } else {
-            alert(`결제 오류: ${result.error}`);
-          }
-          return;
-        }
-
-        // 성공 시 처리는 successUrl로 자동 리디렉션됨
-        
+        // 🚀 토스페이먼츠 카드 결제
+        await handleTossPayment(orderInfo);
       } else {
-        // 기타 결제 수단
-        setTimeout(() => {
-          clearCartAndUpdateCount();
-          navigate(`/MD/payment/complete?orderId=${orderInfo.orderNumber}&amount=${totalAmount}&method=${formData.paymentMethod}`);
-        }, 1500);
+        // 🚀 일반 결제 (무통장입금, 계좌이체)
+        await handleGeneralPayment(orderInfo);
       }
 
     } catch (error) {
-      console.error('결제 처리 실패:', error);
+      console.error('💥 결제 처리 실패:', error);
       alert(`결제 처리 중 오류가 발생했습니다: ${error.message}`);
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  // 🎯 토스페이먼츠 카드 결제 (Success 페이지로 이동)
+  const handleTossPayment = async (orderInfo) => {
+    try {
+      console.log('🔥 토스페이먼츠 결제 시작');
+
+      // 주문 정보를 세션에 저장 (Success 페이지에서 사용)
+      sessionStorage.setItem('pendingOrder', JSON.stringify(orderInfo));
+      localStorage.setItem('tempOrderInfo', JSON.stringify(orderInfo));
+
+      // 토스페이먼츠 결제 데이터 구성
+      const tossPaymentData = {
+        amount: orderInfo.totalAmount,
+        orderName: `${orderInfo.items[0]?.name || '상품'} ${orderInfo.items.length > 1 ? `외 ${orderInfo.items.length - 1}개` : ''}`,
+        customerName: orderInfo.recipient.name,
+        customerEmail: orderInfo.recipient.email,
+        customerPhone: orderInfo.recipient.phone,
+        orderId: orderInfo.orderNumber,
+        // 🎯 중요: Success/Fail URL 명시적 설정
+        successUrl: `${window.location.origin}/MD/payment/success`,
+        failUrl: `${window.location.origin}/MD/payment/fail`
+      };
+
+      console.log('📤 토스페이먼츠 요청 데이터:', tossPaymentData);
+
+      // 🚀 실제 토스페이먼츠 결제창 호출
+      const result = await tossPaymentsService.requestPayment(tossPaymentData);
+      
+      // 결제창 취소 또는 오류 처리
+      if (!result.success) {
+        console.log('❌ 토스페이먼츠 결과:', result);
+        
+        if (result.code === 'USER_CANCEL') {
+          alert('결제가 취소되었습니다.');
+        } else {
+          alert(`결제 오류: ${result.error}`);
+        }
+        
+        // 실패 시 저장된 주문 정보 정리
+        sessionStorage.removeItem('pendingOrder');
+        localStorage.removeItem('tempOrderInfo');
+        
+        return;
+      }
+
+      // 성공 시에는 토스페이먼츠가 자동으로 successUrl로 리디렉션
+      console.log('✅ 토스페이먼츠 결제창 호출 성공');
+
+    } catch (error) {
+      console.error('💥 토스페이먼츠 결제 오류:', error);
+      
+      // 오류 시 정리
+      sessionStorage.removeItem('pendingOrder');
+      localStorage.removeItem('tempOrderInfo');
+      
+      throw error;
+    }
+  };
+
+  // 🎯 일반 결제 처리 (Complete 페이지로 이동)
+  const handleGeneralPayment = async (orderInfo) => {
+    try {
+      console.log('🏦 일반 결제 처리 시작:', formData.paymentMethod);
+
+      // 일반 결제 주문 정보 저장
+      sessionStorage.setItem('completedOrder', JSON.stringify(orderInfo));
+      localStorage.setItem('lastOrder', JSON.stringify(orderInfo));
+
+      // 장바구니 정리
+      clearCartAndUpdateCount();
+
+      // 시뮬레이션 지연 (실제 결제 처리 시간)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // 🎯 Complete 페이지로 이동 (일반 결제용)
+      navigate(`/MD/payment/complete?orderId=${orderInfo.orderNumber}&amount=${orderInfo.totalAmount}&method=${formData.paymentMethod}`, {
+        state: {
+          ...orderInfo,
+          paymentSuccess: true,
+          accountNumber: accountNumber
+        }
+      });
+
+      console.log('✅ 일반 결제 처리 완료');
+
+    } catch (error) {
+      console.error('💥 일반 결제 처리 오류:', error);
+      throw error;
+    }
+  };
+
+  // 장바구니 비우기 및 카운트 업데이트
+  const clearCartAndUpdateCount = () => {
+    if (purchaseType === 'cart') {
+      localStorage.removeItem('cartItems');
+      localStorage.setItem('cartCount', '0');
+      
+      window.dispatchEvent(new CustomEvent('cartUpdated', { 
+        detail: { count: 0, items: [] } 
+      }));
+      
+      console.log('🛒 장바구니 정리 완료');
+    }
+    
+    if (purchaseType === 'direct') {
+      sessionStorage.removeItem('directPurchase');
+      localStorage.removeItem('tempDirectPurchase');
+      console.log('⚡ 바로구매 데이터 정리 완료');
     }
   };
 
@@ -679,7 +741,7 @@ function Payment() {
               <h3 style={styles.sectionTitle}>💳 결제 수단</h3>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 {[
-                  { id: 'card', name: '신용카드', icon: '💳' },
+                  { id: 'card', name: '신용카드 (토스페이)', icon: '💳' },
                   { id: 'transfer', name: '계좌이체', icon: '🏦' },
                   { id: 'deposit', name: '무통장입금', icon: '💰' }
                 ].map(method => (
@@ -745,20 +807,27 @@ function Payment() {
                 <span style={{ color: '#74B9FF' }}>₩{totalAmount.toLocaleString()}</span>
               </div>
 
+              {/* 🎯 통합된 결제 버튼 */}
               <button
                 style={{
                   ...styles.payBtn,
                   backgroundColor: isProcessing ? '#ccc' : '#74B9FF',
                   cursor: isProcessing ? 'not-allowed' : 'pointer'
                 }}
-                onClick={handleTossPayment}
+                onClick={handlePayment}
                 disabled={isProcessing}
               >
-                {isProcessing ? '결제 처리 중...' : `₩${totalAmount.toLocaleString()} 결제하기`}
+                {isProcessing ? 
+                  '결제 처리 중...' : 
+                  `${formData.paymentMethod === 'card' ? '토스페이로' : ''} ₩${totalAmount.toLocaleString()} 결제하기`
+                }
               </button>
 
               <div style={{ fontSize: '12px', color: '#666', textAlign: 'center' }}>
-                결제 시 개인정보 수집 및 이용에 동의한 것으로 간주됩니다.
+                {formData.paymentMethod === 'card' ? 
+                  '토스페이먼츠 결제창이 열립니다.' :
+                  '결제 시 개인정보 수집 및 이용에 동의한 것으로 간주됩니다.'
+                }
               </div>
             </div>
           </div>
