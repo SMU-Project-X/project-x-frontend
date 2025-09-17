@@ -192,7 +192,7 @@ export const OptionBtn = styled.button`
   background: ${({$selected}) => ($selected ? '#87b2d4' : '#4a90e2')};
   color:#fff; border:none; border-radius:8px;
   padding:20px 16px; font-size:14px; line-height:1.4; text-align:left;
-  cursor:pointer; transition:all .2s ease; min-height:60px; display:flex; align-items:center;
+  cursor:pointer; transition:all .2s ease; min-height:60px; display:flex; align-items:center; width: 100%;
 `;
 export const NavBtn = styled.button`
   background:none; border:none; color:${PT.color.primary}; font-size:14px; cursor:pointer; padding:8px 12px; min-width:50px; text-align:center;
