@@ -16,18 +16,20 @@ export default function PsyInlineControl({ open, onClose }) {
     setResult(computed);
     setStep("result");
 
-    // 백엔드 전송 — 필요 시 주석 해제
-    /*
-    const payload = {
-      selections: answers.map(a => ({ qid: a.id, opt: a.choice })), // {qid:number, opt:number(0~4)}
-      recommend: { idolId: computed.characterName, trait: computed.topTraits?.[0] }
-    };
-    fetch("/api/psytest/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    */
+    // 백엔드 전송 ( 없어도 프론트에 영향없음 )
+    try {
+      const topTrait = computed?.topTraits?.[0]; // 예: "신비로움"
+      if (topTrait) {
+        fetch("/api/psytest/hit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ trait: topTrait })
+        }).catch(() => {}); // 네트워크 오류 무시 (결과 화면 유지)
+      }
+    } catch (e) {
+      // 전송 오류는 콘솔만 찍고 무시
+      console.warn("[psytest/hit] send error:", e);
+    }
   };
 
   const handleRetry = () => { setResult(null); setStep("start"); };
