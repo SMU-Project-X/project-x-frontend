@@ -1,4 +1,4 @@
-// MDPage.ProductList.styled.js
+// MDPage.SearchResults.styled.js
 import styled, { keyframes } from 'styled-components';
 
 export const Container = styled.div`
@@ -14,7 +14,6 @@ export const ContentWrapper = styled.main`
   max-width: 1400px;
   margin: 0 auto;
   padding: 30px 100px;
-  position: relative;
 `;
 
 export const Title = styled.h1`
@@ -22,7 +21,19 @@ export const Title = styled.h1`
   font-size: 32px;
   font-weight: 700;
   color: #172031;
-  margin: 0 0 30px 0;
+  margin: 0 0 20px 0;
+`;
+
+export const ResultSummary = styled.div`
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+`;
+
+export const ResultCount = styled.span`
+  color: #74B9FF;
+  font-weight: 600;
 `;
 
 // 로딩 애니메이션
@@ -90,45 +101,20 @@ export const RetryButton = styled.button`
   }
 `;
 
-// 카테고리 탭
-export const CategoryTabs = styled.div`
-  display: flex;
-  gap: 8px;
-  margin-bottom: 30px;
-  border-bottom: 2px solid #f0f0f0;
-`;
-
-export const CategoryTab = styled.button`
-  padding: 12px 24px;
-  border: none;
-  background: none;
+export const NoSearchQuery = styled.div`
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
   font-family: 'Pretendard', sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  color: ${props => props.$active ? '#74B9FF' : '#666'};
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  border-bottom: 3px solid ${props => props.$active ? '#74B9FF' : 'transparent'};
-  margin-bottom: -2px;
-
-  &:hover {
-    color: #74B9FF;
-    background-color: rgba(116, 185, 255, 0.05);
-  }
+  font-size: 18px;
 `;
 
 // 필터 섹션
 export const FilterSection = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   background-color: #f8f9fa;
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 30px;
-  flex-wrap: wrap;
-  gap: 15px;
 `;
 
 export const FilterGroup = styled.div`
@@ -143,7 +129,6 @@ export const FilterLabel = styled.label`
   font-size: 14px;
   font-weight: 500;
   color: #333;
-  white-space: nowrap;
 `;
 
 export const FilterSelect = styled.select`
@@ -154,7 +139,6 @@ export const FilterSelect = styled.select`
   font-size: 14px;
   background-color: white;
   cursor: pointer;
-  min-width: 120px;
 
   &:focus {
     outline: none;
@@ -171,7 +155,6 @@ export const EventFilter = styled.div`
 
 export const EventCheckbox = styled.input`
   cursor: pointer;
-  accent-color: #74B9FF;
 `;
 
 export const EventLabel = styled.label`
@@ -179,20 +162,12 @@ export const EventLabel = styled.label`
   font-size: 14px;
   color: #333;
   cursor: pointer;
-  white-space: nowrap;
-`;
-
-export const ResultInfo = styled.div`
-  font-family: 'Pretendard', sans-serif;
-  font-size: 14px;
-  color: #666;
-  font-weight: 500;
 `;
 
 // 상품 그리드
 export const ProductGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 30px;
   margin-bottom: 40px;
 `;
@@ -290,17 +265,6 @@ export const EventBadge = styled.span`
   font-family: 'Pretendard', sans-serif;
 `;
 
-export const NoProductsMessage = styled.div`
-  text-align: center;
-  padding: 80px 20px;
-  color: #999;
-  font-family: 'Pretendard', sans-serif;
-  font-size: 18px;
-  background-color: #f8f9fa;
-  border-radius: 15px;
-  margin: 40px 0;
-`;
-
 // 페이지네이션
 export const PaginationWrapper = styled.div`
   display: flex;
@@ -321,7 +285,6 @@ export const PaginationBtn = styled.button`
   font-family: 'Pretendard', sans-serif;
   font-size: 14px;
   transition: all 0.2s ease;
-  min-width: 40px;
 
   &:hover:not(:disabled) {
     background-color: ${props => props.$active ? '#5599e5' : '#f8f9fa'};
@@ -336,33 +299,75 @@ export const PaginationBtn = styled.button`
   }
 `;
 
-export const PaginationDots = styled.span`
-  padding: 10px 5px;
-  color: #999;
-  font-family: 'Pretendard', sans-serif;
+// 검색 결과 없음
+export const NoResults = styled.div`
+  text-align: center;
+  padding: 80px 20px;
+  background-color: #f8f9fa;
+  border-radius: 15px;
+  margin: 40px 0;
 `;
 
-// 플로팅 탑 버튼
-export const FloatingTopBtn = styled.button`
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  width: 50px;
-  height: 50px;
-  background-color: #74B9FF;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  transition: all 0.3s ease;
-  z-index: 1000;
+export const NoResultsIcon = styled.div`
+  font-size: 64px;
+  margin-bottom: 20px;
+`;
 
-  &:hover {
-    background-color: #5599e5;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+export const NoResultsTitle = styled.h2`
+  font-family: 'Pretendard', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+`;
+
+export const NoResultsText = styled.p`
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 30px 0;
+`;
+
+export const SearchSuggestions = styled.div`
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 0 auto;
+  max-width: 400px;
+  text-align: left;
+`;
+
+export const SuggestionTitle = styled.h4`
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 15px 0;
+`;
+
+export const SuggestionList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  
+  li {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+    padding-left: 16px;
+    position: relative;
+    
+    &:before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: #74B9FF;
+      font-weight: bold;
+    }
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 `;

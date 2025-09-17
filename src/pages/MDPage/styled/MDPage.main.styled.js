@@ -1,5 +1,5 @@
 // MDPage.main.styled.js
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
 export const Container = styled.div`
   width: 100vw;
@@ -16,10 +16,93 @@ export const MainContent = styled.main`
   padding: 30px 100px;
 `;
 
+// 로딩 애니메이션
+const spin = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
+
+// 로딩 컨테이너
+export const LoadingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+`;
+
+// 로딩 스피너
+export const LoadingSpinner = styled.div`
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #74B9FF;
+  border-radius: 50%;
+  animation: ${spin} 1s linear infinite;
+`;
+
+// 로딩 텍스트
+export const LoadingText = styled.p`
+  font-family: 'Pretendard', sans-serif;
+  font-size: 18px;
+  color: #666;
+  margin: 0;
+`;
+
+// 에러 컨테이너
+export const ErrorContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+`;
+
+// 에러 텍스트
+export const ErrorText = styled.p`
+  font-family: 'Pretendard', sans-serif;
+  font-size: 18px;
+  color: #e74c3c;
+  margin: 0;
+  text-align: center;
+`;
+
+// 재시도 버튼
+export const RetryButton = styled.button`
+  padding: 12px 24px;
+  background-color: #74B9FF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #5599e5;
+  }
+`;
+
+// 상품 없음 메시지
+export const NoProductsMessage = styled.div`
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  margin: 20px 0;
+`;
+
 // 캐러셀 섹션
 export const CarouselSection = styled.section`
   margin-bottom: 60px;
-  position: relative; /* 자식 요소인 캐러셀 컨테이너를 기준으로 위치 잡기 위함 */
+  position: relative;
 `;
 
 export const CarouselContainer = styled.div`
@@ -39,9 +122,19 @@ export const CarouselContainer = styled.div`
 export const CarouselContent = styled.div`
   color: #172031;
   font-family: 'Pretendard', sans-serif;
-  font-size: 24px;
-  font-weight: 600;
   text-align: center;
+  
+  h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+  }
+  
+  p {
+    font-size: 18px;
+    font-weight: 400;
+    margin: 0;
+  }
 `;
 
 export const CarouselNavButton = styled.button`
@@ -72,7 +165,6 @@ export const CarouselNavButton = styled.button`
   }
 `;
 
-// 캐러셀 하단 인디케이터 컨테이너
 export const CarouselIndicators = styled.div`
   position: absolute;
   bottom: 20px;
@@ -80,13 +172,10 @@ export const CarouselIndicators = styled.div`
   justify-content: center;
   gap: 5px; 
   z-index: 10;
-  
-  /* 캐러셀 중앙 정렬을 위한 코드 추가 */
   left: 50%;
   transform: translateX(-50%);
 `;
 
-// 개별 인디케이터 버튼
 export const Indicator = styled.button`
   width: 40px;
   height: 17px;
@@ -110,10 +199,10 @@ export const Section = styled.section`
   margin-bottom: 60px;
 `;
 
-// 섹션 헤더 - 제목과 more 버튼을 한 줄에 정렬
+// 섹션 헤더 (더보기 버튼 제거됨)
 export const SectionHeader = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   margin-bottom: 25px;
 `;
@@ -127,19 +216,10 @@ export const SectionTitle = styled.h2`
   margin: 0;
 `;
 
-// More 버튼
-export const MoreButton = styled.a`
-  font-family: 'Pretendard', sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  color: #74B9FF;
-  text-decoration: none;
-  cursor: pointer;
-  transition: color 0.2s ease-in-out;
-
-  &:hover {
-    color: #5599e5;
-  }
+// 상품 그리드 래퍼 (더보기 버튼을 위한 포지셔닝 컨테이너)
+export const ProductGridWrapper = styled.div`
+  position: relative;
+  width: 100%;
 `;
 
 // 상품 그리드
@@ -150,6 +230,46 @@ export const ProductGrid = styled.div`
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+`;
+
+// 더보기 버튼 오버레이 (세 번째 상품 위에 위치)
+export const MoreButtonOverlay = styled.button`
+  position: absolute;
+  top: -12%;
+  right: 20px;
+  transform: translateY(-50%);
+  z-index: 20;
+  
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #74B9FF, #5DADE2);
+  border: none;
+  border-radius: 25px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(116, 185, 255, 0.3);
+  
+  &:hover {
+    background: linear-gradient(135deg, #5DADE2, #4A9AE1);
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 6px 20px rgba(116, 185, 255, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(-50%) scale(0.98);
+  }
+  
+  // 모바일에서는 하단에 표시
+  @media (max-width: 768px) {
+    position: static;
+    transform: none;
+    margin: 20px auto 0;
+    display: block;
+    width: fit-content;
+  }
 `;
 
 export const ProductCard = styled.div`
@@ -183,6 +303,14 @@ export const ProductImage = styled.div`
   color: #999;
   font-family: 'Pretendard', sans-serif;
   border: 1px solid #E5E5E5;
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+  }
 `;
 
 export const ProductInfo = styled.div`
@@ -199,6 +327,10 @@ export const ProductName = styled.h3`
   color: #172031;
   margin: 0;
   line-height: 1.3;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 `;
 
 export const ProductPrice = styled.p`
@@ -215,26 +347,29 @@ export const ProductDescription = styled.p`
   color: #666;
   margin: 0;
   line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 `;
 
 // 공지사항 섹션
 export const NoticeSection = styled.section`
-  max-width: 1400px;
-  margin: 80px auto 0;
-  padding: 30px;
-  background-color: #F8F8F8;
+  margin-bottom: 60px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #f8f9fa;
   border-radius: 15px;
-  border: 1px solid #E5E5E5;
+  padding: 30px;
 `;
 
-export const NoticeTitle = styled.h3`
+export const NoticeTitle = styled.h2`
   font-family: 'Pretendard', sans-serif;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   color: #172031;
   margin: 0 0 20px 0;
-  border-bottom: 2px solid #B3D1F0;
-  padding-bottom: 10px;
 `;
 
 export const NoticeList = styled.ul`
@@ -244,25 +379,29 @@ export const NoticeList = styled.ul`
 `;
 
 export const NoticeItem = styled.li`
-  padding: 12px 0;
-  border-bottom: 1px solid #E5E5E5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #e9ecef;
   font-family: 'Pretendard', sans-serif;
-  color: #172031;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  color: #333;
   
   &:last-child {
     border-bottom: none;
   }
   
   &:hover {
-    color: #74B9FF;
-    padding-left: 10px;
+    background-color: rgba(116, 185, 255, 0.05);
+    margin: 0 -15px;
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
   }
 `;
 
 export const NoticeDate = styled.span`
   color: #999;
-  font-size: 13px;
-  margin-left: 10px;
+  font-size: 14px;
+  font-weight: 400;
 `;

@@ -1,54 +1,49 @@
-// MDPage.Payment.jsx
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import * as S from './styled/MDPage.Payment.styled';
+// MDPage.Payment.jsx - 토스페이먼츠 연동 수정 버전
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import axios from 'axios';
+import tossPaymentsService from '../../services/paymentApi';
 
 function Payment() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   
-  // 로그인 체크 (임시 - 실제로는 인증 상태 확인)
-  const [isLoggedIn] = useState(true); // 실제로는 useAuth() 등으로 확인
+  // 로딩 상태 관리
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // DB에서 가져온 사용자 정보 (로그인시)
-  const [userInfo] = useState({
-    name: '홍길동',
-    phone: '010-1234-5678',
-    address: '서울특별시 강남구 테헤란로 123',
-    detailAddress: '456호'
+  // 🚀 로그인 상태 관리
+  const [loginStatus, setLoginStatus] = useState({
+    isLoggedIn: false,
+    userId: null,
+    username: null,
+    isAdmin: false
+  });
+  
+  // 🚀 사용자 정보
+  const [userInfo, setUserInfo] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
+    detailAddress: ''
   });
 
-  // 주문 상품 데이터
-  const [orderItems] = useState([
-    {
-      id: 1,
-      name: '한정판 포토북',
-      price: 25000,
-      quantity: 2,
-      image: '상품 이미지 1'
-    },
-    {
-      id: 2, 
-      name: 'Project X 굿즈 세트',
-      price: 18000,
-      quantity: 1,
-      image: '상품 이미지 2'
-    }
-  ]);
-
-  // 최근 주문내역 (더미)
-  const [recentOrders] = useState([
-    { id: 'ORD20241201', date: '2024.12.01', total: 42000, status: '배송완료' },
-    { id: 'ORD20241115', date: '2024.11.15', total: 28000, status: '배송중' }
-  ]);
+  // 🚀 주문 상품 데이터
+  const [orderItems, setOrderItems] = useState([]);
+  const [purchaseType, setPurchaseType] = useState('cart');
 
   // 폼 상태
   const [formData, setFormData] = useState({
-    deliveryRequest: '',
+    recipientName: '',
+    recipientPhone: '',
+    recipientEmail: '',
+    address: '',
+    detailAddress: '',
+    deliveryRequest: '문 앞에 놓아주세요',
     selectedCoupon: '',
-    paymentMethod: 'card',
-    cardCompany: '',
-    installment: '0',
-    paymentSubMethod: 'toss' // toss, naver, kakao
+    paymentMethod: 'card'
   });
 
   // UI 상태
@@ -62,41 +57,179 @@ function Payment() {
     { id: 3, name: '무료배송 쿠폰', discount: 3000, minOrder: 30000, type: 'shipping' }
   ]);
 
-  // 가격 계산
-  const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const selectedCoupon = availableCoupons.find(c => c.id === parseInt(formData.selectedCoupon));
-  
-  let discount = 0;
-  if (selectedCoupon && subtotal >= selectedCoupon.minOrder) {
-    if (selectedCoupon.type === 'shipping') {
-      discount = selectedCoupon.discount;
-    } else if (selectedCoupon.discount < 1) {
-      discount = Math.floor(subtotal * selectedCoupon.discount);
-    } else {
-      discount = selectedCoupon.discount;
-    }
-  }
-  
-  const shipping = subtotal >= 50000 || (selectedCoupon?.type === 'shipping' && subtotal >= selectedCoupon.minOrder) ? 0 : 3000;
-  const finalShipping = selectedCoupon?.type === 'shipping' ? 0 : shipping;
-  const total = subtotal - discount + finalShipping;
+  // 🚀 로그인 상태 및 사용자 정보 확인
+  const checkLoginAndLoadUserInfo = async () => {
+    try {
+      const statusResponse = await axios.get('http://localhost:8080/api/users/status', {
+        withCredentials: true
+      });
 
-  // 로그인하지 않은 경우
-  if (!isLoggedIn) {
-    return (
-      <S.Container>
-        <S.ContentWrapper>
-          <div style={{textAlign: 'center', padding: '100px 20px'}}>
-            <h2 style={{marginBottom: '20px'}}>로그인이 필요합니다</h2>
-            <p style={{marginBottom: '30px', color: '#666'}}>결제를 진행하려면 로그인을 해주세요.</p>
-            <S.PayBtn onClick={() => navigate('/login')}>
-              로그인하러 가기
-            </S.PayBtn>
-          </div>
-        </S.ContentWrapper>
-      </S.Container>
-    );
-  }
+      if (!statusResponse.data.isLoggedIn) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');
+        return false;
+      }
+
+      setLoginStatus(statusResponse.data);
+
+      const userResponse = await axios.get(
+        `http://localhost:8080/api/users/${statusResponse.data.userId}`, 
+        { withCredentials: true }
+      );
+
+      const userData = userResponse.data;
+      setUserInfo({
+        name: userData.name || userData.username || '',
+        phone: '010-0000-0000',
+        email: userData.email || '',
+        address: userData.address || '',
+        detailAddress: ''
+      });
+
+      setFormData(prev => ({
+        ...prev,
+        recipientName: userData.name || userData.username || '',
+        recipientPhone: '010-0000-0000',
+        recipientEmail: userData.email || '',
+        address: userData.address || '',
+        detailAddress: ''
+      }));
+
+      return true;
+
+    } catch (error) {
+      console.error('로그인 확인 실패:', error);
+      
+      const localLogin = localStorage.getItem('isLoggedIn') === 'true';
+      if (localLogin) {
+        setLoginStatus({
+          isLoggedIn: true,
+          userId: localStorage.getItem('userId'),
+          username: localStorage.getItem('username'),
+          isAdmin: localStorage.getItem('isAdmin') === 'true'
+        });
+        
+        setUserInfo({
+          name: localStorage.getItem('username') || '',
+          phone: '010-0000-0000',
+          email: '',
+          address: '',
+          detailAddress: ''
+        });
+
+        setFormData(prev => ({
+          ...prev,
+          recipientName: localStorage.getItem('username') || '',
+          recipientPhone: '010-0000-0000'
+        }));
+
+        return true;
+      } else {
+        alert('로그인이 필요합니다.');
+        navigate('/login');
+        return false;
+      }
+    }
+  };
+
+  // 🚀 주문 상품 데이터 로드
+  const loadOrderItems = () => {
+    try {
+      const purchaseTypeParam = searchParams.get('type');
+      const directPurchaseSession = sessionStorage.getItem('directPurchase');
+      const directPurchaseLocal = localStorage.getItem('tempDirectPurchase');
+      
+      if (purchaseTypeParam === 'direct' || directPurchaseSession || directPurchaseLocal) {
+        let directData = null;
+        
+        if (directPurchaseSession) {
+          directData = JSON.parse(directPurchaseSession);
+        } else if (directPurchaseLocal) {
+          directData = JSON.parse(directPurchaseLocal);
+        }
+        
+        if (directData && directData.items) {
+          setPurchaseType('direct');
+          setOrderItems(directData.items);
+          console.log('바로구매 상품 로드 완료:', directData.items);
+          return;
+        }
+      }
+
+      const cartData = localStorage.getItem('cartItems');
+      if (cartData) {
+        const parsedItems = JSON.parse(cartData);
+        if (parsedItems && parsedItems.length > 0) {
+          setPurchaseType('cart');
+          setOrderItems(parsedItems);
+          console.log('장바구니 상품 로드 완료:', parsedItems);
+          return;
+        }
+      }
+
+      console.log('주문할 상품이 없습니다.');
+      setOrderItems([]);
+      
+    } catch (error) {
+      console.error('주문 상품 데이터 로드 실패:', error);
+      setOrderItems([]);
+    }
+  };
+
+  // 컴포넌트 마운트 시 초기화
+  useEffect(() => {
+    const initializePayment = async () => {
+      setIsLoading(true);
+      
+      try {
+        const loginSuccess = await checkLoginAndLoadUserInfo();
+        if (!loginSuccess) {
+          return;
+        }
+
+        loadOrderItems();
+        
+      } catch (error) {
+        console.error('결제 페이지 초기화 실패:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializePayment();
+  }, [searchParams, location]);
+
+  // 가격 계산
+  const calculateTotals = () => {
+    if (!orderItems || orderItems.length === 0) {
+      return { subtotal: 0, shippingFee: 0, discountAmount: 0, totalAmount: 0 };
+    }
+
+    const subtotal = orderItems.reduce((sum, item) => {
+      const price = item.price || 0;
+      const quantity = item.quantity || 1;
+      return sum + (price * quantity);
+    }, 0);
+
+    let shippingFee = subtotal >= 50000 ? 0 : 3000;
+    let discountAmount = 0;
+
+    if (formData.selectedCoupon) {
+      const selectedCoupon = availableCoupons.find(c => c.id.toString() === formData.selectedCoupon);
+      if (selectedCoupon && subtotal >= selectedCoupon.minOrder) {
+        if (selectedCoupon.type === 'shipping') {
+          shippingFee = Math.max(0, shippingFee - selectedCoupon.discount);
+        } else if (selectedCoupon.discount < 1) {
+          discountAmount = Math.floor(subtotal * selectedCoupon.discount);
+        } else {
+          discountAmount = selectedCoupon.discount;
+        }
+      }
+    }
+
+    const totalAmount = subtotal - discountAmount + shippingFee;
+    return { subtotal, shippingFee, discountAmount, totalAmount };
+  };
 
   // 계좌번호 생성
   const generateAccountNumber = () => {
@@ -117,10 +250,7 @@ function Payment() {
   const handlePaymentMethodChange = (method) => {
     setFormData(prev => ({
       ...prev,
-      paymentMethod: method,
-      cardCompany: '',
-      installment: '0',
-      paymentSubMethod: method === 'card' ? 'toss' : ''
+      paymentMethod: method
     }));
     
     if (method === 'transfer' || method === 'deposit') {
@@ -137,336 +267,504 @@ function Payment() {
     setShowCoupons(false);
   };
 
-  // 결제하기
-  const handlePayment = () => {
-    if (!formData.deliveryRequest) {
-      alert('배송 요청사항을 입력해주세요.');
-      return;
+  // 장바구니 비우기 및 카운트 업데이트
+  const clearCartAndUpdateCount = () => {
+    if (purchaseType === 'cart') {
+      localStorage.removeItem('cartItems');
+      localStorage.setItem('cartCount', '0');
+      
+      window.dispatchEvent(new CustomEvent('cartUpdated', { 
+        detail: { count: 0, items: [] } 
+      }));
+      
+      console.log('장바구니가 비워졌고 헤더에 알림 전송됨');
     }
     
-    navigate('/MD/payment-complete', { 
-      state: { 
-        orderItems, 
-        total,
-        orderNumber: 'ORD' + Date.now(),
-        userInfo
-      }
-    });
+    if (purchaseType === 'direct') {
+      sessionStorage.removeItem('directPurchase');
+      localStorage.removeItem('tempDirectPurchase');
+      console.log('바로구매 임시 데이터 정리 완료');
+    }
   };
 
-  return (
-    <S.Container>
-      <S.ContentWrapper>
-        <S.Title>주문/결제</S.Title>
-        
-        <S.PaymentContent>
-          {/* 왼쪽: 주문 정보 */}
-          <S.PaymentForm>
-            {/* 1. 상품 정보 */}
-            <S.Section>
-              <S.SectionTitle>📦 상품 정보</S.SectionTitle>
-              {orderItems.map(item => (
-                <S.OrderItem key={item.id}>
-                  <S.ItemImage>{item.image}</S.ItemImage>
-                  <S.ItemInfo>
-                    <S.ItemName>{item.name}</S.ItemName>
-                    <S.ItemQuantity>수량: {item.quantity}개</S.ItemQuantity>
-                  </S.ItemInfo>
-                  <S.ItemPrice>₩{(item.price * item.quantity).toLocaleString()}</S.ItemPrice>
-                </S.OrderItem>
-              ))}
-            </S.Section>
+  // 🚀 토스페이먼츠 결제 처리 (수정된 부분)
+  const handleTossPayment = async () => {
+    // 필수 입력값 검증
+    if (!formData.recipientName || !formData.recipientPhone || !formData.address) {
+      alert('배송 정보를 모두 입력해주세요.');
+      return;
+    }
 
-            {/* 2. 배송지 정보 (DB에서 가져온 정보) */}
-            <S.Section>
-              <S.SectionTitle>🚚 배송지 정보</S.SectionTitle>
-              <div style={{
-                padding: '20px',
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
-                marginBottom: '20px'
-              }}>
-                <div style={{marginBottom: '10px'}}>
-                  <strong>받는 분:</strong> {userInfo.name}
+    if (orderItems.length === 0) {
+      alert('주문할 상품이 없습니다.');
+      return;
+    }
+
+    const { totalAmount } = calculateTotals();
+
+    if (totalAmount <= 0) {
+      alert('결제 금액이 올바르지 않습니다.');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+
+      const orderInfo = {
+        orderNumber: 'ORD' + Date.now(),
+        items: orderItems,
+        purchaseType: purchaseType,
+        recipient: {
+          name: formData.recipientName,
+          phone: formData.recipientPhone,
+          email: formData.recipientEmail,
+          address: formData.address,
+          detailAddress: formData.detailAddress
+        },
+        deliveryRequest: formData.deliveryRequest,
+        paymentMethod: formData.paymentMethod,
+        userId: loginStatus.userId,
+        ...calculateTotals()
+      };
+
+      // 주문 정보 저장
+      sessionStorage.setItem('orderInfo', JSON.stringify(orderInfo));
+      localStorage.setItem('tempOrderInfo', JSON.stringify(orderInfo));
+
+      if (formData.paymentMethod === 'card') {
+        // 🔥 실제 토스페이먼츠 SDK 호출 (수정된 부분)
+        console.log('토스페이먼츠 결제 시작:', orderInfo);
+
+        // 토스페이먼츠 결제 데이터 구성
+        const paymentData = {
+          amount: totalAmount,
+          orderName: `${orderItems[0]?.name || '상품'} ${orderItems.length > 1 ? `외 ${orderItems.length - 1}개` : ''}`,
+          customerName: formData.recipientName,
+          customerEmail: formData.recipientEmail,
+          customerPhone: formData.recipientPhone,
+          orderId: orderInfo.orderNumber,
+          successUrl: `${window.location.origin}/MD/payment/success`,
+          failUrl: `${window.location.origin}/MD/payment/fail`
+        };
+
+        // 🚀 실제 토스페이먼츠 결제창 호출
+        const result = await tossPaymentsService.requestPayment(paymentData);
+        
+        // 결제창이 취소된 경우 또는 오류가 발생한 경우
+        if (!result.success) {
+          console.log('토스페이먼츠 결제 결과:', result);
+          if (result.code === 'USER_CANCEL') {
+            alert('결제가 취소되었습니다.');
+          } else {
+            alert(`결제 오류: ${result.error}`);
+          }
+          return;
+        }
+
+        // 성공 시 처리는 successUrl로 자동 리디렉션됨
+        
+      } else {
+        // 기타 결제 수단
+        setTimeout(() => {
+          clearCartAndUpdateCount();
+          navigate(`/MD/payment/complete?orderId=${orderInfo.orderNumber}&amount=${totalAmount}&method=${formData.paymentMethod}`);
+        }, 1500);
+      }
+
+    } catch (error) {
+      console.error('결제 처리 실패:', error);
+      alert(`결제 처리 중 오류가 발생했습니다: ${error.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // 스타일
+  const styles = {
+    container: {
+      minHeight: '100vh',
+      backgroundColor: '#f8f9fa',
+      padding: '0'
+    },
+    contentWrapper: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '40px 20px'
+    },
+    title: {
+      fontSize: '32px',
+      fontWeight: 'bold',
+      color: '#172031',
+      marginBottom: '40px',
+      textAlign: 'center'
+    },
+    section: {
+      backgroundColor: 'white',
+      padding: '30px',
+      borderRadius: '12px',
+      marginBottom: '20px',
+      boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+    },
+    sectionTitle: {
+      fontSize: '20px',
+      fontWeight: '600',
+      color: '#172031',
+      marginBottom: '20px'
+    },
+    formRow: {
+      display: 'flex',
+      gap: '15px',
+      marginBottom: '15px'
+    },
+    formGroup: {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column'
+    },
+    label: {
+      fontSize: '14px',
+      fontWeight: '600',
+      color: '#172031',
+      marginBottom: '8px'
+    },
+    input: {
+      width: '100%',
+      padding: '12px',
+      border: '1px solid #ddd',
+      borderRadius: '8px',
+      fontSize: '14px',
+      boxSizing: 'border-box'
+    },
+    button: {
+      padding: '12px 24px',
+      border: 'none',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontSize: '16px',
+      fontWeight: '600',
+      transition: 'all 0.2s ease'
+    },
+    primaryButton: {
+      backgroundColor: '#2196F3',
+      color: 'white'
+    },
+    payBtn: {
+      width: '100%',
+      padding: '16px',
+      backgroundColor: '#74B9FF',
+      color: 'white',
+      border: 'none',
+      borderRadius: '8px',
+      fontSize: '18px',
+      fontWeight: 'bold',
+      cursor: 'pointer',
+      marginBottom: '15px'
+    },
+    emptyCart: {
+      textAlign: 'center',
+      padding: '100px 20px',
+      color: '#666'
+    },
+    loadingContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '400px',
+      gap: '20px'
+    }
+  };
+
+  // 로딩 중
+  if (isLoading) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.contentWrapper}>
+          <div style={styles.loadingContainer}>
+            <div style={{
+              width: '50px',
+              height: '50px',
+              border: '4px solid #f3f3f3',
+              borderTop: '4px solid #74B9FF',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <h2>로그인 확인 및 주문 정보 로드 중...</h2>
+            <p style={{ color: '#666' }}>잠시만 기다려주세요.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 주문할 상품이 없는 경우
+  if (!orderItems || orderItems.length === 0) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.contentWrapper}>
+          <div style={styles.emptyCart}>
+            <h2>주문할 상품이 없습니다</h2>
+            <p>장바구니에 상품을 담거나 상품 상세페이지에서 바로구매를 이용해주세요.</p>
+            <button 
+              style={{...styles.button, ...styles.primaryButton}}
+              onClick={() => navigate('/MD')}
+            >
+              쇼핑하러 가기
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const { subtotal, shippingFee, discountAmount, totalAmount } = calculateTotals();
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.contentWrapper}>
+        <h1 style={styles.title}>
+          {purchaseType === 'direct' ? '🛒 바로구매 결제' : '🛒 장바구니 결제'}
+        </h1>
+        
+        <div style={{ display: 'flex', gap: '40px', alignItems: 'flex-start' }}>
+          {/* 왼쪽: 주문 정보 */}
+          <div style={{ flex: 2 }}>
+            {/* 주문 상품 정보 */}
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>
+                📦 주문 상품 정보 ({orderItems.length}개)
+                {purchaseType === 'direct' && (
+                  <span style={{ 
+                    fontSize: '14px', 
+                    color: '#667eea', 
+                    fontWeight: 'normal',
+                    marginLeft: '10px'
+                  }}>
+                    (바로구매)
+                  </span>
+                )}
+              </h3>
+              {orderItems.map((item, index) => (
+                <div key={index} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '15px',
+                  border: '1px solid #e9ecef',
+                  borderRadius: '8px',
+                  marginBottom: '10px',
+                  backgroundColor: purchaseType === 'direct' ? '#f8f9ff' : '#f8f9fa'
+                }}>
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    backgroundColor: '#ddd',
+                    borderRadius: '8px',
+                    marginRight: '15px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    color: '#666'
+                  }}>
+                    {item.imageUrl ? (
+                      <img 
+                        src={item.imageUrl} 
+                        alt={item.name}
+                        style={{width: '100%', height: '100%', objectFit: 'cover'}}
+                      />
+                    ) : '이미지'}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: '600', marginBottom: '5px' }}>
+                      {item.name || item.productName}
+                    </div>
+                    {item.selectedOption && (
+                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '5px' }}>
+                        옵션: {item.selectedOption}
+                      </div>
+                    )}
+                    <div style={{ fontSize: '14px', color: '#74B9FF' }}>
+                      ₩{(item.price || 0).toLocaleString()} × {item.quantity || 1}개
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#172031' }}>
+                    ₩{((item.price || 0) * (item.quantity || 1)).toLocaleString()}
+                  </div>
                 </div>
-                <div style={{marginBottom: '10px'}}>
-                  <strong>연락처:</strong> {userInfo.phone}
+              ))}
+            </div>
+
+            {/* 배송 정보 */}
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>🚚 배송 정보</h3>
+              <div style={styles.formRow}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>받는 분</label>
+                  <input
+                    style={styles.input}
+                    type="text"
+                    name="recipientName"
+                    value={formData.recipientName}
+                    onChange={handleInputChange}
+                    placeholder="받는 분 이름"
+                  />
                 </div>
-                <div style={{marginBottom: '10px'}}>
-                  <strong>주소:</strong> {userInfo.address} {userInfo.detailAddress}
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>연락처</label>
+                  <input
+                    style={styles.input}
+                    type="text"
+                    name="recipientPhone"
+                    value={formData.recipientPhone}
+                    onChange={handleInputChange}
+                    placeholder="010-0000-0000"
+                  />
                 </div>
               </div>
-              
-              <S.FormRow>
-                <S.FormGroup>
-                  <S.Label>배송 요청사항</S.Label>
-                  <S.Select
-                    name="deliveryRequest"
-                    value={formData.deliveryRequest}
+
+              <div style={styles.formRow}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>이메일</label>
+                  <input
+                    style={styles.input}
+                    type="email"
+                    name="recipientEmail"
+                    value={formData.recipientEmail}
                     onChange={handleInputChange}
-                  >
-                    <option value="">배송 요청사항을 선택해주세요</option>
-                    <option value="문앞에 놓아주세요">문앞에 놓아주세요</option>
-                    <option value="경비실에 맡겨주세요">경비실에 맡겨주세요</option>
-                    <option value="택배함에 넣어주세요">택배함에 넣어주세요</option>
-                    <option value="직접 받겠습니다">직접 받겠습니다</option>
-                  </S.Select>
-                </S.FormGroup>
-              </S.FormRow>
-            </S.Section>
-
-            {/* 3. 쿠폰 (펼치기 방식) */}
-            <S.Section>
-              <S.SectionTitle 
-                onClick={() => setShowCoupons(!showCoupons)}
-                style={{cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}
-              >
-                🎫 쿠폰 <span>{showCoupons ? '▲' : '▼'}</span>
-              </S.SectionTitle>
-              
-              {showCoupons && (
-                <div style={{marginTop: '20px'}}>
-                  {availableCoupons.map(coupon => (
-                    <div
-                      key={coupon.id}
-                      onClick={() => handleCouponSelect(coupon.id.toString())}
-                      style={{
-                        padding: '15px',
-                        border: formData.selectedCoupon === coupon.id.toString() ? '2px solid #74B9FF' : '1px solid #e9ecef',
-                        borderRadius: '8px',
-                        marginBottom: '10px',
-                        cursor: subtotal >= coupon.minOrder ? 'pointer' : 'not-allowed',
-                        backgroundColor: subtotal >= coupon.minOrder ? '#fff' : '#f5f5f5',
-                        opacity: subtotal >= coupon.minOrder ? 1 : 0.6
-                      }}
-                    >
-                      <div style={{fontWeight: '600', marginBottom: '5px'}}>{coupon.name}</div>
-                      <div style={{fontSize: '12px', color: '#666'}}>
-                        최소 주문금액: ₩{coupon.minOrder.toLocaleString()}
-                      </div>
-                    </div>
-                  ))}
+                    placeholder="이메일 주소"
+                  />
                 </div>
-              )}
-              
-              {formData.selectedCoupon && (
-                <div style={{
-                  marginTop: '15px',
-                  padding: '12px',
-                  backgroundColor: '#e8f4fd',
-                  borderRadius: '6px'
-                }}>
-                  선택된 쿠폰: {availableCoupons.find(c => c.id.toString() === formData.selectedCoupon)?.name}
-                  <span style={{color: '#dc3545', fontWeight: 'bold', marginLeft: '10px'}}>
-                    -₩{discount.toLocaleString()}
-                  </span>
-                </div>
-              )}
-            </S.Section>
+              </div>
 
-            {/* 4. 결제 방법 */}
-            <S.Section>
-              <S.SectionTitle>💳 결제 방법</S.SectionTitle>
-              
-              {/* 결제 수단 선택 (가로 배치) */}
-              <div style={{display: 'flex', gap: '10px', marginBottom: '20px'}}>
+              <div style={styles.formRow}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>주소</label>
+                  <input
+                    style={styles.input}
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    placeholder="기본 주소"
+                  />
+                </div>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>상세주소</label>
+                  <input
+                    style={styles.input}
+                    type="text"
+                    name="detailAddress"
+                    value={formData.detailAddress}
+                    onChange={handleInputChange}
+                    placeholder="상세 주소"
+                  />
+                </div>
+              </div>
+
+              <div style={styles.formGroup}>
+                <label style={styles.label}>배송 요청사항</label>
+                <input
+                  style={styles.input}
+                  type="text"
+                  name="deliveryRequest"
+                  value={formData.deliveryRequest}
+                  onChange={handleInputChange}
+                  placeholder="배송 요청사항을 입력하세요"
+                />
+              </div>
+            </div>
+
+            {/* 결제 수단 */}
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>💳 결제 수단</h3>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 {[
-                  {key: 'card', name: '카드', icon: '💳'},
-                  {key: 'transfer', name: '계좌이체', icon: '🏦'},
-                  {key: 'deposit', name: '무통장입금', icon: '💰'},
-                  {key: 'phone', name: '휴대폰', icon: '📱', disabled: true}
+                  { id: 'card', name: '신용카드', icon: '💳' },
+                  { id: 'transfer', name: '계좌이체', icon: '🏦' },
+                  { id: 'deposit', name: '무통장입금', icon: '💰' }
                 ].map(method => (
                   <button
-                    key={method.key}
-                    onClick={() => !method.disabled && handlePaymentMethodChange(method.key)}
+                    key={method.id}
+                    onClick={() => handlePaymentMethodChange(method.id)}
                     style={{
-                      flex: 1,
-                      padding: '15px',
-                      border: formData.paymentMethod === method.key ? '2px solid #74B9FF' : '1px solid #e9ecef',
-                      borderRadius: '8px',
-                      backgroundColor: method.disabled ? '#f5f5f5' : (formData.paymentMethod === method.key ? '#e8f4fd' : 'white'),
-                      cursor: method.disabled ? 'not-allowed' : 'pointer',
-                      opacity: method.disabled ? 0.5 : 1,
-                      textAlign: 'center'
+                      ...styles.button,
+                      backgroundColor: formData.paymentMethod === method.id ? '#74B9FF' : '#f8f9fa',
+                      color: formData.paymentMethod === method.id ? 'white' : '#333',
+                      border: formData.paymentMethod === method.id ? 'none' : '1px solid #ddd'
                     }}
                   >
-                    <div style={{fontSize: '20px', marginBottom: '5px'}}>{method.icon}</div>
-                    <div style={{fontSize: '14px', fontWeight: '600'}}>{method.name}</div>
-                    {method.disabled && <div style={{fontSize: '10px', color: '#999'}}>준비중</div>}
+                    {method.icon} {method.name}
                   </button>
                 ))}
               </div>
-
-              {/* 카드 결제 세부 옵션 */}
-              {formData.paymentMethod === 'card' && (
-                <div style={{marginTop: '20px'}}>
-                  {/* 간편결제 선택 */}
-                  <div style={{marginBottom: '20px'}}>
-                    <S.Label>간편결제</S.Label>
-                    <div style={{display: 'flex', gap: '10px'}}>
-                      {[
-                        {key: 'toss', name: '토스페이', color: '#3182f6'},
-                        {key: 'naver', name: '네이버페이', color: '#03c75a'},
-                        {key: 'kakao', name: '카카오페이', color: '#fee500'}
-                      ].map(pay => (
-                        <button
-                          key={pay.key}
-                          onClick={() => setFormData(prev => ({...prev, paymentSubMethod: pay.key}))}
-                          style={{
-                            flex: 1,
-                            padding: '12px',
-                            border: formData.paymentSubMethod === pay.key ? `2px solid ${pay.color}` : '1px solid #e9ecef',
-                            borderRadius: '6px',
-                            backgroundColor: formData.paymentSubMethod === pay.key ? `${pay.color}20` : 'white',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {pay.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* 카드사 선택 */}
-                  <S.FormRow>
-                    <S.FormGroup>
-                      <S.Label>카드사 선택</S.Label>
-                      <S.Select
-                        name="cardCompany"
-                        value={formData.cardCompany}
-                        onChange={handleInputChange}
-                      >
-                        <option value="">카드사를 선택해주세요</option>
-                        <option value="삼성">삼성카드</option>
-                        <option value="현대">현대카드</option>
-                        <option value="신한">신한카드</option>
-                        <option value="KB국민">KB국민카드</option>
-                        <option value="하나">하나카드</option>
-                        <option value="롯데">롯데카드</option>
-                        <option value="BC">BC카드</option>
-                      </S.Select>
-                    </S.FormGroup>
-                    <S.FormGroup>
-                      <S.Label>할부 선택</S.Label>
-                      <S.Select
-                        name="installment"
-                        value={formData.installment}
-                        onChange={handleInputChange}
-                      >
-                        <option value="0">일시불</option>
-                        <option value="2">2개월</option>
-                        <option value="3">3개월</option>
-                        <option value="6">6개월</option>
-                        <option value="12">12개월</option>
-                      </S.Select>
-                    </S.FormGroup>
-                  </S.FormRow>
-                </div>
-              )}
-
-              {/* 계좌이체/무통장입금 계좌번호 */}
+              
               {(formData.paymentMethod === 'transfer' || formData.paymentMethod === 'deposit') && accountNumber && (
                 <div style={{
-                  marginTop: '20px',
+                  marginTop: '15px',
                   padding: '15px',
-                  backgroundColor: '#fff3cd',
+                  backgroundColor: '#f8f9fa',
                   borderRadius: '8px',
-                  border: '1px solid #ffeaa7'
+                  border: '1px solid #ddd'
                 }}>
-                  <div style={{fontWeight: '600', marginBottom: '10px'}}>
-                    {formData.paymentMethod === 'transfer' ? '계좌이체' : '무통장입금'} 정보
-                  </div>
-                  <div>계좌번호: <strong>{accountNumber}</strong></div>
-                  <div>예금주: Project-X</div>
-                  <div style={{fontSize: '12px', color: '#666', marginTop: '10px'}}>
-                    ※ 입금 확인 후 상품이 발송됩니다.
-                  </div>
+                  <strong>입금 계좌: {accountNumber}</strong>
+                  <br />
+                  <span style={{ fontSize: '14px', color: '#666' }}>
+                    예금주: (주)Project-X | 입금액: ₩{totalAmount.toLocaleString()}
+                  </span>
                 </div>
               )}
-            </S.Section>
-          </S.PaymentForm>
-
-          {/* 오른쪽: 결제 정보 */}
-          <S.OrderSummary>
-            {/* 결제 금액 */}
-            <S.SummaryTitle>결제 정보</S.SummaryTitle>
-            <S.PriceSummary>
-              <S.PriceRow>
-                <S.PriceLabel>상품금액</S.PriceLabel>
-                <S.PriceValue>₩{subtotal.toLocaleString()}</S.PriceValue>
-              </S.PriceRow>
-              {discount > 0 && (
-                <S.PriceRow>
-                  <S.PriceLabel>쿠폰할인</S.PriceLabel>
-                  <S.PriceValue style={{color: '#dc3545'}}>-₩{discount.toLocaleString()}</S.PriceValue>
-                </S.PriceRow>
-              )}
-              <S.PriceRow>
-                <S.PriceLabel>배송비</S.PriceLabel>
-                <S.PriceValue>{finalShipping === 0 ? '무료' : `₩${finalShipping.toLocaleString()}`}</S.PriceValue>
-              </S.PriceRow>
-              <S.TotalRow>
-                <S.TotalLabel>총 결제금액</S.TotalLabel>
-                <S.TotalValue>₩{total.toLocaleString()}</S.TotalValue>
-              </S.TotalRow>
-            </S.PriceSummary>
-
-            <S.PayBtn onClick={handlePayment} style={{width: '100%', marginTop: '20px'}}>
-              ₩{total.toLocaleString()} 결제하기
-            </S.PayBtn>
-
-            {/* 최근 주문내역 */}
-            <div style={{marginTop: '40px'}}>
-              <h3 style={{fontSize: '18px', fontWeight: '600', marginBottom: '15px'}}>최근 주문내역</h3>
-              {recentOrders.map(order => (
-                <div key={order.id} style={{
-                  padding: '12px',
-                  border: '1px solid #e9ecef',
-                  borderRadius: '6px',
-                  marginBottom: '8px',
-                  fontSize: '14px'
-                }}>
-                  <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '5px'}}>
-                    <span style={{fontWeight: '600'}}>{order.id}</span>
-                    <span style={{color: '#74B9FF'}}>{order.status}</span>
-                  </div>
-                  <div style={{color: '#666', fontSize: '12px'}}>
-                    {order.date} | ₩{order.total.toLocaleString()}
-                  </div>
-                </div>
-              ))}
             </div>
+          </div>
 
-            {/* 광고 배너 */}
-            <div style={{
-              marginTop: '30px',
-              padding: '20px',
-              backgroundColor: '#f8f9fa',
-              borderRadius: '8px',
-              textAlign: 'center'
-            }}>
-              <div style={{fontSize: '16px', fontWeight: '600', marginBottom: '10px'}}>
-                🎉 첫 주문 10% 할인!
+          {/* 오른쪽: 주문 요약 */}
+          <div style={{ flex: 1 }}>
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>💰 결제 정보</h3>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <span>상품금액</span>
+                <span>₩{subtotal.toLocaleString()}</span>
               </div>
-              <div style={{fontSize: '14px', color: '#666', marginBottom: '15px'}}>
-                신규회원 전용 혜택을 놓치지 마세요
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <span>배송비</span>
+                <span>₩{shippingFee.toLocaleString()}</span>
               </div>
-              <button style={{
-                padding: '8px 16px',
-                backgroundColor: '#74B9FF',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '12px',
-                cursor: 'pointer'
-              }}>
-                쿠폰 받기
+              
+              {discountAmount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', color: '#e74c3c' }}>
+                  <span>할인금액</span>
+                  <span>-₩{discountAmount.toLocaleString()}</span>
+                </div>
+              )}
+              
+              <hr style={{ margin: '15px 0', border: 'none', borderTop: '2px solid #e9ecef' }} />
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '18px', fontWeight: 'bold' }}>
+                <span>총 결제금액</span>
+                <span style={{ color: '#74B9FF' }}>₩{totalAmount.toLocaleString()}</span>
+              </div>
+
+              <button
+                style={{
+                  ...styles.payBtn,
+                  backgroundColor: isProcessing ? '#ccc' : '#74B9FF',
+                  cursor: isProcessing ? 'not-allowed' : 'pointer'
+                }}
+                onClick={handleTossPayment}
+                disabled={isProcessing}
+              >
+                {isProcessing ? '결제 처리 중...' : `₩${totalAmount.toLocaleString()} 결제하기`}
               </button>
+
+              <div style={{ fontSize: '12px', color: '#666', textAlign: 'center' }}>
+                결제 시 개인정보 수집 및 이용에 동의한 것으로 간주됩니다.
+              </div>
             </div>
-          </S.OrderSummary>
-        </S.PaymentContent>
-      </S.ContentWrapper>
-    </S.Container>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -1,16 +1,43 @@
-// MDPage.About.jsx
-import { useState } from 'react';
+// MDPage.About.jsx - 상품 수 동적 로딩 수정
+import { useState, useEffect } from 'react';
+import { productAPI } from '../../services/productApi'; // productApi import 추가
 import * as S from './styled/MDPage.About.styled';
 
 function About() {
   // FAQ 열림/닫힘 상태
   const [openFaq, setOpenFaq] = useState(null);
+  
+  // 상품 수 상태 추가
+  const [productCount, setProductCount] = useState(50); // 기본값 50으로 설정
+  const [isLoadingCount, setIsLoadingCount] = useState(true);
+
+  // 전체 상품 수 로드 함수
+  const loadProductCount = async () => {
+    try {
+      setIsLoadingCount(true);
+      // 첫 페이지만 가져와서 전체 개수 확인 (성능 최적화)
+      const response = await productAPI.getAllProducts(0, 1);
+      if (response.success && response.totalElements !== undefined) {
+        setProductCount(response.totalElements);
+      }
+    } catch (error) {
+      console.error('상품 수 로딩 실패:', error);
+      // 에러 발생시 기본값 유지
+    } finally {
+      setIsLoadingCount(false);
+    }
+  };
+
+  // 컴포넌트 마운트시 상품 수 로드
+  useEffect(() => {
+    loadProductCount();
+  }, []);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
-  // FAQ 데이터
+  // FAQ 데이터 (기존과 동일)
   const faqData = [
     {
       question: "주문 후 배송까지 얼마나 걸리나요?",
@@ -58,10 +85,16 @@ function About() {
             </p>
           </S.SectionContent>
 
-          {/* 프로젝트 통계 */}
+          {/* 프로젝트 통계 - 상품 수 동적으로 변경 */}
           <S.ProjectStats>
             <S.StatCard>
-              <S.StatNumber>50+</S.StatNumber>
+              <S.StatNumber>
+                {isLoadingCount ? (
+                  <span style={{ fontSize: '16px' }}>로딩중...</span>
+                ) : (
+                  `${productCount}+`
+                )}
+              </S.StatNumber>
               <S.StatLabel>상품 라인업</S.StatLabel>
             </S.StatCard>
             <S.StatCard>
@@ -79,6 +112,7 @@ function About() {
           </S.ProjectStats>
         </S.Section>
 
+        {/* 나머지 코드는 기존과 동일... */}
         {/* 팀 소개 */}
         <S.Section>
           <S.SectionTitle>👥 팀 소개</S.SectionTitle>
