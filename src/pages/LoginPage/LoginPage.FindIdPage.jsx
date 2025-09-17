@@ -5,7 +5,8 @@ function FindID() {
     const [name, setName] = useState("");
     const [emailFront, setEmailFront] = useState("");
     const [emailBack, setEmailBack] = useState("");
-    const [code, setCode] = useState("");
+    const [userId, setUserId] = useState("");
+    const [visibleId, setVisibleId] = useState(false);
 
     const handleDomainSelect = (e) => {
         if (e.target.value !== "직접입력") {
@@ -15,11 +16,43 @@ function FindID() {
         }
     };
 
-    const sendVerificationCode = () => {
-        const fullEmail = `${emailFront}@${emailBack}`;
-        console.log("이메일 인증 요청:", { name, fullEmail });
-        alert("이메일 전송 시도 (API 연결 필요)");
-    };
+    // const sendVerificationCode = (e) => {
+    //     e.preventDefault();
+    //     const email = `${emailFront}@${emailBack}`;
+    //     console.log("이메일 인증 요청:", { name, email });
+
+    //     fetch("/api/signup/emailSend", {
+    //         method: "POST",
+    //         headers: { "Content-Type": "application/json" },
+    //         body: JSON.stringify({ name, email }),
+    //     })
+    //         .then((res) => res.text())
+    //         .then((data) => console.log("응답:", data))
+    //         .catch((err) => console.error(err));
+    // };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        const email = `${emailFront}@${emailBack}`;
+
+        fetch("/api/login/findid", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email }),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log("응답:", data);
+                if (data.status == "success") {
+                    setUserId(data.userId)
+                    setVisibleId(true);
+                } else {
+                    setVisibleId(false);
+                }
+            })
+            .catch((err) => console.error(err));
+    }
 
     return (
         <S.Container>
@@ -30,7 +63,11 @@ function FindID() {
                 <S.Subtitle>아이디를 잊어버리셨나요?</S.Subtitle>
                 <hr />
                 <h3>아이디 찾기</h3>
-                <S.Subtitle>가입 시 입력했던 정보를 통해 아이디를 찾을 수 있습니다.</S.Subtitle>
+                <S.Subtitle>
+                    {!visibleId
+                        ? "가입 시 입력했던 정보를 통해 아이디를 찾을 수 있습니다."
+                        : `회원님의 아이디는 ${userId}입니다.`}
+                </S.Subtitle>
 
                 <form>
                     <S.Label>이름</S.Label>
@@ -68,7 +105,7 @@ function FindID() {
                         <option value="직접입력">직접입력</option>
                     </S.EmailAuto>
 
-                    <S.Code>
+                    {/* <S.Code>
                         <S.Input
                             type="text"
                             placeholder="인증번호 6자리"
@@ -79,9 +116,9 @@ function FindID() {
                         <S.Button type="button" onClick={sendVerificationCode}>
                             인증번호 전송
                         </S.Button>
-                    </S.Code>
+                    </S.Code> */}
 
-                    <S.FindBtn type="submit" value="아이디 찾기" />
+                    <S.FindBtn type="button" value="아이디 찾기" onClick={handleSubmit} />
                     <S.BackBtn type="button" onClick={() => alert("로그인 페이지 이동")}>
                         로그인 페이지로 이동
                     </S.BackBtn>

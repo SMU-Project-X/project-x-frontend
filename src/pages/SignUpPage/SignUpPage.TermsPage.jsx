@@ -1,8 +1,10 @@
 // src/pages/Signup/TermsPage.jsx
 import React, { useState, useEffect } from "react";
 import * as S from "@/pages/SignUpPage/styled/SignUpPage.TermsPage.style";
+import { useNavigate } from "react-router-dom";
 
 export default function TermsPage() {
+    const navigate = useNavigate();
     const [agreeTerms, setAgreeTerms] = useState(false);
     const [agreePrivacy, setAgreePrivacy] = useState(false);
     const [agreeMarketing, setAgreeMarketing] = useState(false);
@@ -89,7 +91,7 @@ export default function TermsPage() {
                         필수 약관에 모두 동의해주세요.
                     </S.ErrorMessage>
 
-                    <S.Button type="button" disabled={!requiredChecked}>
+                    <S.Button type="button" disabled={!requiredChecked} onClick={()=>navigate("/signup/info")}>
                         다음
                     </S.Button>
                 </S.Container>
