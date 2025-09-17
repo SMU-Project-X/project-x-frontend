@@ -36,6 +36,7 @@ import SelectMember from './pages/CommunityPage/Community.SelectMember';
 // 홈페이지
 import Home from './pages/HomePage/Home.main';
 
+
 import Cart from './pages/MDPage/MDPage.Cart';
 import Payment from './pages/MDPage/MDPage.Payment';
 import PaymentComplete from './pages/MDPage/MDPage.PaymentComplete';
@@ -44,6 +45,8 @@ import ProductDetail from './pages/MDPage/MDPage.ProductDetail';
 import About from './pages/MDPage/MDPage.About';
 import MDMain from './pages/MDPage/MDPage.main';
 import Header from './pages/MDPage/MDPage.header';
+import ChatApp from './pages/ChatbotPage/Chatbot.Chatapp';
+import ChatChoice from './pages/ChatbotPage/Chatbot.ChatChoice';
 
 
 export default function App() {
@@ -84,6 +87,10 @@ export default function App() {
         <Route path="/MD/cart" element={<Cart />} />
         <Route path="/MD/about" element={<About />} />
 
+        {/* 챗봇 path */}
+        <Route path="/ChatChoice" element={<ChatChoice/>} />
+        <Route path="/ChatApp/:chatName" element={<ChatApp />} />
+
         {/* 사진촬영 path */}
         <Route path="/picture/select" element={<PictureSelectMemberPage />} /> 
         <Route path="/picture/deco" element={<MemberDecoPage />} />
@@ -92,4 +99,3 @@ export default function App() {
     </>
   )
 }
-
