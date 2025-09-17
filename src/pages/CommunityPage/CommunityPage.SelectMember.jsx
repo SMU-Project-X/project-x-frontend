@@ -7,6 +7,7 @@ import { m } from 'framer-motion';
 import { useSelectMember } from './hooks/CommunityPage.UseSelectMember';
 import { useComment } from './hooks/CommunityPage.useComment';
 
+
 function MemberCard() {
 
   const members=useSelectMember();
@@ -16,13 +17,13 @@ function MemberCard() {
     {members.map((m) => (
         <Link 
         key={m.memberId}
-        to={`/Community/CheerArtist?memberId=${m.memberId}&name=${encodeURIComponent(m.name)}`}>
+        to={`/Community/CheerArtist?memberId=${m.memberId}&memberName=${encodeURIComponent(m.memberName)}`}>
           <itemS.MemberCard>
               <itemS.MemberImg>
-                  <img src={m.profile_image_url} alt={m.name}  />
+                  <img key={m.memberId} src={m.profileImageUrl} alt={m.memberName}  />
               </itemS.MemberImg>
               <itemS.MemberContent>
-                <p>{m.name}</p>
+                <p>{m.memberName}</p>
               </itemS.MemberContent>
             </itemS.MemberCard>
           </Link>

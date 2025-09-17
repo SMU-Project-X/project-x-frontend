@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
 // modal style
 import * as VoteModal from './styled/CommunityPage.VoteModal.style';
-import Unit from './components/CommunityPage.VotePage.Unit.Component';
+import Unit from './components/CommunityPage.VotePage.Unit';
 
 // 이미지 임포트
 import 가온 from '/Character/가온.png';
@@ -29,8 +29,8 @@ import styled from 'styled-components';
 
 
 
-export const VotePage = ({isModalOpen, onClose, userId}) => {
-    if(!isModalOpen) return null;
+export const VotePage = ({isModalOpen, onClose, banner}) => {
+    if(!isModalOpen || !banner) return null;
     
     // const [isOpen, setIsOpen] = useState(false);
     // const [hasVoted, setHasVoted] = useState(false);    // 투표 여부 상태 확인

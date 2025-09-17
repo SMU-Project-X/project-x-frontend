@@ -126,7 +126,7 @@ export const RadioInfo = styled.div `
 // 유닛 전체
 export const UnitContainer = styled.div`
     display: flex;
-    gap: 20px;
+    gap: 10px;
     width: 100%;
     justify-content: center;
     

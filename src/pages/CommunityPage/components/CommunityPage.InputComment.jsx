@@ -2,12 +2,26 @@ import React,{ useState } from "react"
 import * as itemS from '@/pages/CommunityPage/styled/CommunityPage.CheerArtist.style';
 import { useComment } from "../hooks/CommunityPage.useComment";
 import SendImg from "@/assets/images/CommunityPage/sendImg.png";
+import image1 from '@/assets/images/CommunityPage/image1.png';
+
+export const PuzzleSection = ({memberId, memberName}) => {
+    return (
+        <itemS.PuzzleContainer>
+            <itemS.PuzzleImg>
+                <img src={image1} alt={`${memberName}`}/>
+            </itemS.PuzzleImg>
+            <itemS.PuzzleCongress>
+                <InputComment memberId={memberId} memberName={memberName} />
+            </itemS.PuzzleCongress>
+        </itemS.PuzzleContainer>
+    );
+};
 
 
-export const InputComment = ({ memberId, name }) => {
+export const InputComment = ({ memberId, memberName }) => {
 
     const [commentText, setCommentText ] = useState("");
-    const {saveComment } = useComment(memberId, name);
+    const {saveComment } = useComment(memberId, memberName);
 
     // const [text, setText] = useState('');
     // 엔터시 댓글입력
@@ -38,7 +52,7 @@ export const InputComment = ({ memberId, name }) => {
         <itemS.CommentReply>
         <input 
             type={"text"} id={"reply"} name={"reply"}
-            placeholder='멤버이름을 넣어 응원메세지를 적어주세요!'
+            placeholder={`${memberName}에게 응원메세지를 적어주세요!`}
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             onKeyDown={handlerEnter}

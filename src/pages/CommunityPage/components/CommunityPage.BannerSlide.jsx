@@ -10,7 +10,7 @@ const BannerSlide = ({ title, date, img, onClick }) => {
         <p className="vote_date">{date}</p>
       </itemS.vote_content>
       <itemS.vote_img>
-        <img src={img || image2} alt={title} />
+        <img src={img || "투표이미지"} alt={title} />
       </itemS.vote_img>
     </itemS.vote_card>
   );

@@ -15,7 +15,7 @@ function VoteCard({title,img,CharacterName,Personality}) {
             </VoteModal.VoteImg>
             <VoteModal.UnitInfo>
             <span>{CharacterName}</span>
-            <p>{Personality}</p>
+            <p> {Personality}</p>
             </VoteModal.UnitInfo>
         </VoteModal.VoteCard>
     )
