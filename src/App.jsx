@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
@@ -16,14 +16,12 @@ import CameraPage from './pages/PicturePage/PicturePage.CameraPage';
 
 
 // 커뮤니티페이지
-import CommunityHome from './pages/CommunityPage/CommunityHome';
-import CheerArtist from './pages/CommunityPage/Community.CheerArtist';
-import FandomTalk from './pages/CommunityPage/Community.FandomTalk';
-import Vote from './pages/CommunityPage/Community.Vote';
-import SelectMember from './pages/CommunityPage/Community.SelectMember';
+import CommunityHome from './pages/CommunityPage/CommunityPage.CommunityHome';
+import CheerArtist from './pages/CommunityPage/CommunityPage.CheerArtist';
+import SelectMember from './pages/CommunityPage/CommunityPage.SelectMember';
 
 // 홈페이지
-import Home from './pages/HomePage/Home.main';
+// import Home from './pages/HomePage/Home.main';
 
 // 로그인
 import Login from './pages/LoginPage/LoginPage.main';
@@ -44,23 +42,24 @@ import ChatApp from './pages/ChatbotPage/Chatbot.Chatapp';
 import ChatChoice from './pages/ChatbotPage/Chatbot.ChatChoice';
 
 export default function App() {
+  const [units, setUnits] = useState();
+
   return (
     <>
       <Routes>
         {/* 랜딩페이지 path */}
-        <Route path="/" element={<SplashPage />} />
+        <Route path="/"  element={<SplashPage />} />
         <Route path="/selectMember" element={<SelectMemberPage />} />
         <Route path="/selectMember/view" element={<ViewPage />} />
 
         {/* 홈 path */}
-        <Route path='/home' element={<Home/>} />
+        {/* <Route path='/home' element={<Home/>} /> */}
         
         {/* 커뮤니티 path */}
-        <Route path="/CommunityHome" element={<CommunityHome />} />
-        <Route path='/Community/Vote' element={<Vote />} />
+        <Route path="/Community/" element={<CommunityHome />} />
         <Route path="/Community/CheerArtist" element={<CheerArtist />} />
         <Route path="/Community/SelectMember" element={<SelectMember />} />
-        <Route path="/Community/FandomTalk" element={<FandomTalk />} />
+        {/* <Route path="/Community/FandomTalk" element={<FandomTalk />} /> */}
 
         {/* 챗봇 path */}
         <Route path="/ChatChoice" element={<ChatChoice/>} />
