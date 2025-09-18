@@ -47,17 +47,10 @@ import { UseBanner } from './hooks/CommunityPage.useBanner';
     `;
 
 export const Banner = () => {
-    // const { banners } = UseBanner();
+    const BannerCard = UseBanner();
 
-    // 더미 배너 데이터
-    const banners = [
-        { bannerId:1, bannerTitle:"유닛조합에 투표해주세요!", startDate:"2025.09.03", endDate:"2025.09.24", Banner_imgUrl:zentreya },
-        { bannerId:2, bannerTitle:"최고의 응.꾸 투표하기!", startDate:"2025.09.05", endDate:"2025.09.25", Banner_imgUrl:image2 },
-        { bannerId:3, bannerTitle:"투표결과를 확인하세요!", startDate:"2025.09.07", endDate:"2025.09.27", Banner_imgUrl:image1 },
-        { bannerId:4, bannerTitle:"투표1", startDate:"2025.09.05", endDate:"2025.09.25", Banner_imgUrl:image2 },
-        { bannerId:5, bannerTitle:"투표2", startDate:"2025.09.07", endDate:"2025.09.27", Banner_imgUrl:image2 },       
-        { bannerId:6, bannerTitle:"투표3", startDate:"2025.09.03", endDate:"2025.09.24", Banner_imgUrl:zentreya }
-    ];
+    console.log("가져온 배너 데이터: ",BannerCard);
+
 
     // 모달 상태관리
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,6 +64,10 @@ export const Banner = () => {
     const onCloseModal = () => {
         setIsModalOpen(false);
         setSelectedBanenr(null);
+    }
+
+    if(!BannerCard || BannerCard.length === 0){
+        return null
     }
   
     return (
@@ -98,16 +95,22 @@ export const Banner = () => {
                     slidesPerView={3}
                 >
                     {/* <itemS.slide> */}
-                    {banners.map((banner)=> (
-                    <SwiperSlide key={banner.bannerId}>
-                        <BannerSlide 
-                            title = {banner.bannerTitle}
-                            date= {`${banner.startDate} ~ ${banner.endDate}`}
-                            img = {banner.Banner_imgUrl}
-                            onClick={()=>onOpenModal(banner.bannerId)}
-                        />
-                    </SwiperSlide>
-                    ))}
+                    {BannerCard.map((banner)=> {
+                        const startDate = new Date(banner.startDate).toISOString().split("T")[0];
+                        const endDate = new Date(banner.endDate).toISOString().split("T")[0];
+                    
+                        return(
+                        <SwiperSlide key={banner.bannerId}>
+                            <BannerSlide 
+                                bannerId={banner.bannerId}
+                                title = {banner.bannerTitle}
+                                startDate= {startDate} 
+                                endDate = {endDate}
+                                img = {image2}
+                                onClick={()=>onOpenModal(banner)}
+                            />
+                        </SwiperSlide>
+                        )})}
                     {/* </itemS.slide> */}
                 </Swiper>
             </itemS.slider>

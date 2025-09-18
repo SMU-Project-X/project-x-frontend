@@ -21,7 +21,7 @@ import CheerArtist from './pages/CommunityPage/CommunityPage.CheerArtist';
 import SelectMember from './pages/CommunityPage/CommunityPage.SelectMember';
 
 // 홈페이지
-// import Home from './pages/HomePage/Home.main';
+import Home from './pages/HomePage/Home.main';
 
 import ChatApp from './pages/ChatbotPage/Chatbot.Chatapp';
 import ChatChoice from './pages/ChatbotPage/Chatbot.ChatChoice';

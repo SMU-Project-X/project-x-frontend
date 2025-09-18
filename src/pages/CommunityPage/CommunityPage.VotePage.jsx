@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
 // modal style
 import * as VoteModal from './styled/CommunityPage.VoteModal.style';
-import Unit from './components/CommunityPage.VotePage.Unit';
+import Unit from './components/CommunityPage.VotePage.UnitAll';
 
 // 이미지 임포트
 import CloseBtn from '@/assets/images/CommunityPage/closeBtn.png';
@@ -60,42 +60,46 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
 
 
     // VoteCard 와 props 이름 일치시키기 필요
-    const dummyUnits = [
+    const Candidates = [
         {
-        title: "유닛 A",
-        options: [
-            { CharacterName: "가온", Personality: "#귀염 #ENFP", img:'/Character/가온.png'},
-            { CharacterName: "다온", Personality: "#시크 #INTJ", img:'/Character/다온.png'},
-            { CharacterName: "류하", Personality: "#시크 #INTJ", img:'/Character/류하.png' },
-            { CharacterName: "모아", Personality: "#시크 #INTJ", img:'/Character/모아.png' }
-            
+            unit_id: 1,
+            title: "유닛 A",
+            options: [
+                { CharacterName: "가온", Personality: "#귀염 #ENFP", Position:"리더", img:'/Character/가운.png'},
+                { CharacterName: "다온", Personality: "#시크 #INTJ", Position:"메인보컬", img:'/Character/다은.png'},
+                { CharacterName: "류하", Personality: "#시크 #INTJ", Position:"메인댄서", img:'/Character/류하.png' },
+                { CharacterName: "모아", Personality: "#시크 #INTJ", Position:"메인래퍼", img:'/Character/모아.png' }
+                
         ],
         },
         {
-        title: "유닛 B",
-        options: [
-            { CharacterName: "세라", Personality: "#상큼 #ENTP", img:'/Character/세라.png' },
-            { CharacterName: "세인", Personality: "#차분 #ISFJ", img:'/Character/세인.png' },
-            { CharacterName: "수린", Personality: "#시크 #INTJ", img:'/Character/수린.png' },
-            { CharacterName: "아린", Personality: "#시크 #INTJ", img:'/Character/아린.png' }
+            unit_id: 2,
+            title: "유닛 B",
+            options: [
+                { CharacterName: "세라", Personality: "#상큼 #ENTP", Position:"리더", img:'/Character/세라.png' },
+                { CharacterName: "세인", Personality: "#차분 #ISFJ", Position:"메인보컬", img:'/Character/세인.png' },
+                { CharacterName: "수린", Personality: "#시크 #INTJ", Position:"메인댄서", img:'/Character/수린.png' },
+                { CharacterName: "아린", Personality: "#시크 #INTJ", Position:"메인래퍼", img:'/Character/아린.png' }
         ],
         },
         {
-        title: "유닛 C",
-        options: [
-            { CharacterName: "세라", Personality: "#상큼 #ENTP", img:'/Character/세라.png' },
-            { CharacterName: "세인", Personality: "#차분 #ISFJ", img:'/Character/세인.png' },
-            { CharacterName: "수린", Personality: "#시크 #INTJ", img:'/Character/수린.png' },
-            { CharacterName: "아린", Personality: "#시크 #INTJ", img:'/Character/아린.png' }
+            unit_id: 3,
+            title: "유닛 C",
+            options: [
+                { CharacterName: "세라", Personality: "#상큼 #ENTP", Position:"리더", img:'/Character/아린.png' },
+                { CharacterName: "세인", Personality: "#차분 #ISFJ", Position:"메인보컬", img:'/Character/유나.png' },
+                { CharacterName: "수린", Personality: "#시크 #INTJ", Position:"메인댄서", img:'/Character/지원.png' },
+                { CharacterName: "아린", Personality: "#시크 #INTJ", Position:"메인래퍼", img:'/Character/채윤.png' }
         ],
         },        
         {
-        title: "유닛 D",
-        options: [
-            { CharacterName: "세라", Personality: "#상큼 #ENTP", img:'/Character/세라.png' },
-            { CharacterName: "세인", Personality: "#차분 #ISFJ", img:'/Character/세인.png' },
-            { CharacterName: "수린", Personality: "#시크 #INTJ", img:'/Character/수린.png' },
-            { CharacterName: "아린", Personality: "#시크 #INTJ", img:'/Character/아린.png' }
+            unit_id: 4,
+            title: "유닛 D",
+            options: [
+                { CharacterName: "세라", Personality: "#상큼 #ENTP", Position:"리더", img:'/Character/현.png' },
+                { CharacterName: "세인", Personality: "#차분 #ISFJ", Position:"메인보컬", img:'/Character/수린.png' },
+                { CharacterName: "수린", Personality: "#시크 #INTJ", Position:"메인댄서", img:'/Character/류하.png' },
+                { CharacterName: "아린", Personality: "#시크 #INTJ", Position:"메인래퍼", img:'/Character/아린.png' }
         ],
         },
         
@@ -121,7 +125,7 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
                                     slidesPerView={1} 
                                 >   
                                     {/* 이전으로 넘어가기 */}
-                                    {dummyUnits.map((unit, idx) => (
+                                    {Candidates.map((unit, idx) => (
                                         <SwiperSlide key={idx}>
                                         <VoteModal.UnitContainer>
                                             <Unit title={unit.title} options={unit.options} />

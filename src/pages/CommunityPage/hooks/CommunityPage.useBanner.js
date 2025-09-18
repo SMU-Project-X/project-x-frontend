@@ -8,12 +8,15 @@ export const UseBanner = () => {
 
     useEffect(() => {
         axios.get("http://localhost:8080/api/banners/list")
-        // .then(res => setBanners(res.data))
-        .then(res => setBanners(res.data))
-        .catch(err => setError(err));
-
+        .then((res) => {
+            setBanners(res.data);
+            console.log(res.data);
+        })
+        .catch((error) => {
+            console.log("에러 발생: ",error)
+        })
     }, []);
 
-    return {banners, error};
+    return banners ;
 
 }
