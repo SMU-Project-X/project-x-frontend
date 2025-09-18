@@ -20,15 +20,15 @@ export const CommunityHome = () => {
           <itemS.Nav>
             <itemS.Logo>Project - x</itemS.Logo>
             <itemS.MenuNav>
-              <li><a href="/">HOME</a></li>
-              <li><a href="#">MD</a></li>
-              <li><a href="#">COMMUNITY</a></li>
-              <li><a href="#">CONTENT</a></li>
-              <li><a href="#">CHAT</a></li>
+              <li><a href="/home">HOME</a></li>
+              <li><a href="/MD">MD</a></li>
+              <li><a href="/Community">COMMUNITY</a></li>
+              <li><a href="/picture/select">CONTENT</a></li>
+              <li><a href="/ChatChoice">CHAT</a></li>
             </itemS.MenuNav>
             <itemS.UserBox>
               <itemS.UserCircle></itemS.UserCircle>
-              <a href="#" className='UserMenu'>로그인</a>
+              <a href="/login" className='UserMenu'>로그인</a>
             </itemS.UserBox>
           </itemS.Nav>
         </itemS.Header>

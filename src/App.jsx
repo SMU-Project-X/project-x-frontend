@@ -60,8 +60,8 @@ import AdminPostPage from './pages/AdminPage/AdminPage.PostPage';
 import AdminUserPage from './pages/AdminPage/AdminPage.UserPage';
 
 // 챗봇 
-// import ChatApp from './pages/ChatbotPage/Chatbot.Chatapp';
-// import ChatChoice from './pages/ChatbotPage/Chatbot.ChatChoice';
+import ChatApp from './pages/ChatbotPage/Chatbot.Chatapp';
+import ChatChoice from './pages/ChatbotPage/Chatbot.ChatChoice';
 
 export default function App() {
   const location = useLocation();
@@ -88,6 +88,7 @@ export default function App() {
         <Route path="/selectMember" element={<SelectMemberPage />} />
         <Route path="/light_stick" element={<LightStickCustomPage />} />
         <Route path="/selectMember/view" element={<ViewPage />} />
+        <Route path="/selectMember/view/:slotIndex" element={<ViewPageWrapper />} />
 
         
         {/* 커뮤니티 path */}
@@ -176,7 +177,17 @@ export default function App() {
         <Route path='/admin/post' element={<AdminPostPage/>} />
         <Route path='/admin/user' element={<AdminUserPage/>} />
 
+        <Route path="/ChatChoice" element={<ChatChoice/>} />
+        <Route path="/ChatApp/:chatName" element={<ChatApp />}/>
+
       </Routes>
     </>
   );
+}
+
+// slotIndex를 useParams로 꺼내서 ViewPage에 넘김
+import { useParams } from 'react-router-dom';
+function ViewPageWrapper() {
+  const { slotIndex } = useParams();
+  return <ViewPage slotIndex={parseInt(slotIndex, 10)} />;
 }

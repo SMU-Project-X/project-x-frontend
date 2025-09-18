@@ -11,9 +11,14 @@ import ArrowContainer from "@/pages/HomePage/Home.main.ArrowContainer"
 import Countdown from "./Home.main.Countdown"
 import { useNavigate } from "react-router-dom"
 
+import { useRecoilState } from 'recoil';
+import { selectedCharactersState } from '@/recoil/characterAtom';
+
 
 function Home() {
     const navigate = useNavigate();
+    const [selectedCharacters, setSelectedCharacters] = useRecoilState(selectedCharactersState);
+    
     return(
         <itemS.HomePageContainer>
             <Header />
@@ -28,10 +33,14 @@ function Home() {
                 </itemS.MemberInfoNavContainer>
             </itemS.LogoVideoWrapper>
             <itemS.MemberInfoContainer>
-                <MemberInfoCard/>
-                <MemberInfoCard/>
-                <MemberInfoCard/>
-                <MemberInfoCard/>
+                {selectedCharacters.map((char, i) => (
+                        <MemberInfoCard
+                            key={i}
+                            img={char.img}
+                            name={char.name}
+                            traits={char.traits}
+                        />
+                    ))}
             </itemS.MemberInfoContainer>
             <itemS.ContentContainer>
                 <itemS.CountdownWrapper>
