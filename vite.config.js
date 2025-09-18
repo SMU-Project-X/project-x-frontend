@@ -5,13 +5,16 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    // 배열 대신 객체 형태도 OK
-    alias: { '@': '/src' },
+    alias: [{ find: '@', replacement: '/src' }],
   },
   server: {
     proxy: {
-      '/api':  { target: 'http://localhost:8080', changeOrigin: true, secure: false },
+      "/api": {
+        target: "http://localhost:8080", // Spring Boot 서버 주소
+        changeOrigin: true,
+      },
       '/files':{ target: 'http://localhost:8080', changeOrigin: true, secure: false },
+
     },
   },
 })
