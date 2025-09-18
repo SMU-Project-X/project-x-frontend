@@ -9,9 +9,11 @@ import ContentViewBtn from "./Home.main.ContentViewBtn"
 
 import ArrowContainer from "@/pages/HomePage/Home.main.ArrowContainer"
 import Countdown from "./Home.main.Countdown"
+import { useNavigate } from "react-router-dom"
 
 
 function Home() {
+    const navigate = useNavigate();
     return(
         <itemS.HomePageContainer>
             <Header />
@@ -54,7 +56,7 @@ function Home() {
                     <ArrowContainer color={Chevron_grey} rotate={90} count={2}/>
                     <itemS.JoinBtnContainer>
                         <itemS.JoinBtn>그룹 공유하기</itemS.JoinBtn>
-                        <itemS.JoinBtn>회원가입</itemS.JoinBtn>
+                        <itemS.JoinBtn onClick={() => navigate("/signup/terms")}>회원가입</itemS.JoinBtn>
                     </itemS.JoinBtnContainer>
                 </itemS.JoinContainer>
             </itemS.ContentContainer>
