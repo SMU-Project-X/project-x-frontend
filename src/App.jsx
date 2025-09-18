@@ -39,8 +39,9 @@ import AdminPage from './pages/AdminPage/AdminPage.main';
 import AdminPostPage from './pages/AdminPage/AdminPage.PostPage';
 import AdminUserPage from './pages/AdminPage/AdminPage.UserPage';
 
-
-
+// 챗봇 
+import ChatApp from './pages/ChatbotPage/Chatbot.Chatapp';
+import ChatChoice from './pages/ChatbotPage/Chatbot.ChatChoice';
 
 export default function App() {
   return (
@@ -60,6 +61,10 @@ export default function App() {
         <Route path="/Community/CheerArtist" element={<CheerArtist />} />
         <Route path="/Community/SelectMember" element={<SelectMember />} />
         <Route path="/Community/FandomTalk" element={<FandomTalk />} />
+
+        {/* 챗봇 path */}
+        <Route path="/ChatChoice" element={<ChatChoice/>} />
+        <Route path="/ChatApp/:chatName" element={<ChatApp />} />
 
         {/* 사진촬영 path */}
         <Route path="/picture/select" element={<PictureSelectMemberPage />} /> 
@@ -85,4 +90,3 @@ export default function App() {
     </>
   )
 }
-
