@@ -13,10 +13,10 @@ function VoteCard({title,img,CharacterName,Personality}) {
             <VoteModal.VoteImg>
                 <img src={img} alt={title} />
             </VoteModal.VoteImg>
-            <VoteModal.VoteContent>
+            <VoteModal.UnitInfo>
             <span>{CharacterName}</span>
-            <p>#{Personality}</p>
-            </VoteModal.VoteContent>
+            <p> {Personality}</p>
+            </VoteModal.UnitInfo>
         </VoteModal.VoteCard>
     )
 }

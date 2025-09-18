@@ -11,7 +11,7 @@ import ViewPage from './pages/RandingPage/RandingPage.SelectMemberPage.ViewPage'
 
 // 사진촬영 페이지
 import PictureSelectMemberPage from './pages/PicturePage/PicturePage.SelectMemberPage';
-// import MemberDecoPage from './pages/PicturePage/PicturePage.MemberDecoPage';
+import MemberDecoPage from './pages/PicturePage/PicturePage.MemberDecoPage';
 import CameraPage from './pages/PicturePage/PicturePage.CameraPage';
 
 
@@ -19,8 +19,6 @@ import CameraPage from './pages/PicturePage/PicturePage.CameraPage';
 import CommunityHome from './pages/CommunityPage/CommunityPage.CommunityHome';
 import CheerArtist from './pages/CommunityPage/CommunityPage.CheerArtist';
 import SelectMember from './pages/CommunityPage/CommunityPage.SelectMember';
-import axios from 'axios';
-// import FandomTalk from './pages/CommunityPage/CommunityPage.FandomTalk';
 
 // 홈페이지
 // import Home from './pages/HomePage/Home.main';
@@ -54,7 +52,7 @@ export default function App() {
 
         {/* 사진촬영 path */}
         <Route path="/picture/select" element={<PictureSelectMemberPage />} /> 
-        {/* <Route path="/picture/deco" element={<MemberDecoPage />} /> */}
+        <Route path="/picture/deco" element={<MemberDecoPage />} />
         <Route path="/picture/camera" element={<CameraPage />} />
       </Routes>
     </>

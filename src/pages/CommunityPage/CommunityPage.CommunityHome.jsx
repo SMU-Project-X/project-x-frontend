@@ -6,8 +6,8 @@ import * as itemS from './styled/CommunityPage.CommunityHome.style';
 // 이미지
 import puzzle from '@/assets/images/CommunityPage/puzzle.png';
 
-import Banner from '@/pages/CommunityPage/components/CommunityPage.Banner.Component';
-import Unit from '@/pages/CommunityPage/components/CommunityPage.VotePage.Unit.Component';
+import Banner from '@/pages/CommunityPage/CommunityPage.Banner';
+import Unit from '@/pages/CommunityPage/components/CommunityPage.VotePage.Unit';
 import VotePage from '@/pages/CommunityPage/CommunityPage.VotePage'
 
 
