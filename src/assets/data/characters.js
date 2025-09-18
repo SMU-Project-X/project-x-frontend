@@ -8,10 +8,10 @@ export const characters = [
     },
     {
         original: "Haruka Karibu",
-        name: "다은",
+        name: "다온",
         hanja: "多溫",
         trait: "상냥함",
-        img: "/Character/다은.png",
+        img: "/Character/다온.png",
     },
     {
         original: "Hime Hajime",
@@ -71,10 +71,10 @@ export const characters = [
     },
     {
         original: "Zentreya",
-        name: "가운",
+        name: "가온",
         hanja: "嘉溫",
         trait: "카리스마",
-        img: "/Character/가운.png",
+        img: "/Character/가온.png",
     },
     {
         original: "Projekt Melody",
