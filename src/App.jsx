@@ -27,7 +27,7 @@ import CheerArtist from './pages/CommunityPage/CommunityPage.CheerArtist';
 import SelectMember from './pages/CommunityPage/CommunityPage.SelectMember';
 
 // 홈페이지
-// import Home from './pages/HomePage/Home.main';
+import Home from './pages/HomePage/Home.main';
 
 
 // MD 페이지들 (기존)
@@ -43,23 +43,7 @@ import About from './pages/MDPage/MDPage.About';
 import MDMain from './pages/MDPage/MDPage.main';
 import Header from './pages/MDPage/MDPage.header';
 
-//  새로 추가된 페이지들
-import Login from './pages/LoginPage/Login';
 import MyPage from './pages/MyPage/MyPage';
-import AdminPage from './pages/AdminPage/AdminPage';
-
-export default function App() {
-  const location = useLocation();
-  
-  //  헤더 표시 조건 (새 페이지 제외)
-  const shouldShowHeader = 
-    location.pathname.startsWith('/MD/product') ||
-    location.pathname.startsWith('/MD/cart') ||
-    location.pathname.startsWith('/MD/payment') ||
-    location.pathname.startsWith('/MD/products') ||
-    location.pathname.startsWith('/MD/search') ||
-    location.pathname.startsWith('/MD/about') ||
-    location.pathname === '/MD';
 
 // 로그인
 import Login from './pages/LoginPage/LoginPage.main';
@@ -76,10 +60,22 @@ import AdminPostPage from './pages/AdminPage/AdminPage.PostPage';
 import AdminUserPage from './pages/AdminPage/AdminPage.UserPage';
 
 // 챗봇 
-import ChatApp from './pages/ChatbotPage/Chatbot.Chatapp';
-import ChatChoice from './pages/ChatbotPage/Chatbot.ChatChoice';
+// import ChatApp from './pages/ChatbotPage/Chatbot.Chatapp';
+// import ChatChoice from './pages/ChatbotPage/Chatbot.ChatChoice';
 
 export default function App() {
+  const location = useLocation();
+  
+  //  헤더 표시 조건 (새 페이지 제외)
+  const shouldShowHeader = 
+    location.pathname.startsWith('/MD/product') ||
+    location.pathname.startsWith('/MD/cart') ||
+    location.pathname.startsWith('/MD/payment') ||
+    location.pathname.startsWith('/MD/products') ||
+    location.pathname.startsWith('/MD/search') ||
+    location.pathname.startsWith('/MD/about') ||
+    location.pathname === '/MD';
+    
   const [units, setUnits] = useState();
 
 

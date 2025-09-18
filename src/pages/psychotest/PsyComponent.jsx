@@ -88,6 +88,7 @@ export function QuestionPage({ onClose, onComplete }) {
       "봄 — 설레고 따뜻한 새출발","여름 — 뜨겁고 활발한 에너지","가을 — 차분하고 감성적인 분위기","겨울 — 고요하고 신비로운 무드","계절 상관없이 늘 같은 루틴"]},
     { id: 11, question: "아이돌의 목소리 중 가장 끌리는 건?", options: [
       "카리스마 넘치는 파워 보컬","부드럽고 따뜻한 미성","낮고 시크한 톤","귀엽고 개성 있는 목소리","안정적이고 지적인 톤"]},
+
   ]), []);
   const totalQuestions = questions.length;
 
