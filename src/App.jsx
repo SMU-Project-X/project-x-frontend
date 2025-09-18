@@ -11,6 +11,7 @@ import { Route, Routes, Link, useLocation } from "react-router-dom";
 import SplashPage from './pages/RandingPage/RandingPage.SplashPage';
 import SelectMemberPage from './pages/RandingPage/RandingPage.SelectMemberPage';
 import ViewPage from './pages/RandingPage/RandingPage.SelectMemberPage.ViewPage';
+import LightStickCustomPage from "./pages/light_stick/light_stick.CustomPage.jsx";
 
 // 사진촬영 페이지
 import PictureSelectMemberPage from './pages/PicturePage/PicturePage.SelectMemberPage';
@@ -85,6 +86,7 @@ export default function App() {
         {/* 랜딩페이지 path */}
         <Route path="/"  element={<SplashPage />} />
         <Route path="/selectMember" element={<SelectMemberPage />} />
+        <Route path="/light_stick" element={<LightStickCustomPage />} />
         <Route path="/selectMember/view" element={<ViewPage />} />
         <Route path="/selectMember/view/:slotIndex" element={<ViewPageWrapper />} />
 

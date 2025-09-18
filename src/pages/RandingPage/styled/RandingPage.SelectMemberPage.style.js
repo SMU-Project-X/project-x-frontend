@@ -31,7 +31,7 @@ export const TitleWappper = styled.div`
 
 export const MiddleTitleWapper = styled.div `
     display: flex;
-    width: 526px;
+    width: 535px;
     height: 140px;
     flex-direction: column;
     justify-content: center;
