@@ -10,8 +10,7 @@ function InsertInfoPage() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [userName, setUserName] = useState("");
     const [nickname, setNickname] = useState("");
-    const [birthdate, setBirthdate] = useState("");
-    const [gender, setGender] = useState("");
+    const [age, setAge] = useState("");
     const [sendCode, setSendCode] = useState(false);
     const [email, setEmail] = useState("");
     const [verifyCode, setVerifyCode] = useState("");
@@ -43,7 +42,7 @@ function InsertInfoPage() {
             alert("비밀번호가 일치하지 않습니다.");
             return;
         }
-        if (!userName || !nickname || !birthdate || !gender || !email) {
+        if (!userName || !nickname || !age || !email) {
             alert("모든 필드를 입력해야 합니다.");
             return;
         }
@@ -55,7 +54,7 @@ function InsertInfoPage() {
         fetch("/api/signup/info", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId, userName, nickname, password, birthdate, gender, email }),
+            body: JSON.stringify({ userId, userName, nickname, password, age, email }),
         })
             .then((res) => res.text())
             .then((data) => { console.log("응답:", data); })
@@ -153,17 +152,17 @@ function InsertInfoPage() {
 
                             <S.FormRow>
                                 <S.FormGroup>
-                                    <label htmlFor="birthdate">생년월일</label>
-                                    <input type="date" id="birthdate" required value={birthdate} onChange={(e) => setBirthdate(e.target.value)} />
+                                    <label htmlFor="age">나이</label>
+                                    <input type="text" id="age" required value={age} onChange={(e) => setAge(e.target.value)} />
                                 </S.FormGroup>
-                                <S.FormGroup>
+                                {/* <S.FormGroup>
                                     <label htmlFor="gender">성별</label>
                                     <select id="gender" required value={gender} onChange={(e) => setGender(e.target.value)} >
                                         <option value="">선택해주세요</option>
                                         <option value="남성">남성</option>
                                         <option value="여성">여성</option>
                                     </select>
-                                </S.FormGroup>
+                                </S.FormGroup> */}
                             </S.FormRow>
 
                             <S.FormGroup>
