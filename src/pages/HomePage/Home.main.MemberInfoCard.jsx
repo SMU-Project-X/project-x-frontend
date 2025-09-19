@@ -1,12 +1,10 @@
 
 import * as itemS from "@/pages/HomePage/styled/Home.main.style"
-import Mark_img from "@/assets/images/CommunityPage/image1.png"
-
-function MemberInfoCard() {
+function MemberInfoCard({img, name, traits}) {
     return (
         <itemS.MemberCardWapper>
-            <itemS.MemberImg src={Mark_img} />
-            <itemS.MemeberTagWrapper>#류하 #도도함 #지성</itemS.MemeberTagWrapper>
+            <itemS.MemberImg src={img} />
+            <itemS.MemeberTagWrapper>#{name} #{traits[0]} #{traits[1]}</itemS.MemeberTagWrapper>
         </itemS.MemberCardWapper>
     )
 }

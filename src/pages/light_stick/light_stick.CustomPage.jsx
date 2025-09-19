@@ -1,0 +1,516 @@
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  PageRoot, Header, HeaderLeft, Logo, Button, Content,
+  ViewerCard, ViewerStage, ViewerActions, Sidebar, Panel, PanelTitle, SubTitle,
+  IconGrid, IconRow, CapBtn, GripBtn, Field, ColorField, SliderField,
+  UploadCard
+} from "./styled/light_stick.CustomPage.style.js";
+
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Environment } from "@react-three/drei";
+import MyElement3D from "./light_stick.MyElement3D.jsx";
+import { useLightstickShare, fetchLightstickByCode } from "./light_stick.ShareHandler.jsx";
+import { useLocation } from "react-router-dom";
+
+/* ===========================
+ * HEX 유틸
+ * =========================== */
+const HEX6 = /^#([0-9a-fA-F]{6})$/;
+const HEX3 = /^#([0-9a-fA-F]{3})$/;
+
+/** #RGB → #RRGGBB, # 누락 보정 */
+function normalizeHex(v) {
+  let s = (v ?? "").trim();
+  if (!s.startsWith("#")) s = "#" + s;
+  const m3 = s.match(HEX3);
+  if (m3) {
+    const [r, g, b] = m3[1];
+    return `#${r}${r}${g}${g}${b}${b}`;
+  }
+  return s;
+}
+const isHex6 = (v) => HEX6.test(normalizeHex(v));
+const clamp01 = (n) => Math.min(1, Math.max(0, n));
+
+/* ===========================
+ * 카메라 / 오빗
+ * =========================== */
+const CAMERA_INIT = { fov: 40, near: 0.05, far: 40, position: [1.5, 1.5, 2.7] };
+const ORBIT_CFG = {
+  enablePan: false,
+  enableDamping: true,
+  dampingFactor: 0.08,
+  minDistance: 1.2,
+  maxDistance: 6,
+  minPolarAngle: 0.01,
+  maxPolarAngle: Math.PI - 0.01,
+  target: [0, 0.7, 0],
+  zoomSpeed: 0.8,
+  rotateSpeed: 0.9,
+};
+
+/* ===========================
+ * 피규어 카탈로그 (코드→URL)
+ * =========================== */
+const FIGURES = [
+  { code: "NONE",  label: "없음", url: "" },
+  { code: "RYUHA", label: "류하", url: "/models/scene.gltf" },
+  // { code: "AAA", label: "다른피규어", url: "/models/aaa/scene.gltf" },
+];
+const FIGURE_URL_BY_CODE = FIGURES.reduce((acc, f) => (acc[f.code] = f.url, acc), {});
+
+export default function LightStickCustomPage() {
+  // 모듈: 저장→code 수신→게시판 이동
+  const { share } = useLightstickShare({
+    boardWritePath: "/community/write",  // 실제 커뮤니티 응원봉 게시글 작성 라우트에 맞게 조정
+  });
+
+  const location = useLocation();
+
+  /* =============== 형태 상태 =============== */
+  const [capShape, setCapShape] = useState("sphere");
+  const [thickness, setThickness] = useState("thin");
+  const [bodyLength, setBodyLength] = useState("short");
+
+  /* =============== 색상 상태 =============== */
+  const [bodyColor, setBodyColor] = useState("#ffffff");
+  const [capColor, setCapColor] = useState("#ffffff");
+  const [bodyColorText, setBodyColorText] = useState(bodyColor);
+  const [capColorText, setCapColorText] = useState(capColor);
+  const bodyInvalid = useMemo(() => bodyColorText.trim() !== "" && !isHex6(bodyColorText), [bodyColorText]);
+  const capInvalid = useMemo(() => capColorText.trim() !== "" && !isHex6(capColorText), [capColorText]);
+
+  /* =============== 재질 상태 =============== */
+  const [metallic, setMetallic] = useState(0.25);
+  const [roughness, setRoughness] = useState(0.0);
+  const [transmission, setTransmission] = useState(0.5);
+
+  /* =============== 피규어(코드 선택) =============== */
+  const [figureCode, setFigureCode] = useState("NONE");
+  const figureUrl = useMemo(() => FIGURE_URL_BY_CODE[figureCode] || "", [figureCode]);
+
+  /* =============== 스티커(로컬 전용) =============== */
+  const [stickerUrl, setStickerUrl] = useState("");
+  const [stickerScale, setStickerScale] = useState(0.3);
+  const [stickerY, setStickerY] = useState(0.5);
+  const [stickerAssetUrl, setStickerAssetUrl] = useState("");
+
+  /* =============== 코드 불러오기 입력 =============== */
+  const [loadCode, setLoadCode] = useState("");
+
+  // blob 정리(교체/언마운트 시 메모리 해제)
+  useEffect(() => {
+    return () => {
+      if (stickerUrl && stickerUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(stickerUrl);
+      }
+    };
+  }, [stickerUrl]);
+
+  /* =============== 초기화 =============== */
+  const resetAll = useCallback(() => {
+    setCapShape("sphere");
+    setThickness("thin");
+    setBodyLength("short");
+    setBodyColor("#ffffff");
+    setCapColor("#ffffff");
+    setMetallic(0.25);
+    setRoughness(0.0);
+    setTransmission(0.5);
+    setStickerUrl("");
+    setStickerScale(0.3);
+    setStickerY(0.5);
+    setStickerAssetUrl("");
+    setBodyColorText("#ffffff");
+    setCapColorText("#ffffff");
+    setFigureCode("NONE");
+    setLoadCode("");
+  }, []);
+
+  /* =============== 캡처 toBlob (이미지 저장 버튼 전용) =============== */
+  const glRef = useRef(null);
+  const sceneRef = useRef(null);
+  const cameraRef = useRef(null);
+
+  const captureBlob = useCallback(
+    () =>
+      new Promise((resolve) => {
+        requestAnimationFrame(() => {
+          const gl = glRef.current, scene = sceneRef.current, camera = cameraRef.current;
+          if (!gl || !scene || !camera) return resolve(null);
+          gl.render(scene, camera);
+          gl.domElement.toBlob((blob) => resolve(blob), "image/png");
+        });
+      }),
+    []
+  );
+
+  const handleSaveImage = useCallback(async () => {
+    const blob = await captureBlob();
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    try {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "lightstick.png";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }, [captureBlob]);
+
+  // 스티커 파일 서버 업로드 → 공개 URL 반환
+  const uploadSticker = useCallback(async (file) => {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch("/api/lightstick/stickers", {
+      method: "POST",
+      body: form,
+      credentials: "include",
+    });
+    if (!res.ok) {
+      const t = await res.text().catch(()=>"");
+      throw new Error(t || "스티커 업로드 실패");
+    }
+    const data = await res.json();
+    return data?.url; // 예) "/files/2025-09-16/xxxx.png"
+  }, []);
+
+  /* =============== 공유하기: 페이로드 생성→모듈 호출 =============== */
+  const buildSharePayload = useCallback(() => ({
+    schemaVersion: 1,
+    clientTs: Date.now(),
+    // 형태
+    capShape, thickness, bodyLength,
+    // 색상
+    bodyColor, capColor,
+    // 재질
+    metallic: clamp01(metallic),
+    roughness: clamp01(roughness),
+    transmission: clamp01(transmission),
+    // 피규어: URL은 보내지 않고 코드만
+    figureCode: figureCode === "NONE" ? null : figureCode,
+    // 스티커 파라미터(이미지 자체는 전송 X)
+    stickerScale: Number(stickerScale.toFixed(3)),  // 0.1~1.0
+    stickerY:     Number(stickerY.toFixed(3)),      // 0~1 (정규화)
+    // 서버 업로드된 파일 접근 URL (DB 저장용)
+    stickerAssetUrl: stickerAssetUrl || null,
+  }), [capShape, thickness, bodyLength, bodyColor, capColor, metallic, roughness, transmission, figureCode, stickerScale, stickerY, stickerAssetUrl]);
+
+  const handleShare = useCallback(async () => {
+    try {
+      if (bodyInvalid || capInvalid) {
+        alert("색상 입력을 확인해주세요. (#RRGGBB)");
+        return;
+      }
+      const payload = buildSharePayload();
+      await share(payload); // 서버 저장 → code 수신 → 글쓰기 페이지로 이동
+    } catch (e) {
+      console.error(e);
+      alert(e.message || "공유에 실패했습니다.");
+    }
+  }, [bodyInvalid, capInvalid, buildSharePayload, share]);
+
+  /* =============== 코드로 프리셋 적용 =============== */
+
+  const applyPreset = useCallback((d) => {
+    const num = (v, def=0) => (v == null ? def : Number(v));
+    const str = (v, def="") => (v == null ? def : String(v));
+
+    setCapShape(str(d.capShape, "sphere"));
+    setThickness(str(d.thickness, "thin"));
+    setBodyLength(str(d.bodyLength, "short"));
+
+    const bc = str(d.bodyColor, "#ffffff").toLowerCase();
+    const cc = str(d.capColor, "#ffffff").toLowerCase();
+    setBodyColor(bc);
+    setCapColor(cc);
+    setBodyColorText(bc);
+    setCapColorText(cc);
+
+    setMetallic(Math.min(1, Math.max(0, num(d.metallic, 0.25))));
+    setRoughness(Math.min(1, Math.max(0, num(d.roughness, 0.0))));
+    setTransmission(Math.min(1, Math.max(0, num(d.transmission, 0.5))));
+
+    setFigureCode(d.figureCode ? d.figureCode : "NONE");
+
+    setStickerScale(Math.min(1, Math.max(0.1, num(d.stickerScale, 0.3))));
+    setStickerY(Math.min(1, Math.max(0, num(d.stickerY, 0.5))));
+    const assetUrl = str(d.stickerAssetUrl, "");
+    setStickerAssetUrl(assetUrl);
+    if (assetUrl) setStickerUrl(assetUrl); // 미리보기도 서버 URL 사용
+  }, []);
+
+  const handleLoadByCode = useCallback(async (code) => {
+    try {
+      const data = await fetchLightstickByCode(code);
+      applyPreset(data);
+    } catch (e) {
+      console.error(e);
+      alert(e.message || "불러오기에 실패했습니다.");
+    }
+  }, [applyPreset]);
+
+  // 주소창 ?code=... 있으면 자동 적용
+  useEffect(() => {
+    const q = new URLSearchParams(location.search);
+    const c = q.get("code");
+    if (c) {
+      setLoadCode(c);
+      handleLoadByCode(c);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 최초 1회
+
+  /* =============== 페이지 =============== */
+  return (
+    <PageRoot>
+      {/* 헤더 */}
+      <Header>
+        <HeaderLeft>
+          <Logo aria-hidden>✨</Logo>
+          <h1>응원봉 커스텀</h1>
+        </HeaderLeft>
+      </Header>
+
+      <Content>
+        {/* 좌: 3D 뷰어 */}
+        <ViewerCard>
+          <ViewerStage>
+            <Canvas
+              dpr={[1, 2]}
+              camera={CAMERA_INIT}
+              gl={{ antialias: true, preserveDrawingBuffer: true }}
+              onCreated={({ gl, scene, camera }) => {
+                glRef.current = gl;
+                sceneRef.current = scene;
+                cameraRef.current = camera;
+              }}
+            >
+              <Suspense fallback={null}>
+                <MyElement3D
+                  capShape={capShape}
+                  thickness={thickness}
+                  bodyLength={bodyLength}
+                  bodyColor={bodyColor}
+                  capColor={capColor}
+                  metallic={clamp01(metallic)}
+                  roughness={clamp01(roughness)}
+                  transmission={clamp01(transmission)}
+                  // 스티커(렌더링 전용)
+                  stickerUrl={stickerUrl}
+                  stickerScale={stickerScale}
+                  stickerY={stickerY}
+                  // 피규어는 URL로 렌더링
+                  figureUrl={figureUrl}
+                />
+                <OrbitControls makeDefault {...ORBIT_CFG} />
+                <Environment preset="city" />
+              </Suspense>
+            </Canvas>
+          </ViewerStage>
+
+          {/* 하단 액션 */}
+          <ViewerActions>
+            <Button onClick={resetAll}>초기화</Button>
+            <div className="spacer" />
+            <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+            <input
+              type="text"
+              value={loadCode}
+              onChange={(e)=>setLoadCode(e.target.value)}
+              placeholder="예: CLDE4ZU7B9"
+              style={{ width:200, padding:"8px 10px", border:"1px solid #ddd", borderRadius:8 }}
+            />
+            <Button onClick={()=> loadCode && handleLoadByCode(loadCode)}>불러오기</Button>
+            </div>
+            <Button className="dark" onClick={handleShare}>공유하기</Button>
+            <Button onClick={handleSaveImage}>이미지 저장</Button>
+          </ViewerActions>
+        </ViewerCard>
+
+        {/* 우: 사이드바 */}
+        <Sidebar>
+          <Panel className="wide">
+            <PanelTitle>커스터마이즈</PanelTitle>
+            {/* 캡 모양 */}
+            <SubTitle>캡 모양</SubTitle>
+            <IconGrid>
+              <CapBtn className={capShape==="sphere" ? "active" : ""} onClick={()=>setCapShape("sphere")}>구</CapBtn>
+              <CapBtn className={capShape==="star" ? "active" : ""} onClick={()=>setCapShape("star")}>별</CapBtn>
+              <CapBtn className={capShape==="heart" ? "active" : ""} onClick={()=>setCapShape("heart")}>하트</CapBtn>
+              <CapBtn className={capShape==="hemisphere" ? "active" : ""} onClick={()=>setCapShape("hemisphere")}>반구</CapBtn>
+            </IconGrid>
+
+            {/* 바디 두께/길이 */}
+            <SubTitle>바디 두께 · 길이</SubTitle>
+            <IconRow>
+              <GripBtn className={`thin  ${thickness==="thin"  ? "active" : ""}`} onClick={()=>setThickness("thin")}><span className="label">얇게</span></GripBtn>
+              <GripBtn className={`wide  ${thickness==="wide"  ? "active" : ""}`} onClick={()=>setThickness("wide")}><span className="label">굵게</span></GripBtn>
+              <GripBtn className={`short ${bodyLength==="short" ? "active" : ""}`} onClick={()=>setBodyLength("short")}><span className="label">짧게</span></GripBtn>
+              <GripBtn className={`long  ${bodyLength==="long"  ? "active" : ""}`} onClick={()=>setBodyLength("long")}><span className="label">길게</span></GripBtn>
+            </IconRow>
+
+            {/* 바디 색상 */}
+            <Field>
+              <span>바디 색상</span>
+              <ColorField>
+                <input
+                  type="text"
+                  value={bodyColorText}
+                  onChange={(e) => {
+                    const t = e.target.value;
+                    setBodyColorText(t);
+                    const n = normalizeHex(t);
+                    if (HEX6.test(n)) setBodyColor(n.toLowerCase());
+                  }}
+                  onBlur={() => {
+                    const n = normalizeHex(bodyColorText);
+                    setBodyColorText(HEX6.test(n) ? n.toLowerCase() : bodyColor);
+                  }}
+                  placeholder="#RRGGBB"
+                  spellCheck={false}
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  aria-invalid={bodyInvalid}
+                  aria-describedby={bodyInvalid ? "bodyColorErr" : undefined}
+                  style={bodyInvalid ? { borderColor:"#ef4444", outlineColor:"#ef4444" } : undefined}
+                />
+                <input
+                  type="color"
+                  value={bodyColor}
+                  onChange={(e)=> {
+                    setBodyColor(e.target.value);
+                    setBodyColorText(e.target.value);
+                  }}
+                />
+              </ColorField>
+              {bodyInvalid && (
+                <div id="bodyColorErr" role="alert" style={{ color:"#ef4444", fontSize:12, marginTop:4 }}>
+                  유효한 HEX 색상(예: <code>#1a2b3c</code>)을 입력하세요.
+                </div>
+              )}
+            </Field>
+
+            {/* 캡 색상 */}
+            <Field>
+              <span>캡 색상</span>
+              <ColorField>
+                <input
+                  type="text"
+                  value={capColorText}
+                  onChange={(e) => {
+                    const t = e.target.value;
+                    setCapColorText(t);
+                    const n = normalizeHex(t);
+                    if (HEX6.test(n)) setCapColor(n.toLowerCase());
+                  }}
+                  onBlur={() => {
+                    const n = normalizeHex(capColorText);
+                    setCapColorText(HEX6.test(n) ? n.toLowerCase() : capColor);
+                  }}
+                  placeholder="#RRGGBB"
+                  spellCheck={false}
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  aria-invalid={capInvalid}
+                  aria-describedby={capInvalid ? "capColorErr" : undefined}
+                  style={capInvalid ? { borderColor:"#ef4444", outlineColor:"#ef4444" } : undefined}
+                />
+                <input
+                  type="color"
+                  value={capColor}
+                  onChange={(e)=> {
+                    setCapColor(e.target.value);
+                    setCapColorText(e.target.value);
+                  }}
+                />
+              </ColorField>
+              {capInvalid && (
+                <div id="capColorErr" role="alert" style={{ color:"#ef4444", fontSize:12, marginTop:4 }}>
+                  유효한 HEX 색상(예: <code>#1a2b3c</code>)을 입력하세요.
+                </div>
+              )}
+            </Field>
+
+            {/* 재질 */}
+            <SubTitle>재질 속성</SubTitle>
+            <SliderField>
+              <label>메탈릭</label>
+              <div className="slider">
+                <input type="range" min="0" max="1" step="0.01" value={metallic} onChange={(e)=>setMetallic(parseFloat(e.target.value))}/>
+                <span className="value">{metallic.toFixed(2)}</span>
+              </div>
+            </SliderField>
+            <SliderField>
+              <label>거칠기</label>
+              <div className="slider">
+                <input type="range" min="0" max="1" step="0.01" value={roughness} onChange={(e)=>setRoughness(parseFloat(e.target.value))}/>
+                <span className="value">{roughness.toFixed(2)}</span>
+              </div>
+            </SliderField>
+            <SliderField>
+              <label>투명도</label>
+              <div className="slider">
+                <input type="range" min="0" max="1" step="0.01" value={transmission} onChange={(e)=>setTransmission(parseFloat(e.target.value))}/>
+                <span className="value">{transmission.toFixed(2)}</span>
+              </div>
+            </SliderField>
+
+            {/* 피규어 선택(코드 기반) */}
+            <SubTitle>피규어 선택</SubTitle>
+            <select value={figureCode} onChange={(e) => setFigureCode(e.target.value)}>
+              {FIGURES.map(f => (
+                <option key={f.code} value={f.code}>{f.label}</option>
+              ))}
+            </select>
+
+            {/* 스티커(렌더링 전용, 서버 전송 X) */}
+            <SubTitle>스티커 & 데칼</SubTitle>
+            <UploadCard>
+              <div className="title">꾸미기 업로드</div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e)=>{
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  // 미리보기(로컬)
+                  const url = URL.createObjectURL(f);
+                  setStickerUrl(url);
+                  // 서버 업로드 → DB 저장용 URL 확보
+                  try {
+                    const uploaded = await uploadSticker(f);
+                    setStickerAssetUrl(uploaded);
+                  } catch (err) {
+                    console.error(err);
+                    alert("스티커 업로드에 실패했습니다.");
+                    setStickerAssetUrl("");
+                  }
+                }}
+              />
+              <SliderField>
+                <label>스티커 크기</label>
+                <div className="slider">
+                  <input type="range" min="0.1" max="1" step="0.01" value={stickerScale} onChange={(e)=>setStickerScale(parseFloat(e.target.value))}/>
+                  <span className="value">{stickerScale.toFixed(2)}</span>
+                </div>
+              </SliderField>
+              <SliderField>
+                <label>스티커 높이(Y)</label>
+                <div className="slider">
+                  <input type="range" min="0" max="1" step="0.01" value={stickerY} onChange={(e)=>setStickerY(parseFloat(e.target.value))}/>
+                  <span className="value">{Math.round(stickerY*100)}%</span>
+                </div>
+              </SliderField>
+            </UploadCard>
+          </Panel>
+        </Sidebar>
+      </Content>
+    </PageRoot>
+  );
+}

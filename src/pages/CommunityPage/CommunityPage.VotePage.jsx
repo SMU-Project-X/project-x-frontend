@@ -7,15 +7,15 @@ import * as VoteModal from './styled/CommunityPage.VoteModal.style';
 import Unit from './components/CommunityPage.VotePage.Unit';
 
 // 이미지 임포트
-import 가온 from '/Character/가온.png';
-import 다온 from '/Character/다온.png';
-import 류하 from '/Character/류하.png';
-import 모아 from '/Character/모아.png';
-import 세라 from '/Character/세라.png';
-import 세인 from '/Character/세인.png';
-import 수린 from '/Character/수린.png';
-import 아린 from '/Character/아린.png';
-import CloseBtn from '@/assets/images/CommunityPage/closeBtn.png';
+// import 가온 from '/Character/가온.png';
+// import 다온 from '/Character/다온.png';
+// import 류하 from '/Character/류하.png';
+// import 모아 from '/Character/모아.png';
+// import 세라 from '/Character/세라.png';
+// import 세인 from '/Character/세인.png';
+// import 수린 from '/Character/수린.png';
+// import 아린 from '/Character/아린.png';
+// import CloseBtn from '@/assets/images/CommunityPage/closeBtn.png';
 import { Navigation, Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';

@@ -8,6 +8,8 @@ function Login() {
     const [password, setPassword] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
     const navigate = useNavigate();
+    const [saveIdChecked, setSaveIdChecked] = useState(false);
+
 
     useEffect(() => {
         const storedId = localStorage.getItem("savedId");
@@ -15,39 +17,54 @@ function Login() {
     }, []);
 
     const handleSaveId = (e) => {
-        if (e.target.checked) {
-            localStorage.setItem("savedId", savedId);
-        } else {
-            localStorage.removeItem("savedId");
+    setSaveIdChecked(e.target.checked);
+    if (e.target.checked) {
+        localStorage.setItem("savedId", savedId);
+    } else {
+        localStorage.removeItem("savedId");
+    }
+};
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setErrorMsg("");
+
+        try {
+            // 쿠키 전달 + CSRF 헤더
+            const csrfToken = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('XSRF-TOKEN='))
+                ?.split('=')[1];
+
+            const res = await fetch("/api/login", {
+                method: "POST",
+                credentials: "include", // ✅ 세션 쿠키 포함
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-XSRF-TOKEN": csrfToken || "",
+                },
+                body: JSON.stringify({ userId: savedId, password }),
+            });
+
+            if (!res.ok) {
+                if (res.status === 401) throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.");
+                else throw new Error("로그인 실패");
+            }
+
+            const data = await res.json();
+            console.log("로그인 성공:", data);
+
+            // 로그인 성공 시 localStorage에 상태 저장
+            localStorage.setItem("isLoggedIn", "true");
+            localStorage.setItem("userId", data.userId);
+            localStorage.setItem("username", data.username);
+
+            navigate("/home");
+        } catch (err) {
+            console.error(err);
+            setErrorMsg(err.message);
         }
     };
 
-    const handleLogin = (e) => {
-        e.preventDefault();
-
-        fetch("/api/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: savedId, password }),
-        })
-            .then((res) => {
-                if (res.status === 200) {
-                    return res.json(); // 성공 시 JSON 데이터 반환
-                } else if (res.status === 401) {
-                    throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.");
-                } else {
-                    throw new Error("로그인 실패");
-                }
-            })
-            .then((data) => {
-                console.log("로그인 성공:", data);
-                navigate("/home"); // 로그인 성공 시 메인 페이지 이동
-            })
-            .catch((err) => {
-                console.error(err);
-                setErrorMsg(err.message);
-            });
-    };
 
     return (
         <itemS.Container>
@@ -85,7 +102,7 @@ function Login() {
 
                     <itemS.LoginOptions>
                         <itemS.IdSave>
-                            <input type="checkbox" id="saveId" onChange={handleSaveId} checked={!!savedId} />
+                            <input type="checkbox" id="saveId" onChange={handleSaveId} checked={saveIdChecked} />
                             <span>아이디 저장</span>
                         </itemS.IdSave>
 
