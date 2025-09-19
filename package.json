@@ -14,7 +14,7 @@
     "@leenguyen/react-flip-clock-countdown": "^1.7.1",
     "@react-three/drei": "^9.56.1",
     "@react-three/fiber": "^8.13.2",
-    "@react-three/postprocessing": "^3.0.4",
+    "@react-three/postprocessing": "^2.15.11",
     "axios": "^1.11.0",
     "bootstrap": "^5.3.8",
     "framer-motion": "^12.23.12",
