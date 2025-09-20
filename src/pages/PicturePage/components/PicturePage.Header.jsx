@@ -14,10 +14,10 @@ function Header() {
         </itemS.logo>
         <itemS.menu>
           <span onClick={() => navigate("/")}>Home</span>
-          <span>MD</span>
-          <span onClick={() => navigate("/CommunityHome")}>Community</span>
-          <span>Content</span>
-          <span>Chat</span>
+          <span onClick={() => navigate("/MD")}>MD</span>
+          <span onClick={() => navigate("/Community")}>Community</span>
+          <span onClick={() => navigate("/picture/select")}>Content</span>
+          <span onClick={() => navigate("/ChatChoice")}>Chat</span>
         </itemS.menu>
         <itemS.login>
           <img src={login} alt="login" />
