@@ -7,24 +7,33 @@ import * as VoteModal from '@/pages/CommunityPage/styled/CommunityPage.VoteModal
 import VoteCard from './CommunityPage.VotePage.Unit';
 import image1 from '@/assets/images/CommunityPage/image1.png'
 
-const onVote = () => {
-    alert("투표하시겠습니까?");
-    console.log()
-}
 
 // 투표하기 후보 전체
-function Unit({title, options}){
+function Unit({title, options, onSelect, isSelected}){
+    
     return (
-        <VoteModal.VoteSelect>
-            <VoteModal.Unit onClick={onVote}>
-                {options.map((opt,idx)=>(
+        <VoteModal.VoteSelect 
+        onClick={onSelect} 
+        style={{ 
+            border: isSelected ? "3px solid #ff4081" : "2px solid transparent",
+            borderRadius: "12px",
+            backgroundColor: isSelected ? "rgba(255, 64, 129, 0.5)" : "transparent",
+            cursor: "pointer",
+            transition: "all 0.3s ease"}}
+        >
+            <VoteModal.top>
+                <p>{title}</p>
+            </VoteModal.top>
+            <VoteModal.Unit>
+                {options.map((member,idx)=>(
                     <VoteCard
                         key={idx}
-                        title={title}
-                        img={opt.img || "이미지 없음"}
-                        CharacterName={opt.CharacterName}
-                        Personality={opt.Personality}
-                        Position={opt.Position}
+                        {...member}
+                        // title={title}
+                        // img={member.img || "이미지 없음"}
+                        // CharacterName={member.CharacterName}
+                        // Personality={member.Personality}
+                        // Position={member.Position}
                     />
                 ))}
             </VoteModal.Unit>

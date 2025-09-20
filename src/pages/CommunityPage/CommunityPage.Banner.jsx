@@ -15,8 +15,6 @@ import previous from '@/assets/images/CommunityPage/previous.png';
 import next from '@/assets/images/CommunityPage/next.png';
 import image2 from '@/assets/images/CommunityPage/image2.png';
 import voteicon from '@/assets/images/CommunityPage/voteicon.png';
-import zentreya from '@/assets/images/RandingPage/zentreya_img.jpg';
-import image1 from '@/assets/images/CommunityPage/image1.png';
 
 import BannerSlide from './components/CommunityPage.BannerSlide';
 import  VotePage  from '@/pages/CommunityPage/CommunityPage.VotePage';
@@ -47,9 +45,8 @@ import { UseBanner } from './hooks/CommunityPage.useBanner';
     `;
 
 export const Banner = () => {
-    const BannerCard = UseBanner();
-
-    console.log("가져온 배너 데이터: ",BannerCard);
+    const banners = UseBanner();
+    console.log("가져온 배너 데이터: ",banners);
 
 
     // 모달 상태관리
@@ -66,8 +63,9 @@ export const Banner = () => {
         setSelectedBanenr(null);
     }
 
-    if(!BannerCard || BannerCard.length === 0){
-        return null
+    // 배너가 없는 경우 실행 안함
+    if(!banners || banners.length === 0){
+        return null;
     }
   
     return (
@@ -95,19 +93,20 @@ export const Banner = () => {
                     slidesPerView={3}
                 >
                     {/* <itemS.slide> */}
-                    {BannerCard.map((banner)=> {
-                        const startDate = new Date(banner.startDate).toISOString().split("T")[0];
-                        const endDate = new Date(banner.endDate).toISOString().split("T")[0];
+                    {banners.map((b)=> {
+                        const startDate = new Date(b.startDate).toISOString().split("T")[0];
+                        const endDate = new Date(b.endDate).toISOString().split("T")[0];
                     
                         return(
-                        <SwiperSlide key={banner.bannerId}>
+                        <SwiperSlide key={b.bannerId}>
+                            {/* 컴포넌트 부분 */}
                             <BannerSlide 
-                                bannerId={banner.bannerId}
-                                title = {banner.bannerTitle}
+                                bannerId={b.bannerId}
+                                title = {b.bannerTitle}
                                 startDate= {startDate} 
                                 endDate = {endDate}
                                 img = {image2}
-                                onClick={()=>onOpenModal(banner)}
+                                onClick={()=>onOpenModal(b)}
                             />
                         </SwiperSlide>
                         )})}

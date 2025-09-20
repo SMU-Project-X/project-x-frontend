@@ -17,24 +17,12 @@ import previous from '@/assets/images/CommunityPage/previous.png';
 import next from '@/assets/images/CommunityPage/next.png';
 import * as itemS from './styled/CommunityPage.VoteBanner.style';
 import styled from 'styled-components';
+import { useBannerOptions } from './hooks/CommunityPage.useBanner';
+import { useVote } from './hooks/CommunityPage.useVote';
 
-
-
-
-export const VotePage = ({isModalOpen, onClose, banner}) => {
-    if(!isModalOpen || !banner) return null;
     
-    // const [isOpen, setIsOpen] = useState(false);
-    // const [hasVoted, setHasVoted] = useState(false);    // 투표 여부 상태 확인
-
-    // // 투표 완료
-    // const handleVote = () => {
-    //     setHasVoted(true);
-    //     alert("투표가 완료되었습니다.");
-    //     // 실제 구현에서는 서버 API 호출 후 상태 업데이트
-    // }
-
-        const PrevBtn = styled.div`
+    // 이전, 다음 버튼
+    const PrevBtn = styled.div`
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -59,12 +47,34 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
     `;
 
 
+export const VotePage = ({isModalOpen, onClose, banner}) => {
+    const { postVote, votes, loading } = useVote();
+    const [selectedUnit, setSelectedUnit]=useState(null);
+        // 투표 여부 체크
+    const [voted, setVoted] = useState(true);
+
+    // 버튼 함수 호출
+    const prevRef = useRef(null);
+    const nextRef = useRef(null);
+
+    if(!isModalOpen || !banner) return null;
+
+
+    const handleVote=()=>{
+        postVote(banner.bannerId, selectedUnit);
+        setVoted(true)
+    };
+
+
+    // 배너ID로 후보 불러오기
+    // const options = useBannerOptions(banner.bannerId);
+
     // VoteCard 와 props 이름 일치시키기 필요
-    const Candidates = [
+    const options = [
         {
             unit_id: 1,
             title: "유닛 A",
-            options: [
+            unit: [
                 { CharacterName: "가온", Personality: "#귀염 #ENFP", Position:"리더", img:'/Character/가운.png'},
                 { CharacterName: "다온", Personality: "#시크 #INTJ", Position:"메인보컬", img:'/Character/다은.png'},
                 { CharacterName: "류하", Personality: "#시크 #INTJ", Position:"메인댄서", img:'/Character/류하.png' },
@@ -75,7 +85,7 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
         {
             unit_id: 2,
             title: "유닛 B",
-            options: [
+            unit: [
                 { CharacterName: "세라", Personality: "#상큼 #ENTP", Position:"리더", img:'/Character/세라.png' },
                 { CharacterName: "세인", Personality: "#차분 #ISFJ", Position:"메인보컬", img:'/Character/세인.png' },
                 { CharacterName: "수린", Personality: "#시크 #INTJ", Position:"메인댄서", img:'/Character/수린.png' },
@@ -85,7 +95,7 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
         {
             unit_id: 3,
             title: "유닛 C",
-            options: [
+            unit: [
                 { CharacterName: "세라", Personality: "#상큼 #ENTP", Position:"리더", img:'/Character/아린.png' },
                 { CharacterName: "세인", Personality: "#차분 #ISFJ", Position:"메인보컬", img:'/Character/유나.png' },
                 { CharacterName: "수린", Personality: "#시크 #INTJ", Position:"메인댄서", img:'/Character/지원.png' },
@@ -95,56 +105,71 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
         {
             unit_id: 4,
             title: "유닛 D",
-            options: [
-                { CharacterName: "세라", Personality: "#상큼 #ENTP", Position:"리더", img:'/Character/현.png' },
-                { CharacterName: "세인", Personality: "#차분 #ISFJ", Position:"메인보컬", img:'/Character/수린.png' },
-                { CharacterName: "수린", Personality: "#시크 #INTJ", Position:"메인댄서", img:'/Character/류하.png' },
-                { CharacterName: "아린", Personality: "#시크 #INTJ", Position:"메인래퍼", img:'/Character/아린.png' }
+            unit: [
+                { unit_id: 4,CharacterName: "세라", Personality: "#상큼 #ENTP", Position:"리더", img:'/Character/현.png' },
+                { unit_id: 4,CharacterName: "세인", Personality: "#차분 #ISFJ", Position:"메인보컬", img:'/Character/수린.png' },
+                { unit_id: 4,CharacterName: "수린", Personality: "#시크 #INTJ", Position:"메인댄서", img:'/Character/류하.png' },
+                { unit_id: 4,CharacterName: "아린", Personality: "#시크 #INTJ", Position:"메인래퍼", img:'/Character/아린.png' }
         ],
         },
         
     ];
-
-        return (
+    
+    return (
             <VoteModal.Overlay>
                 <VoteModal.ModuleContainer>
                     <VoteModal.VoteContainer>
                         <VoteModal.top>
-                            <h1>유닛조합에 투표 해주세요</h1>
+                            <h1>{banner.bannerTitle}</h1>
                             <VoteModal.CloseBtn onClick={onClose}>닫기</VoteModal.CloseBtn>
                         </VoteModal.top>
+
+                        {/* 본문 */}
                         <VoteModal.SwiperWrapper >
-                            <PrevBtn className="prevBtn">
-                                <img src={previous} />
+                            <PrevBtn ref={prevRef} className="prevBtn">
+                                <img src={previous} alt="prev" />
                             </PrevBtn>
                                 <Swiper 
                                     modules={[Navigation, Pagination]}
-                                    navigation={{ prevEl: '.prevBtn', nextEl: '.nextBtn' }}
+                                    navigation={{ prevEl: prevRef.current, nextEl: nextRef.current }}
                                     loop={true}
                                     spaceBetween={30}
                                     slidesPerView={1} 
                                 >   
                                     {/* 이전으로 넘어가기 */}
-                                    {Candidates.map((unit, idx) => (
-                                        <SwiperSlide key={idx}>
+                                    {options.map((unit) => (
+                                    <SwiperSlide key={unit.unit_id}>
                                         <VoteModal.UnitContainer>
-                                            <Unit title={unit.title} options={unit.options} />
+                                        <Unit
+                                            title={unit.title}
+                                            options={unit.unit}
+                                            isSelected={selectedUnit === unit.unit_id}
+                                            // 한번 더 클릭시 해제
+                                            onSelect={() =>
+                                            setSelectedUnit(
+                                                selectedUnit === unit.unit_id ? null : unit.unit_id
+                                            )
+                                            }
+                                        />
                                         </VoteModal.UnitContainer>
-                                        </SwiperSlide>
+                                    </SwiperSlide>
                                     ))}
                                 </Swiper>
                             {/* 다음으로 넘어가기 */}
-                            <NextBtn className="nextBtn">
-                                <img src={next} />
+                            <NextBtn ref={nextRef} className="nextBtn">
+                                <img src={next} alt="next" />
                             </NextBtn>
                         </VoteModal.SwiperWrapper >
-                            {/* 투표가 이미 완료된 경우 안내 */}
-                            {/* <VoteModal.VoteBlock>
-                                <VoteModal.NoMoreVote>
-                                    <p>이미 투표에 참여하셨습니다.</p>
-                                    <p>결과를 기다려주세요</p>
-                                </VoteModal.NoMoreVote>
-                            </VoteModal.VoteBlock> */}
+
+                        {/* ✅ 투표하기 버튼 */}
+                        <VoteModal.VoteButton onClick={handleVote} aria-disabled={loading}>
+                            {loading ? "투표 중..." : "투표하기"}
+                        </VoteModal.VoteButton>
+
+                        {/* ✅ 투표결과 확인 */}
+                        <pre style={{ marginTop: "10px", color: "#888" }}>
+                            {JSON.stringify(votes, null, 2)}
+                        </pre>
                     </VoteModal.VoteContainer> 
                 </VoteModal.ModuleContainer>
             </VoteModal.Overlay>

@@ -7,11 +7,11 @@ import * as VoteModal from '@/pages/CommunityPage/styled/CommunityPage.VoteModal
 import image1 from '@/assets/images/CommunityPage/image1.png';
 
 // 투표하기 유닛멤버 후보
-function VoteCard({title,img,CharacterName,Personality,Position}) {
+function UnitMember({title,img,CharacterName,Personality,Position}) {
     return (
          <VoteModal.VoteCard>
             <VoteModal.VoteImg>
-                <img src={img} alt={title} />
+                <img src={img} alt={CharacterName} />
             </VoteModal.VoteImg>
             <VoteModal.UnitInfo>
             <span>{CharacterName}</span>
@@ -21,4 +21,4 @@ function VoteCard({title,img,CharacterName,Personality,Position}) {
         </VoteModal.VoteCard>
     )
 }
-export default VoteCard;
+export default UnitMember;
