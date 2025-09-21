@@ -596,18 +596,6 @@ function Payment() {
           {purchaseType === 'direct' ? '바로구매 결제' : '장바구니 결제'}
         </S.Title>
 
-        {/* 결제 타입 안내 (개발용) */}
-        {process.env.NODE_ENV === 'development' && (
-          <S.DebugInfo>
-            <strong>결제 정보:</strong> 
-            진입경로={paymentSource}, 
-            결제타입={purchaseType}, 
-            상품수={orderItems.length}개
-            {purchaseType === 'cart' && ' (장바구니에서 진입)'}
-            {purchaseType === 'direct' && ' (바로구매에서 진입)'}
-          </S.DebugInfo>
-        )}
-        
         <S.PaymentContent>
           {/* 왼쪽: 주문 정보 */}
           <S.PaymentForm>
