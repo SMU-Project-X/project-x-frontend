@@ -1,164 +1,166 @@
-import * as THREE from 'three'
-import { useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Image, ScrollControls, useScroll, Text} from '@react-three/drei'
-import { easing } from 'maath'
-import * as itemS from '@/pages/RandingPage/styled/RandingPage.SelectMemberPage.ViewPage.style'
-import { useGLTF, OrbitControls } from '@react-three/drei'
-import './util'
-import { characters } from '@/assets/data/characters'
+import React, { useEffect, useRef, useState } from "react"
+import gsap from "gsap"
+import * as THREE from "three"
+import { Canvas, useThree } from "@react-three/fiber"
+import { OrbitControls, useGLTF } from "@react-three/drei"
+import {
+    CarouselWrapper,
+    Track,
+    Card,
+    ViewPageContainer,
+    CharacterModelViewWrapper,
+    NextBtn
+} from "@/pages/RandingPage/styled/RandingPage.SelectMemberPage.Carosel.style"
+import { useRecoilState } from 'recoil';
+import { selectedCharactersState } from '@/recoil/characterAtom';
+import { useNavigate } from "react-router-dom"
 
-// ---------------- Rig ---------------- 회전하는 wrapper
-function Rig(props) {
-    const ref = useRef()
-    const scroll = useScroll()
-    const rotationSpeed = 0.001
-    const [isScrolling, setIsScrolling] = useState(false)
+const characters = [
+    { id: 1, name: "가온", img: "/Character/가온.png" },
+    { id: 2, name: "다온", img: "/Character/다온.png" },
+    { id: 3, name: "류하", img: "/Character/류하.png" },
+    { id: 4, name: "모아", img: "/Character/모아.png" },
+    { id: 5, name: "세라", img: "/Character/세라.png" },
+    { id: 6, name: "세인", img: "/Character/세인.png" },
+    { id: 7, name: "수린", img: "/Character/수린.png" },
+    { id: 8, name: "아린", img: "/Character/아린.png" },
+    { id: 9, name: "유나", img: "/Character/유나.png" },
+    { id: 10, name: "지원", img: "/Character/지원.png" },
+    { id: 11, name: "채윤", img: "/Character/채윤.png" },
+    { id: 12, name: "현", img: "/Character/현.png" },
+]
 
-    useFrame((state, delta) => {
-        if (!ref.current) return
-
-        const scrollDelta = Math.abs(scroll.delta)
-        setIsScrolling(scrollDelta > 0.001)
-
-        // 스크롤 없을 시 자동으로 회전
-        if (!isScrolling) {
-            ref.current.rotation.y -= rotationSpeed * delta * 60
-        }
-
-        // 스크롤 있을 시 그 비율만큼 화전
-        if (scrollDelta > 0.001) {
-            ref.current.rotation.y = -scroll.offset * (Math.PI * 2)
-        }
-
-        state.events.update()
-        // 마우스 움직일 때마다 카메라도 따라오도록
-        easing.damp3(
-            state.camera.position,
-            [-state.pointer.x * 2, state.pointer.y + 1.5, 10],
-            0.3,
-            delta
-        )
-        state.camera.lookAt(0, 0, 0)
-    })
-
-    return <group ref={ref} {...props} />
-}
-
-// ---------------- Carousel ---------------- 카드 배열 배치
-function Carousel({ onCardClick }) {
-    return characters.map((char, i) => (
-        // 캐릭터 length만큼 카드 생성 후 배치
-        <Card
-            key={i}
-            url={char.img}
-            name={char.name}
-            onClick={() => onCardClick?.(char)}
-            position={[
-                Math.sin((i / characters.length) * Math.PI * 2) * 2.1,
-                0,
-                Math.cos((i / characters.length) * Math.PI * 2) * 2.1,
-            ]}
-            rotation={[0, Math.PI + (i / characters.length) * Math.PI * 2, 0]}
-        />
-    ))
-}
-
-// ---------------- Card ---------------- 각 카드
-function Card({ url, name, ...props }) {
-    const ref = useRef()
-    const [hovered, setHovered] = useState(false)
-
-    useFrame((state, delta) => {
-        if (!ref.current) return
-        // 호버할 시 액션
-        easing.damp3(ref.current.scale, hovered ? 1.15 : 1, 0.1, delta)
-        easing.damp(ref.current.material, 'radius', hovered ? 0.25 : 0.1, 0.2, delta)
-        easing.damp(ref.current.material, 'zoom', hovered ? 1 : 1.5, 0.2, delta)
-    })
-
-    return (
-        <Image
-            ref={ref}
-            url={url}
-            transparent
-            side={THREE.DoubleSide}
-            onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
-            onPointerOut={() => setHovered(false)}
-            onClick={props.onClick}
-            {...props}
-        >
-
-            {/* 카드 Rig에 맞게 휘어지게 */}
-            <bentPlaneGeometry args={[0.1, 1, 1, 20, 20]} />
-
-            {/* 카드 호버할 시 카드 위에 이름 텍스트 배치 */}
-            {hovered && (
-            <Text
-                position={[0, 0.65, 0.1]} // 이미지 아래쪽
-                rotation={[0, Math.PI, 0]} // 이미지와 동일하게 텍스트 뒤집기
-                fontSize={0.1}
-                color="#172031"
-                anchorX="center"
-                anchorY="middle"
-            >
-                {name}
-            </Text>
-            )}
-        </Image>
-    )
-}
-
-// ---------------- 3D Model ---------------- 테스트 중, 추후 수정
-function Model({ url }) {
-    const { scene } = useGLTF(url)
+// ---------------- 3D 모델 ----------------
+function Model() {
+    const { scene } = useGLTF("/models/scene.gltf")
     return <primitive object={scene} scale={2} />
 }
 
-// ---------------- ViewPage ---------------- main
-function ViewPage() {
-    const [selectedModel, setSelectedModel] = useState(null)
-    const cards = Array.from({ length: 12 }, (_, i) => i + 1)
+// ---------------- 카메라 컨트롤 ----------------
+function CameraController({ targetChar }) {
+    const { camera } = useThree()
+    const controlsRef = useRef()
+
+    const characterViews = {
+        가온: { pos: [0.5159652751289685, 2.083365114640386, 3.7417668795811445], lookAt: [0.973613814519157, 1.9229014744605226, 2.867233155489126] },
+        다온: { pos: [-2.8834435981386926, 2.4729828973031425, 1.5287231521542535], lookAt: [-2.975271345913904, 2.2118458009704405, 0.5677990752067262] },
+        류하: { pos: [-0.14272049077820115, 1.9505091822795233, 4.260298298402865], lookAt: [-0.49319067103004477, 1.8791701380453105, 3.3264453155827693] },
+        모아: { pos: [-0.1459238794260113, 2.5076553297967314, 0.1901574556038026], lookAt: [-0.2949641903875492, 2.2122661830893273, -0.7535227008665768] },
+        세라: { pos: [-0.49074388016168013, 2.49025717249357, 8.242722766824574], lookAt: [-0.8579025239211168, 2.1656182258168837, 7.371055350539336] },
+        세인: { pos: [-3.156219469710801, 2.3064607338047196, 4.896769519352022], lookAt: [-3.434969052080781, 2.0564381553843, 3.969522313581863] },
+        수린: { pos: [3.243775667146896, 2.4676974426863625, 1.6305810399346101], lookAt: [3.416207648040183, 2.2965277234114283, 0.660545917287725] },
+        아린: { pos: [5.558929163611013, 2.265797088489572, 2.943916483999889], lookAt: [5.984023925512881, 2.1187283198365177, 2.050795427988741] },
+        유나: { pos: [0.5062692270629681, 2.0272840308689, 8.161640534685661], lookAt: [0.9373939982996629, 1.9249546766848593, 7.265169601025018] },
+        지원: { pos: [3.193358493216367, 1.9453219879497488, 4.946405155656101], lookAt: [3.6245286602066655, 1.8429961635192451, 4.0499556519180615] },
+        채윤: { pos: [0.6083156730327968, 1.9631343840695707, 0.35784813467843907], lookAt: [1.0394855717894007, 1.8608087069587391, -0.5386015148892487] },
+        현: { pos: [-5.781900240156544, 2.3944618306686625, 3.3394392654020857], lookAt: [-6.180409177753928, 2.114140781210238, 2.4661634006917805] },
+
+    }
+
+    useEffect(() => {
+        if (!targetChar) return
+        const view = characterViews[targetChar.name]
+        if (!view) return
+
+        gsap.to(camera.position, {
+            x: view.pos[0],
+            y: view.pos[1],
+            z: view.pos[2],
+            duration: 1.2,
+            ease: "power2.inOut",
+            onUpdate: () => {
+                camera.lookAt(...view.lookAt)
+                if (controlsRef.current) {
+                    controlsRef.current.target.set(...view.lookAt)
+                    controlsRef.current.update()
+                }
+            },
+        })
+    }, [targetChar])
+
+    return <OrbitControls
+        ref={controlsRef}
+        enableZoom={true}
+        onChange={() => {
+            const pos = camera.position.toArray()
+            const dir = camera.getWorldDirection(new THREE.Vector3()).toArray()
+            const lookAt = [pos[0] + dir[0], pos[1] + dir[1], pos[2] + dir[2]]
+        }}
+    />
+}
+
+// ---------------- 메인 컴포넌트 ----------------
+function ViewPage({ slotIndex = 0 }) {
+    const navigate = useNavigate();
+    const trackRef = useRef(null)
+    const [selectedChar, setSelectedChar] = useState(null)
+    const [selectedCharacters, setSelectedCharacters] = useRecoilState(selectedCharactersState);
+
+    // 무한 루프 캐러셀
+    useEffect(() => {
+        const track = trackRef.current
+        if (!track) return
+        const totalWidth = track.scrollWidth / 2
+        gsap.to(track, {
+            x: -totalWidth,
+            duration: 30,
+            ease: "linear",
+            repeat: -1,
+        })
+    }, [])
+
+    // 확인 버튼 클릭 시 Recoil 상태에 저장 (traits, mbti 유지)
+const handleConfirm = () => {
+    if (!selectedChar) return;
+
+    const updated = [...selectedCharacters];
+
+    // 기존 traits와 mbti 유지
+    const existing = selectedCharacters[slotIndex] || {};
+    updated[slotIndex] = {
+        ...selectedChar,
+        traits: existing.traits || [null, null, null],
+        mbti: existing.mbti || null,
+    };
+
+    setSelectedCharacters(updated);
+    alert(`${selectedChar.name} 선택 완료`);
+    console.log(selectedChar);
+    console.log(updated); // Recoil 상태에 반영된 최신 값 확인
+    navigate(-1);
+}
+
 
     return (
-        <itemS.ViewPageContainer>
-            {/* Carousel 영역 */}
-            <itemS.CharacterImgContainer>
-                <itemS.CharacterImgTitle>스크롤하여 캐릭터 카드를 선택해 보세요</itemS.CharacterImgTitle>
-                <Canvas camera={{ position: [0, 0, 100], fov: 15 }}>
-                    <ScrollControls pages={4} infinite>
-                        <Rig rotation={[0, 0, 0.15]}>
-                            <Carousel
-                                count={cards.length}
-                                onCardClick={() =>
-                                    setSelectedModel('/models/scene.gltf') // 클릭하면 모델 scene.gltf 로드 (현재 테스트 모델)
-                                }
-                            />
-                        </Rig>
-                        {/* <Banner position={[0, -0.15, 0]} /> */}
-                    </ScrollControls>
+        <ViewPageContainer>
+            {/* 3D 모델 영역 */}
+            <CharacterModelViewWrapper>
+                <Canvas camera={{ position: [0, 2, 5] }}>
+                    <ambientLight intensity={0.5} />
+                    <directionalLight position={[5, 5, 5]} />
+                    <Model />
+                    <CameraController targetChar={selectedChar} />
                 </Canvas>
-            </itemS.CharacterImgContainer>
+            </CharacterModelViewWrapper>
 
-            {/* 선택된 3D 모델 영역 */}
-            {selectedModel && (
-                <itemS.CharacterModelViewWrapper>
-                    <Canvas camera={{ position: [0, 2, 3] }}>
-                        <ambientLight intensity={0.5} />
-                        <directionalLight position={[5, 5, 5]} />
-                        <group position={[0, -2.5, 0]}>
-                            <Model url={selectedModel} />
-                        </group>
-                        <OrbitControls enableZoom={true} />
-                    </Canvas>
+            {/* 캐러셀 */}
+            <CarouselWrapper>
+                <Track ref={trackRef}>
+                    {[...characters, ...characters].map((char, i) => (
+                        <Card key={i} onClick={() => setSelectedChar(char)}>
+                            <img src={char.img} alt={char.name} />
+                            <p>{char.name}</p>
+                        </Card>
+                    ))}
+                </Track>
+            </CarouselWrapper>
 
-                    <itemS.NextBtn onClick={() => setSelectedModel(null)}>
-                        완료
-                    </itemS.NextBtn>
-                </itemS.CharacterModelViewWrapper>
-            )}
-        </itemS.ViewPageContainer>
+            {/* 확인 버튼 */}
+            <NextBtn onClick={handleConfirm}>
+                확인
+            </NextBtn>
+        </ViewPageContainer>
     )
 }
 
-export default ViewPage
+export default ViewPage;
