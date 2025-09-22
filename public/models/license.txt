@@ -1,0 +1,11 @@
+Model Information:
+* title:	VShojo Chibi Models - Public release!
+* source:	https://sketchfab.com/3d-models/vshojo-chibi-models-public-release-5ae3bc86845141c09481255b8dd6cd6e
+* author:	Seafoam (https://sketchfab.com/seafoam)
+
+Model License:
+* license type:	CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
+* requirements:	Author must be credited. No commercial use.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "VShojo Chibi Models - Public release!" (https://sketchfab.com/3d-models/vshojo-chibi-models-public-release-5ae3bc86845141c09481255b8dd6cd6e) by Seafoam (https://sketchfab.com/seafoam) licensed under CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
