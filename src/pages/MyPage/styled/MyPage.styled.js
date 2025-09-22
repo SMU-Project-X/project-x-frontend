@@ -313,7 +313,7 @@ export const ValidationMessage = styled.small`
 
 export const MainMyPageContainer = styled.div`
     min-height: 100vh;
-    padding: 60px 40px 80px;
+    padding: 10px 40px 80px;
     background: linear-gradient(to bottom, #fdfcfb 0%, #eef3fb 40%, #d9e3f2 100%);
     display: flex;
     flex-direction: column;
@@ -330,17 +330,10 @@ export const PageHeader = styled.header`
 `;
 
 export const PageTitle = styled.h1`
-    margin: 0;
-    font-size: 42px;
+    margin: 10px;
+    font-size: 40px;
     font-weight: 700;
     color: #172031;
-`;
-
-export const PageSubtitle = styled.p`
-    margin: 0;
-    font-size: 16px;
-    font-weight: 500;
-    color: #4b5563;
 `;
 
 export const SlotsGrid = styled.div`

@@ -640,10 +640,7 @@ function MyPage({ initialTab = 'info' }) {
         <S.ContentSection>
           <S.MainMyPageContainer>
             <S.PageHeader>
-              <S.PageTitle>멤버 선택</S.PageTitle>
-              <S.PageSubtitle>
-                멤버와 성격 2개를 수정
-              </S.PageSubtitle>
+              <S.PageTitle>멤버 선택 수정</S.PageTitle>
             </S.PageHeader>
 
             <S.SlotsGrid>
