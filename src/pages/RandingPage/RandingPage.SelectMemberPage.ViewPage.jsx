@@ -135,7 +135,7 @@ const handleConfirm = () => {
         <ViewPageContainer>
             {/* 3D 모델 영역 */}
             <CharacterModelViewWrapper>
-                <Canvas camera={{ position: [0, 2, 5] }}>
+                <Canvas camera={{ position: [0, 6, 10] }}>
                     <ambientLight intensity={0.5} />
                     <directionalLight position={[5, 5, 5]} />
                     <Model />
