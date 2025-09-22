@@ -1,15 +1,26 @@
-import React, { useState, useRef } from "react";
+import axios from "axios";
+import React, { useState, useRef, useEffect } from "react";
 import * as itemS from "@/pages/PicturePage/styled/PicturePage.PostPage.Write.style";
 import Header from "@/pages/PicturePage/components/PicturePage.Header";
 import { useNavigate } from "react-router-dom";
 
-const members = ["카리나", "장원영", "민지", "카즈하", "가온", "다온", "류하", "모아", "세라", "세인", "수린", "아린", "유나", "지원", "채윤", "현"];
 
 function PostWrite() {
     const navigate = useNavigate();
     const [previewImage, setPreviewImage] = useState(null);
     const [selectedMember, setSelectedMember] = useState(null);
+    const [title, setTitle] = useState("");
+    const [content, setContent] = useState("");
+    const [imageFile, setImageFile] = useState(null);
+    const [members, setMembers] = useState([]);
     const inputRef = useRef(null);
+
+    // 멤버 목록 불러오기
+    useEffect(() => {
+        axios.get("http://localhost:8080/api/memberName")
+            .then(res => setMembers(res.data))
+            .catch(err => console.error("멤버 불러오기 실패", err));
+    }, []);
 
     // 클릭 시 파일 선택창 열기
     const handleAreaClick = () => {
@@ -26,17 +37,44 @@ function PostWrite() {
         e.preventDefault(); // 기본 동작 막기
         const file = e.dataTransfer.files[0];
         if (file) {
-            const imageUrl = URL.createObjectURL(file);
-            setPreviewImage(imageUrl);
+            setPreviewImage(URL.createObjectURL(file));
+            setImageFile(file);
         }
     };
 
     // 파일 선택 이벤트
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const imageUrl = URL.createObjectURL(file);
-            setPreviewImage(imageUrl);
+        if(file) {
+            setPreviewImage(URL.createObjectURL(file));
+            setImageFile(file);
+        }
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        if(!title || !selectedMember || !imageFile) {
+            alert("필수 항목을 모두 입력해주세요");
+            return;
+        }
+
+        console.log({ title, content, selectedMember, imageFile });
+
+        const formData = new FormData();
+        formData.append("title", title);
+        formData.append("member", selectedMember);
+        formData.append("content", content);
+        formData.append("image", imageFile);
+
+        try{
+            axios.post("http://localhost:8080/api/posts", formData, {
+                headers: {"Content-Type": "multipart/form-data"},
+            });
+            // 게시판 페이지를 새로고침해서 fetchPosts 재실행
+            window.location.href = "/picture/post";
+        } catch (err) {
+            console.error("게시글 등록 실패", err);
         }
     };
 
@@ -54,14 +92,14 @@ function PostWrite() {
                     <itemS.form_section>
                         <itemS.form_content>
                             <itemS.label>게시글 제목<itemS.required>*</itemS.required></itemS.label>
-                            <itemS.input id="title" placeholder="게시글 제목을 입력해주세요"></itemS.input>
+                            <itemS.input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="게시글 제목을 입력해주세요"></itemS.input>
                         </itemS.form_content>
 
                         <itemS.form_content>
                             <itemS.label>멤버<itemS.required>*</itemS.required></itemS.label>
                             <itemS.member_container>
-                                {members.map((name, index) => (
-                                    <itemS.member_toggle key={index} data-selected={(selectedMember === name).toString()} onClick={() => setSelectedMember(selectedMember === name ? null : name)}>{name}</itemS.member_toggle>
+                                {members.map((member) => (
+                                    <itemS.member_toggle key={member.member_id} data-selected={(selectedMember === member.name).toString()} onClick={() => setSelectedMember(selectedMember === member.name ? null : member.name)}>{member.name}</itemS.member_toggle>
                                 ))}
                             </itemS.member_container>
                         </itemS.form_content>
@@ -82,11 +120,11 @@ function PostWrite() {
 
                         <itemS.form_content>
                             <itemS.label>게시글 내용</itemS.label>
-                            <itemS.textarea id="description"></itemS.textarea>
+                            <itemS.textarea id="description" value={content} onChange={(e) => setContent(e.target.value)}></itemS.textarea>
                         </itemS.form_content>
                         <itemS.button_container>
                             <itemS.btn_secondary onClick={() => navigate(-1)}>취소하기</itemS.btn_secondary>
-                            <itemS.btn_primary>등록하기</itemS.btn_primary>
+                            <itemS.btn_primary onClick={handleSubmit}>등록하기</itemS.btn_primary>
                         </itemS.button_container>
                     </itemS.form_section>
                 </itemS.upload_container>
