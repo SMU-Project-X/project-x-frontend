@@ -1,4 +1,4 @@
-// MDPage.SearchResults.jsx - 완전히 개선된 버전
+// MDPage.SearchResults.jsx - 필터링 및 페이지네이션 완전 수정
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { productAPI } from '../../services/productApi';
@@ -12,341 +12,350 @@ function SearchResults() {
   // 상태 관리
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchResults, setSearchResults] = useState([]);
+  const [allSearchResults, setAllSearchResults] = useState([]); // 전체 검색 결과
+  const [displayResults, setDisplayResults] = useState([]); // 화면에 표시할 결과
   const [totalElements, setTotalElements] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isFromMockData, setIsFromMockData] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
 
   // 필터 상태
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortDirection, setSortDirection] = useState('desc');
-  const [priceRange, setPriceRange] = useState('all');
-  const [categoryId, setCategoryId] = useState(null);
-  const [eventOnly, setEventOnly] = useState(false);
+  const [filters, setFilters] = useState({
+    sortBy: 'createdAt',
+    sortDirection: 'desc',
+    priceRange: 'all',
+    eventOnly: false
+  });
 
   const itemsPerPage = 12;
-  const maxRetries = 2;
 
-  // 🔧 목업 검색 결과 생성 함수
-  const generateMockSearchResults = (keyword, page, size) => {
-    const mockProducts = [
+  // 🔧 목업 데이터 생성 - 필터링 테스트를 위해 다양한 데이터
+  const generateMockData = (keyword) => {
+    return [
       {
         id: 1,
-        name: `Project X ${keyword || '검색'} 타일 세트`,
-        price: 30000,
-        originalPrice: 35000,
-        description: `${keyword || '검색'}과 관련된 고품질 제품입니다. 부드러운 마이크로파이버 소재로 제작되었습니다.`,
-        imageUrl: '/placeholder-product.jpg',
+        name: `${keyword} 키링세트`,
+        price: 8000,
+        originalPrice: 10000,
+        description: `Project X 공식 ${keyword} 키링 세트입니다.`,
+        imageUrls: ['/placeholder-product.jpg'],
         stockQuantity: 120,
-        category: '타일',
         isNew: true,
-        hasEvent: false
+        hasEvent: false, // 이벤트 아님
+        averageRating: 4.6,
+        reviewCount: 92,
+        createdAt: '2024-01-15'
       },
       {
         id: 2,
-        name: `${keyword || '검색'} 전용 청소용품 세트`,
-        price: 25000,
-        originalPrice: 25000,
-        description: `${keyword || '검색'}을 위한 전문 청소용품입니다. 효과적인 청소가 가능합니다.`,
-        imageUrl: '/placeholder-product2.jpg',
+        name: `${keyword} 에코백`,
+        price: 15000,
+        originalPrice: 18000,
+        description: `친환경 소재로 만든 ${keyword} 에코백입니다.`,
+        imageUrls: ['/placeholder-product2.jpg'],
         stockQuantity: 85,
-        category: '청소용품',
         isNew: false,
-        hasEvent: true
+        hasEvent: true, // 이벤트 상품
+        averageRating: 4.3,
+        reviewCount: 56,
+        createdAt: '2024-01-10'
       },
       {
         id: 3,
-        name: `프리미엄 ${keyword || '검색'} 관리 세트`,
-        price: 45000,
-        originalPrice: 50000,
-        description: `최고급 ${keyword || '검색'} 관련 제품입니다. 프리미엄 품질을 자랑합니다.`,
-        imageUrl: '/placeholder-product3.jpg',
+        name: `${keyword} 머그컵`,
+        price: 25000,
+        originalPrice: 25000,
+        description: `${keyword}을 위한 특별한 머그컵입니다.`,
+        imageUrls: ['/placeholder-product3.jpg'],
         stockQuantity: 60,
-        category: '프리미엄',
         isNew: true,
-        hasEvent: true
+        hasEvent: false,
+        averageRating: 4.4,
+        reviewCount: 73,
+        createdAt: '2024-01-20'
       },
       {
         id: 4,
-        name: `${keyword || '검색'} 스페셜 에디션`,
+        name: `${keyword} 라이트스틱`,
         price: 35000,
         originalPrice: 40000,
-        description: `특별한 ${keyword || '검색'} 제품입니다. 한정판으로 출시됩니다.`,
-        imageUrl: '/placeholder-product4.jpg',
+        description: `콘서트 필수 아이템! ${keyword} 라이트스틱입니다.`,
+        imageUrls: ['/placeholder-product4.jpg'],
         stockQuantity: 40,
-        category: '스페셜',
-        isNew: true,
-        hasEvent: false
+        isNew: false,
+        hasEvent: true, // 이벤트 상품
+        averageRating: 4.6,
+        reviewCount: 312,
+        createdAt: '2024-01-05'
       },
       {
         id: 5,
-        name: `베이직 ${keyword || '검색'} 패키지`,
-        price: 20000,
-        originalPrice: 20000,
-        description: `기본적인 ${keyword || '검색'} 상품입니다. 실용적이고 경제적입니다.`,
-        imageUrl: '/placeholder-product5.jpg',
-        stockQuantity: 150,
-        category: '베이직',
-        isNew: false,
-        hasEvent: false
+        name: `${keyword} 포토북`,
+        price: 28000,
+        originalPrice: 30000,
+        description: `${keyword} 관련 한정판 포토북입니다.`,
+        imageUrls: ['/placeholder-product5.jpg'],
+        stockQuantity: 50,
+        isNew: true,
+        hasEvent: true, // 이벤트 상품
+        averageRating: 4.8,
+        reviewCount: 125,
+        createdAt: '2024-01-25'
       },
       {
         id: 6,
-        name: `${keyword || '검색'} 컴플리트 세트`,
-        price: 55000,
-        originalPrice: 60000,
-        description: `모든 ${keyword || '검색'} 관련 용품이 포함된 완전한 세트입니다.`,
-        imageUrl: '/placeholder-product6.jpg',
+        name: `${keyword} 스티커팩`,
+        price: 5000,
+        originalPrice: 5000,
+        description: `홀로그램 ${keyword} 스티커팩입니다.`,
+        imageUrls: ['/placeholder-product6.jpg'],
+        stockQuantity: 200,
+        isNew: false,
+        hasEvent: false,
+        averageRating: 4.7,
+        reviewCount: 203,
+        createdAt: '2024-01-12'
+      },
+      {
+        id: 7,
+        name: `${keyword} 티셔츠`,
+        price: 18000,
+        originalPrice: 20000,
+        description: `편안한 ${keyword} 면 티셔츠입니다.`,
+        imageUrls: ['/placeholder-product7.jpg'],
+        stockQuantity: 150,
+        isNew: false,
+        hasEvent: false,
+        averageRating: 4.2,
+        reviewCount: 88,
+        createdAt: '2024-01-08'
+      },
+      {
+        id: 8,
+        name: `${keyword} 한정판 굿즈`,
+        price: 45000,
+        originalPrice: 50000,
+        description: `${keyword} 한정판 특별 굿즈입니다.`,
+        imageUrls: ['/placeholder-product8.jpg'],
         stockQuantity: 30,
-        category: '컴플리트',
         isNew: true,
-        hasEvent: true
+        hasEvent: true, // 이벤트 상품
+        averageRating: 4.9,
+        reviewCount: 67,
+        createdAt: '2024-01-30'
       }
     ];
+  };
 
-    // 가격 필터 적용
-    let filteredProducts = mockProducts;
-    
-    if (priceRange !== 'all') {
-      filteredProducts = mockProducts.filter(product => {
-        switch (priceRange) {
-          case 'under-10000':
-            return product.price < 10000;
-          case '10000-20000':
-            return product.price >= 10000 && product.price <= 20000;
-          case '20000-30000':
-            return product.price >= 20000 && product.price <= 30000;
-          case 'over-30000':
-            return product.price > 30000;
-          default:
-            return true;
-        }
-      });
+  // 🔧 클라이언트 사이드 필터링 함수
+  const applyFilters = (products, filters) => {
+    let filtered = [...products];
+
+    console.log('필터링 시작:', {
+      원본상품수: products.length,
+      필터: filters
+    });
+
+    // 1. 가격 필터
+    if (filters.priceRange !== 'all') {
+      const originalLength = filtered.length;
+      switch (filters.priceRange) {
+        case 'under-10000':
+          filtered = filtered.filter(product => product.price < 10000);
+          break;
+        case '10000-20000':
+          filtered = filtered.filter(product => product.price >= 10000 && product.price <= 20000);
+          break;
+        case '20000-30000':
+          filtered = filtered.filter(product => product.price >= 20000 && product.price <= 30000);
+          break;
+        case 'over-30000':
+          filtered = filtered.filter(product => product.price > 30000);
+          break;
+      }
+      console.log(`가격 필터 적용: ${originalLength} → ${filtered.length}`);
     }
 
-    // 이벤트 필터 적용
-    if (eventOnly) {
-      filteredProducts = filteredProducts.filter(product => product.hasEvent);
+    // 2. 이벤트 필터
+    if (filters.eventOnly) {
+      const originalLength = filtered.length;
+      filtered = filtered.filter(product => product.hasEvent === true);
+      console.log(`이벤트 필터 적용: ${originalLength} → ${filtered.length}`);
     }
 
-    // 정렬 적용
-    filteredProducts.sort((a, b) => {
-      const direction = sortDirection === 'asc' ? 1 : -1;
+    // 3. 정렬
+    filtered.sort((a, b) => {
+      const direction = filters.sortDirection === 'asc' ? 1 : -1;
       
-      switch (sortBy) {
+      switch (filters.sortBy) {
         case 'price':
           return (a.price - b.price) * direction;
         case 'name':
           return a.name.localeCompare(b.name) * direction;
+        case 'rating':
+          return ((a.averageRating || 0) - (b.averageRating || 0)) * direction;
         case 'createdAt':
         default:
-          return (a.id - b.id) * direction;
+          const dateA = new Date(a.createdAt || '2024-01-01');
+          const dateB = new Date(b.createdAt || '2024-01-01');
+          return (dateA - dateB) * direction;
       }
     });
 
-    const startIndex = page * size;
-    const endIndex = startIndex + size;
-    const totalElements = filteredProducts.length;
-    const totalPages = Math.ceil(totalElements / size);
+    console.log('필터링 완료:', {
+      최종상품수: filtered.length,
+      정렬: `${filters.sortBy}-${filters.sortDirection}`
+    });
 
+    return filtered;
+  };
+
+  // 🔧 페이지네이션 적용 함수
+  const applyPagination = (products, page) => {
+    const startIndex = page * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const totalPages = Math.ceil(products.length / itemsPerPage);
+    
     return {
-      content: filteredProducts.slice(startIndex, endIndex),
+      content: products.slice(startIndex, endIndex),
+      totalElements: products.length,
       totalPages,
-      totalElements,
-      number: page,
-      size,
-      first: page === 0,
-      last: page >= totalPages - 1
+      currentPage: page
     };
   };
 
-  // 🔧 안전한 API 호출 함수 (재시도 로직 포함)
-  const safeApiCall = async (apiFunction, currentRetry = 0) => {
-    try {
-      return await apiFunction();
-    } catch (error) {
-      console.error(`API 호출 실패 (시도 ${currentRetry + 1}/${maxRetries + 1}):`, error);
-      
-      // 403 에러 또는 네트워크 오류시 재시도
-      if ((error.response?.status === 403 || error.code === 'ERR_NETWORK') && currentRetry < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 1000 * (currentRetry + 1))); // 점진적 대기
-        return safeApiCall(apiFunction, currentRetry + 1);
-      }
-      
-      throw error;
-    }
-  };
-
-  // 🔧 검색 실행 함수 - 완전히 개선된 버전
-  const performSearch = async (page = 0, isRetry = false) => {
+  // 🔧 초기 검색 데이터 로드
+  const performInitialSearch = async () => {
     if (!searchQuery.trim()) {
-      setSearchResults([]);
+      setAllSearchResults([]);
+      setDisplayResults([]);
       setLoading(false);
       return;
     }
 
     try {
       setLoading(true);
-      if (!isRetry) {
-        setError(null);
-        setRetryCount(0);
-      }
+      setError(null);
 
-      console.log(`검색 실행 (페이지 ${page}):`, {
-        keyword: searchQuery,
-        sortBy,
-        sortDirection,
-        priceRange,
-        eventOnly
-      });
+      console.log('🔍 초기 검색 실행:', searchQuery);
 
-      // 가격 범위 계산
-      let minPrice, maxPrice;
-      switch (priceRange) {
-        case 'under-10000':
-          maxPrice = 10000;
-          break;
-        case '10000-20000':
-          minPrice = 10000;
-          maxPrice = 20000;
-          break;
-        case '20000-30000':
-          minPrice = 20000;
-          maxPrice = 30000;
-          break;
-        case 'over-30000':
-          minPrice = 30000;
-          break;
-        default:
-          minPrice = null;
-          maxPrice = null;
-      }
-
-      // 검색 파라미터 구성
-      const searchRequestParams = {
-        keyword: searchQuery.trim(),
-        categoryId,
-        minPrice,
-        maxPrice,
-        hasEvent: eventOnly || null,
-        sortBy,
-        sortDirection,
-        page,
-        size: itemsPerPage
-      };
-
-      // 🔧 안전한 API 호출
-      const response = await safeApiCall(async () => {
-        return await productAPI.searchProducts(searchRequestParams);
-      });
-
-      if (response.success) {
-        setSearchResults(response.data || []);
-        setTotalElements(response.totalElements || 0);
-        setTotalPages(response.totalPages || 0);
-        setCurrentPage(response.currentPage || page);
-        setIsFromMockData(response.isFromMockData || false);
-
-        // 목업 데이터 사용시 알림
-        if (response.isFromMockData && !isRetry) {
-          setError('서버 연결 문제로 임시 검색 결과를 표시하고 있습니다.');
-        }
-
-        console.log('검색 성공:', {
-          결과수: response.data?.length || 0,
-          전체수: response.totalElements || 0,
-          목업데이터: response.isFromMockData
+      // API 호출 시도
+      try {
+        const response = await productAPI.searchProducts({
+          keyword: searchQuery.trim(),
+          page: 0,
+          size: 100 // 모든 결과를 가져와서 클라이언트에서 필터링
         });
 
-      } else {
-        throw new Error(response.message || '검색에 실패했습니다.');
+        if (response.success && response.data && response.data.length > 0) {
+          console.log('✅ 실제 API 데이터 사용:', response.data.length, '개');
+          setAllSearchResults(response.data);
+          setIsFromMockData(false);
+        } else {
+          throw new Error('API 데이터 없음');
+        }
+      } catch (apiError) {
+        console.warn('⚠️ API 호출 실패, 목업 데이터 사용:', apiError.message);
+        const mockData = generateMockData(searchQuery);
+        setAllSearchResults(mockData);
+        setIsFromMockData(true);
+        setError('서버 연결 문제로 임시 검색 결과를 표시합니다.');
       }
 
     } catch (error) {
-      console.error('검색 실행 실패:', error);
-      
-      // 🔧 에러 상황에서 목업 데이터 사용
-      const mockResult = generateMockSearchResults(searchQuery, page, itemsPerPage);
-      
-      setSearchResults(mockResult.content);
-      setTotalElements(mockResult.totalElements);
-      setTotalPages(mockResult.totalPages);
-      setCurrentPage(mockResult.number);
-      setIsFromMockData(true);
-
-      if (error.response?.status === 403) {
-        setError('서버 권한 문제로 임시 검색 결과를 표시하고 있습니다.');
-      } else if (error.code === 'ERR_NETWORK') {
-        setError('네트워크 연결 문제로 임시 검색 결과를 표시하고 있습니다.');
-      } else {
-        setError('검색 중 오류가 발생하여 임시 결과를 표시하고 있습니다.');
-      }
-
-      console.log('목업 데이터로 대체:', {
-        검색어: searchQuery,
-        결과수: mockResult.content.length,
-        에러: error.message
-      });
-
+      console.error('❌ 검색 실행 실패:', error);
+      setError('검색 중 오류가 발생했습니다.');
+      setAllSearchResults([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔧 재시도 함수
-  const handleRetry = async () => {
-    if (retryCount < maxRetries) {
-      setRetryCount(prev => prev + 1);
-      await performSearch(currentPage, true);
-    } else {
-      alert('최대 재시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요.');
+  // 🔧 필터 및 페이지네이션 적용
+  const updateDisplayResults = () => {
+    console.log('🔄 화면 결과 업데이트:', {
+      전체결과: allSearchResults.length,
+      현재페이지: currentPage,
+      필터: filters
+    });
+
+    if (allSearchResults.length === 0) {
+      setDisplayResults([]);
+      setTotalElements(0);
+      setTotalPages(0);
+      return;
+    }
+
+    // 1. 필터링 적용
+    const filteredResults = applyFilters(allSearchResults, filters);
+    
+    // 2. 페이지네이션 적용
+    const paginatedResults = applyPagination(filteredResults, currentPage);
+    
+    // 3. 상태 업데이트
+    setDisplayResults(paginatedResults.content);
+    setTotalElements(paginatedResults.totalElements);
+    setTotalPages(paginatedResults.totalPages);
+
+    console.log('✅ 화면 결과 업데이트 완료:', {
+      표시상품: paginatedResults.content.length,
+      전체필터링상품: paginatedResults.totalElements,
+      총페이지: paginatedResults.totalPages
+    });
+  };
+
+  // 🔧 필터 변경 핸들러
+  const handleFilterChange = (filterType, value) => {
+    console.log('🎛️ 필터 변경:', filterType, '=', value);
+    
+    setFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+    
+    // 필터 변경 시 첫 페이지로 이동
+    setCurrentPage(0);
+  };
+
+  // 🔧 페이지 변경 핸들러
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages && newPage !== currentPage) {
+      console.log('📄 페이지 변경:', currentPage, '→', newPage);
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  // 초기 검색 및 검색어 변경 시 재검색
-  useEffect(() => {
+  // 상품 클릭 핸들러
+  const handleProductClick = (productId) => {
+    navigate(`/MD/product/${productId}`);
+  };
+
+  // 필터 초기화
+  const resetFilters = () => {
+    console.log('🔄 필터 초기화');
+    setFilters({
+      sortBy: 'createdAt',
+      sortDirection: 'desc',
+      priceRange: 'all',
+      eventOnly: false
+    });
     setCurrentPage(0);
-    setRetryCount(0);
-    performSearch(0);
+  };
+
+  // 🔧 Effect: 검색어 변경 시 초기 데이터 로드
+  useEffect(() => {
+    console.log('🔍 검색어 변경 감지:', searchQuery);
+    setCurrentPage(0);
+    performInitialSearch();
   }, [searchQuery]);
 
-  // 필터 변경 시 재검색
+  // 🔧 Effect: 필터나 페이지 변경 시 화면 업데이트
   useEffect(() => {
-    if (searchQuery.trim()) {
-      setCurrentPage(0);
-      setRetryCount(0);
-      performSearch(0);
+    if (allSearchResults.length > 0) {
+      updateDisplayResults();
     }
-  }, [sortBy, sortDirection, priceRange, categoryId, eventOnly]);
-
-  // 페이지 변경 시 검색
-  useEffect(() => {
-    if (searchQuery.trim() && currentPage > 0) {
-      performSearch(currentPage);
-    }
-  }, [currentPage]);
-
-  // 상품 클릭 핸들러 - 라우트 수정
-  const handleProductClick = (productId) => {
-    navigate(`/MD/products/${productId}`); // 올바른 라우트로 수정
-  };
-
-  // 페이지 변경
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // 🔧 필터 리셋 함수
-  const resetFilters = () => {
-    setSortBy('createdAt');
-    setSortDirection('desc');
-    setPriceRange('all');
-    setCategoryId(null);
-    setEventOnly(false);
-  };
+  }, [allSearchResults, filters, currentPage]);
 
   // 검색어가 없는 경우
   if (!searchQuery.trim()) {
@@ -354,29 +363,26 @@ function SearchResults() {
       <S.Container>
         <S.ContentWrapper>
           <S.Title>검색 결과</S.Title>
-          <S.NoSearchQuery>
-            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '20px' }}>🔍</div>
-              <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>검색어를 입력해주세요</h3>
-              <p style={{ margin: '0 0 30px 0', color: '#666' }}>
-                원하는 상품을 검색해보세요.
-              </p>
-              <button
-                onClick={() => navigate('/MD/products')}
-                style={{
-                  padding: '12px 24px',
-                  background: '#3498db',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                전체 상품 보기
-              </button>
-            </div>
-          </S.NoSearchQuery>
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <div style={{ fontSize: '48px', marginBottom: '20px' }}>🔍</div>
+            <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>검색어를 입력해주세요</h3>
+            <p style={{ margin: '0 0 30px 0', color: '#666' }}>원하는 상품을 검색해보세요.</p>
+            <button
+              onClick={() => navigate('/MD')}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#74B9FF',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: '600'
+              }}
+            >
+              전체 상품 보기
+            </button>
+          </div>
         </S.ContentWrapper>
       </S.Container>
     );
@@ -387,7 +393,6 @@ function SearchResults() {
     return (
       <S.Container>
         <S.ContentWrapper>
-          <S.Title>"{searchQuery}" 검색 결과</S.Title>
           <S.LoadingContainer>
             <S.LoadingSpinner />
             <S.LoadingText>검색 중...</S.LoadingText>
@@ -400,251 +405,129 @@ function SearchResults() {
   return (
     <S.Container>
       <S.ContentWrapper>
-        <S.Title>"{searchQuery}" 검색 결과</S.Title>
-        
+        <S.Title>검색 결과</S.Title>
         <S.ResultSummary>
-          총 <S.ResultCount>{totalElements}</S.ResultCount>개의 상품을 찾았습니다.
+          "<S.ResultCount>{searchQuery}</S.ResultCount>"에 대한 검색 결과 
+          <S.ResultCount> {totalElements}개</S.ResultCount>
           {isFromMockData && (
-            <span style={{ 
-              color: '#e74c3c', 
-              fontSize: '14px', 
-              marginLeft: '10px',
-              fontWeight: 'normal'
-            }}>
+            <span style={{ color: '#e67e22', marginLeft: '10px' }}>
               (임시 데이터)
             </span>
           )}
         </S.ResultSummary>
 
-        {/* 🔧 개선된 에러 메시지 */}
         {error && (
           <div style={{
             padding: '15px',
             background: '#fff3cd',
-            color: '#856404',
             border: '1px solid #ffeaa7',
             borderRadius: '8px',
-            marginBottom: '20px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
+            color: '#856404',
+            marginBottom: '20px'
           }}>
-            <span>{error}</span>
-            {retryCount < maxRetries && (
-              <button
-                onClick={handleRetry}
-                style={{
-                  padding: '6px 12px',
-                  background: '#f39c12',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '12px'
-                }}
-              >
-                재시도 ({retryCount + 1}/{maxRetries + 1})
-              </button>
-            )}
+            ⚠️ {error}
           </div>
         )}
 
-        {/* 필터 및 정렬 */}
+        {/* 🎛️ 필터 섹션 */}
         <S.FilterSection>
           <S.FilterGroup>
-            <S.FilterLabel>정렬:</S.FilterLabel>
-            <S.FilterSelect value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <S.FilterLabel>정렬</S.FilterLabel>
+            <S.FilterSelect 
+              value={filters.sortBy} 
+              onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+            >
               <option value="createdAt">최신순</option>
               <option value="price">가격순</option>
               <option value="name">이름순</option>
+              <option value="rating">평점순</option>
             </S.FilterSelect>
 
             <S.FilterSelect 
-              value={sortDirection} 
-              onChange={(e) => setSortDirection(e.target.value)}
+              value={filters.sortDirection} 
+              onChange={(e) => handleFilterChange('sortDirection', e.target.value)}
             >
               <option value="desc">내림차순</option>
               <option value="asc">오름차순</option>
             </S.FilterSelect>
+          </S.FilterGroup>
 
-            <S.FilterLabel>가격대:</S.FilterLabel>
-            <S.FilterSelect value={priceRange} onChange={(e) => setPriceRange(e.target.value)}>
+          <S.FilterGroup>
+            <S.FilterLabel>가격대</S.FilterLabel>
+            <S.FilterSelect 
+              value={filters.priceRange} 
+              onChange={(e) => handleFilterChange('priceRange', e.target.value)}
+            >
               <option value="all">전체</option>
               <option value="under-10000">1만원 미만</option>
               <option value="10000-20000">1만원 - 2만원</option>
               <option value="20000-30000">2만원 - 3만원</option>
               <option value="over-30000">3만원 이상</option>
             </S.FilterSelect>
+          </S.FilterGroup>
 
-            <S.EventFilter>
-              <S.EventCheckbox
+          <S.FilterGroup>
+            <S.FilterCheckbox>
+              <input
                 type="checkbox"
                 id="eventOnly"
-                checked={eventOnly}
-                onChange={(e) => setEventOnly(e.target.checked)}
+                checked={filters.eventOnly}
+                onChange={(e) => handleFilterChange('eventOnly', e.target.checked)}
               />
-              <S.EventLabel htmlFor="eventOnly">이벤트 상품만</S.EventLabel>
-            </S.EventFilter>
+              <label htmlFor="eventOnly">이벤트 상품만</label>
+            </S.FilterCheckbox>
+          </S.FilterGroup>
 
-            {/* 🔧 필터 초기화 버튼 추가 */}
-            <button
-              onClick={resetFilters}
-              style={{
-                padding: '6px 12px',
-                background: '#95a5a6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                marginLeft: '10px'
-              }}
-            >
+          <S.FilterGroup>
+            <S.ResetButton onClick={resetFilters}>
               필터 초기화
-            </button>
+            </S.ResetButton>
           </S.FilterGroup>
         </S.FilterSection>
 
+       
         {/* 검색 결과 */}
-        {searchResults.length > 0 ? (
+        {displayResults.length > 0 ? (
           <>
             <S.ProductGrid>
-              {searchResults.map(product => (
+              {displayResults.map((product) => (
                 <S.ProductCard 
-                  key={product.id}
+                  key={product.id} 
                   onClick={() => handleProductClick(product.id)}
-                  style={{
-                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-5px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
                 >
                   <S.ProductImage>
-                    {product.imageUrl ? (
-                      <img 
-                        src={product.imageUrl} 
-                        alt={product.name}
-                        style={{
-                          width: '100%',
-                          height: '200px',
-                          objectFit: 'cover',
-                          borderRadius: '8px 8px 0 0'
-                        }}
-                        onError={(e) => {
-                          e.target.src = '/placeholder-product.jpg';
-                        }}
-                      />
-                    ) : (
-                      <div style={{
-                        width: '100%',
-                        height: '200px',
-                        background: '#f0f0f0',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#666',
-                        borderRadius: '8px 8px 0 0'
-                      }}>
-                        상품 이미지 {product.id}
-                      </div>
-                    )}
+                    <img 
+                      src={product.imageUrls?.[0] || '/placeholder-product.jpg'} 
+                      alt={product.name}
+                      onError={(e) => {
+                        e.target.src = '/placeholder-product.jpg';
+                      }}
+                    />
+                    {product.isNew && <S.NewBadge>NEW</S.NewBadge>}
+                    {product.hasEvent && <S.EventBadge>EVENT</S.EventBadge>}
                   </S.ProductImage>
-                  <S.ProductInfo style={{ padding: '15px' }}>
-                    <S.ProductName style={{
-                      fontSize: '16px',
-                      fontWeight: 'bold',
-                      marginBottom: '8px',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      {product.name}
-                    </S.ProductName>
-                    
-                    <S.ProductPrice style={{
-                      fontSize: '18px',
-                      fontWeight: 'bold',
-                      color: '#e74c3c',
-                      marginBottom: '8px'
-                    }}>
-                      ₩{product.price?.toLocaleString()}
-                    </S.ProductPrice>
-                    
-                    {/* 🔧 할인 정보 표시 */}
-                    {product.originalPrice && product.originalPrice > product.price && (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        marginBottom: '8px'
-                      }}>
-                        <span style={{
-                          textDecoration: 'line-through',
-                          color: '#999',
-                          fontSize: '14px'
-                        }}>
-                          ₩{product.originalPrice.toLocaleString()}
-                        </span>
-                        <span style={{
-                          background: '#e74c3c',
-                          color: 'white',
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          fontSize: '12px'
-                        }}>
-                          {Math.round((1 - product.price / product.originalPrice) * 100)}%
-                        </span>
-                      </div>
-                    )}
-                    
-                    <S.ProductDescription style={{
-                      color: '#666',
-                      fontSize: '14px',
-                      height: '40px',
-                      overflow: 'hidden',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      marginBottom: '10px'
-                    }}>
-                      {product.description}
-                    </S.ProductDescription>
-                    
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      fontSize: '12px',
-                      color: '#666'
-                    }}>
-                      <span>재고: {product.stockQuantity || 0}개</span>
-                      {product.hasEvent && (
-                        <S.EventBadge style={{
-                          background: '#f39c12',
-                          color: 'white',
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          fontSize: '10px'
-                        }}>
-                          이벤트
-                        </S.EventBadge>
+                  <S.ProductInfo>
+                    <S.ProductName>{product.name}</S.ProductName>
+                    <S.ProductDescription>{product.description}</S.ProductDescription>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <S.ProductPrice>
+                        {product.price?.toLocaleString() || '0'}원
+                      </S.ProductPrice>
+                      {product.originalPrice && product.originalPrice !== product.price && (
+                        <S.OriginalPrice>
+                          {product.originalPrice.toLocaleString()}원
+                        </S.OriginalPrice>
                       )}
-                      {product.isNew && (
-                        <span style={{
-                          background: '#27ae60',
-                          color: 'white',
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          fontSize: '10px'
-                        }}>
-                          NEW
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {product.averageRating && (
+                        <span style={{ fontSize: '14px', color: '#f39c12' }}>
+                          ⭐ {product.averageRating}
+                        </span>
+                      )}
+                      {product.reviewCount && (
+                        <span style={{ fontSize: '14px', color: '#95a5a6' }}>
+                          ({product.reviewCount})
                         </span>
                       )}
                     </div>
@@ -663,11 +546,13 @@ function SearchResults() {
                   이전
                 </S.PaginationBtn>
 
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const pageNum = i + Math.max(0, currentPage - 2);
-                  if (pageNum >= totalPages) return null;
-
-                  return (
+                {Array.from({ length: totalPages }, (_, i) => i)
+                  .filter(pageNum => {
+                    const start = Math.max(0, currentPage - 2);
+                    const end = Math.min(totalPages - 1, currentPage + 2);
+                    return pageNum >= start && pageNum <= end;
+                  })
+                  .map(pageNum => (
                     <S.PaginationBtn
                       key={pageNum}
                       $active={currentPage === pageNum}
@@ -675,8 +560,7 @@ function SearchResults() {
                     >
                       {pageNum + 1}
                     </S.PaginationBtn>
-                  );
-                })}
+                  ))}
 
                 <S.PaginationBtn
                   disabled={currentPage === totalPages - 1}
@@ -688,30 +572,13 @@ function SearchResults() {
             )}
           </>
         ) : (
-          <S.NoResults>
-            <S.NoResultsIcon>🔍</S.NoResultsIcon>
-            <S.NoResultsTitle>검색 결과가 없습니다.</S.NoResultsTitle>
-            <S.NoResultsText>
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <div style={{ fontSize: '48px', marginBottom: '20px' }}>😅</div>
+            <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>검색 결과가 없습니다</h3>
+            <p style={{ margin: '0 0 30px 0', color: '#666' }}>
               "{searchQuery}"에 대한 검색 결과를 찾을 수 없습니다.
-            </S.NoResultsText>
-            <S.SearchSuggestions>
-              <S.SuggestionTitle>검색 팁:</S.SuggestionTitle>
-              <ul style={{ textAlign: 'left', color: '#666' }}>
-                <li>단어의 철자가 정확한지 확인해보세요</li>
-                <li>더 일반적인 검색어로 다시 검색해보세요</li>
-                <li>검색어를 줄여서 검색해보세요</li>
-                <li>다른 필터 조건을 사용해보세요</li>
-              </ul>
-            </S.SearchSuggestions>
-            
-            {/* 🔧 추천 액션 버튼들 */}
-            <div style={{
-              display: 'flex',
-              gap: '10px',
-              justifyContent: 'center',
-              marginTop: '20px',
-              flexWrap: 'wrap'
-            }}>
+            </p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
               <button
                 onClick={resetFilters}
                 style={{
@@ -726,7 +593,7 @@ function SearchResults() {
                 필터 초기화
               </button>
               <button
-                onClick={() => navigate('/MD/products')}
+                onClick={() => navigate('/MD')}
                 style={{
                   padding: '10px 20px',
                   background: '#95a5a6',
@@ -739,27 +606,6 @@ function SearchResults() {
                 전체 상품 보기
               </button>
             </div>
-          </S.NoResults>
-        )}
-
-        {/* 🔧 개발용 디버그 정보 */}
-        {process.env.NODE_ENV === 'development' && (
-          <div style={{
-            marginTop: '40px',
-            padding: '15px',
-            background: '#f8f9fa',
-            borderRadius: '8px',
-            fontSize: '12px',
-            color: '#666',
-            border: '1px solid #ddd'
-          }}>
-            <strong>디버그 정보:</strong>
-            <div>검색어: {searchQuery}</div>
-            <div>현재 페이지: {currentPage + 1}/{totalPages}</div>
-            <div>총 결과: {totalElements}개</div>
-            <div>목업 데이터 사용: {isFromMockData ? 'Yes' : 'No'}</div>
-            <div>재시도 횟수: {retryCount}/{maxRetries}</div>
-            <div>필터: 정렬={sortBy}-{sortDirection}, 가격={priceRange}, 이벤트={eventOnly}</div>
           </div>
         )}
       </S.ContentWrapper>
