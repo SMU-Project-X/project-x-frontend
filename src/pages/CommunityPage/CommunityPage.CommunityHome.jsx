@@ -15,23 +15,6 @@ export const CommunityHome = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
     return(
       <>        
-      {/* 상단 헤더 */}
-        <itemS.Header>
-          <itemS.Nav>
-            <itemS.Logo>Project - x</itemS.Logo>
-            <itemS.MenuNav>
-              <li><a href="/home">HOME</a></li>
-              <li><a href="/MD">MD</a></li>
-              <li><a href="/Community">COMMUNITY</a></li>
-              <li><a href="/picture/select">CONTENT</a></li>
-              <li><a href="/ChatChoice">CHAT</a></li>
-            </itemS.MenuNav>
-            <itemS.UserBox>
-              <itemS.UserCircle></itemS.UserCircle>
-              <a href="/login" className='UserMenu'>로그인</a>
-            </itemS.UserBox>
-          </itemS.Nav>
-        </itemS.Header>
 
 
       <itemS.Maincontainer>

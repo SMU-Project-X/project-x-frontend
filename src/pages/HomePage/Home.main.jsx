@@ -1,4 +1,3 @@
-import Header from "@/pages/PicturePage/components/PicturePage.Header"
 import * as itemS from "@/pages/HomePage/styled/Home.main.style"
 
 import Video from "@/assets/images/HomaPage/LogoVideo2.mp4"
@@ -21,7 +20,6 @@ function Home() {
     
     return(
         <itemS.HomePageContainer>
-            <Header />
             <itemS.LogoVideoWrapper>
                 <itemS.LogoVideo autoPlay muted loop playsInline preload="none">
                     <source src={Video} />

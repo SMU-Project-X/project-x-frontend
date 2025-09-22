@@ -1,4 +1,4 @@
-// MDPage.header.jsx - 기존 구조 100% 유지하면서 환율/번역 기능만 추가
+﻿// MDPage.header.jsx - 기존 구조 100% 유지하면서 환율/번역 기능 + 로그인 상태 표시는 항상 노출
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -18,23 +18,24 @@ import {
   DropdownContainer,
   DropdownMenu,
   DropdownItem,
-  SearchInput
+  SearchInput,
+  LoginStatusText, // ✅ 추가: 로그인 상태 텍스트 스타일
 } from './styled/MDPage.Header.styled';
 
-function Header() {
+function Header({ showSearch = true, showExchange = true, showCart = true, showAbout = true } = {}) {
   const [cartCount, setCartCount] = useState(0);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   // 🚀 로그인 상태 관리
   const [loginStatus, setLoginStatus] = useState({
     isLoggedIn: false,
     userId: null,
     username: null,
-    isAdmin: false
+    isAdmin: false,
   });
-  
+
   // API 연동 상태
   const [isExchangeOpen, setIsExchangeOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
@@ -42,18 +43,32 @@ function Header() {
   const [selectedLanguage, setSelectedLanguage] = useState('ko');
   const [isTranslating, setIsTranslating] = useState(false);
   const [isExchanging, setIsExchanging] = useState(false);
-  
+
+  // Feature visibility toggles
+  useEffect(() => {
+    if (!showSearch) {
+      setIsSearchOpen(false);
+      setSearchQuery('');
+    }
+  }, [showSearch]);
+
+  useEffect(() => {
+    if (!showExchange) {
+      setIsExchangeOpen(false);
+    }
+  }, [showExchange]);
+
   // 백엔드에서 가져온 언어 목록
   const [supportedLanguages, setSupportedLanguages] = useState({
-    'ko': '한국어'
+    ko: '한국어',
   });
-  
+
   // API 상태 정보
   const [apiStatus, setApiStatus] = useState({
     deepL: false,
-    exchange: true
+    exchange: true,
   });
-  
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -61,11 +76,11 @@ function Header() {
   const checkLoginStatus = async () => {
     try {
       const response = await axios.get('http://localhost:8080/api/users/status', {
-        withCredentials: true
+        withCredentials: true,
       });
-      
+
       setLoginStatus(response.data);
-      
+
       // localStorage와 동기화
       if (response.data.isLoggedIn) {
         localStorage.setItem('isLoggedIn', 'true');
@@ -87,7 +102,7 @@ function Header() {
           isLoggedIn: true,
           userId: localStorage.getItem('userId'),
           username: localStorage.getItem('username'),
-          isAdmin: localStorage.getItem('isAdmin') === 'true'
+          isAdmin: localStorage.getItem('isAdmin') === 'true',
         });
       }
     }
@@ -109,19 +124,19 @@ function Header() {
   useEffect(() => {
     // 🚀 로그인 상태 확인 추가
     checkLoginStatus();
-    
+
     // 장바구니 개수 로드
     loadCartCount();
-    
+
     // 언어 지원 확인
     const checkLanguageSupport = async () => {
       try {
         const languages = await deepLTranslatorService.getSupportedLanguages();
         setSupportedLanguages(languages);
-        setApiStatus(prev => ({ ...prev, deepL: true }));
+        setApiStatus((prev) => ({ ...prev, deepL: true }));
       } catch (error) {
         console.warn('언어 API 연결 실패, 기본 설정 사용:', error);
-        setApiStatus(prev => ({ ...prev, deepL: false }));
+        setApiStatus((prev) => ({ ...prev, deepL: false }));
       }
     };
 
@@ -184,10 +199,7 @@ function Header() {
     if (e.key === 'Enter' && searchQuery.trim()) {
       try {
         setLoading(true);
-        console.log('검색어:', searchQuery);
-        
         navigate(`/MD/search?q=${encodeURIComponent(searchQuery.trim())}`);
-        
         setIsSearchOpen(false);
         setSearchQuery('');
       } catch (error) {
@@ -202,8 +214,6 @@ function Header() {
     if (isSearchOpen && searchQuery.trim()) {
       try {
         setLoading(true);
-        console.log('검색어:', searchQuery);
-        
         navigate(`/MD/search?q=${encodeURIComponent(searchQuery.trim())}`);
         setIsSearchOpen(false);
         setSearchQuery('');
@@ -243,50 +253,45 @@ function Header() {
     setIsSearchOpen(false);
   };
 
-  // 실제 환율 변환 기능 (수정된 버전)
-const handleCurrencySelect = async (currency) => {
-  if (currency === selectedCurrency) {
+  // 실제 환율 변환 기능
+  const handleCurrencySelect = async (currency) => {
+    if (currency === selectedCurrency) {
+      setIsExchangeOpen(false);
+      return;
+    }
+
+    setIsExchanging(true);
     setIsExchangeOpen(false);
-    return;
-  }
 
-  setIsExchanging(true);
-  setIsExchangeOpen(false);
+    try {
+      // convertPagePrices(toCurrency, fromCurrency)
+      const result = await exchangeRateService.convertPagePrices(currency, selectedCurrency);
 
-  try {
-    // 올바른 함수 호출: convertPagePrices(toCurrency, fromCurrency)
-    const result = await exchangeRateService.convertPagePrices(currency, selectedCurrency);
-    
-    if (result.success) {
-      setSelectedCurrency(currency);
-      
-      window.dispatchEvent(new CustomEvent('currencyChanged', {
-        detail: { from: selectedCurrency, to: currency }
-      }));
-      
-      console.log(`환율 변환 완료: ${selectedCurrency} → ${currency}`);
-      console.log(`변환된 가격: ${result.data.convertedCount}개`);
-    } else {
-      throw new Error(result.error || '환율 API 연결 실패');
+      if (result.success) {
+        setSelectedCurrency(currency);
+
+        window.dispatchEvent(
+          new CustomEvent('currencyChanged', {
+            detail: { from: selectedCurrency, to: currency },
+          })
+        );
+      } else {
+        throw new Error(result.error || '환율 API 연결 실패');
+      }
+    } catch (error) {
+      console.error('환율 변환 실패:', error);
+
+      let errorMessage = '환율 변환에 실패했습니다.';
+      if (error.message.includes('429')) {
+        errorMessage = 'API 호출 한도를 초과했습니다.\n잠시 후 다시 시도해주세요.';
+      } else if (error.message.includes('network')) {
+        errorMessage = '네트워크 연결을 확인해주세요.';
+      }
+      alert(errorMessage);
+    } finally {
+      setIsExchanging(false);
     }
-    
-  } catch (error) {
-    console.error('환율 변환 실패:', error);
-    
-    let errorMessage = '환율 변환에 실패했습니다.';
-    
-    if (error.message.includes('429')) {
-      errorMessage = 'API 호출 한도를 초과했습니다.\n잠시 후 다시 시도해주세요.';
-    } else if (error.message.includes('network')) {
-      errorMessage = '네트워크 연결을 확인해주세요.';
-    }
-    
-    alert(errorMessage);
-    
-  } finally {
-    setIsExchanging(false);
-  }
-};
+  };
 
   // 실제 번역 기능
   const handleLanguageSelect = async (languageCode) => {
@@ -300,24 +305,22 @@ const handleCurrencySelect = async (currency) => {
 
     try {
       const success = await deepLTranslatorService.translatePage(selectedLanguage, languageCode);
-      
+
       if (success) {
         setSelectedLanguage(languageCode);
-        
-        window.dispatchEvent(new CustomEvent('languageChanged', {
-          detail: { from: selectedLanguage, to: languageCode }
-        }));
-        
-        console.log(`번역 완료: ${selectedLanguage} → ${languageCode}`);
+
+        window.dispatchEvent(
+          new CustomEvent('languageChanged', {
+            detail: { from: selectedLanguage, to: languageCode },
+          })
+        );
       } else {
         throw new Error('번역 API 연결 실패');
       }
-      
     } catch (error) {
       console.error('번역 실패:', error);
-      
+
       let errorMessage = '번역에 실패했습니다.';
-      
       if (error.message.includes('429')) {
         errorMessage = 'API 호출 한도를 초과했습니다.\n잠시 후 다시 시도해주세요.';
       } else if (error.message.includes('403')) {
@@ -325,11 +328,9 @@ const handleCurrencySelect = async (currency) => {
       } else if (error.message.includes('network')) {
         errorMessage = '네트워크 연결을 확인해주세요.';
       }
-      
+
       alert(errorMessage);
-      
       setSelectedLanguage('ko');
-      
     } finally {
       setIsTranslating(false);
     }
@@ -355,35 +356,35 @@ const handleCurrencySelect = async (currency) => {
 
         {/* 네비게이션 메뉴 */}
         <Navigation>
-          <NavItem 
+          <NavItem
             className={isActivePage('/') ? 'active' : ''}
             onClick={() => handleNavigation('/Home')}
             data-translate="Home"
           >
             Home
           </NavItem>
-          <NavItem 
+          <NavItem
             className={isActivePage('/MD') ? 'active' : ''}
             onClick={() => handleNavigation('/MD')}
             data-translate="MD"
           >
             MD
           </NavItem>
-          <NavItem 
+          <NavItem
             className={isActivePage('/Community') ? 'active' : ''}
             onClick={() => handleNavigation('/Community')}
             data-translate="Community"
           >
             Community
           </NavItem>
-          <NavItem 
+          <NavItem
             className={isActivePage('/content') ? 'active' : ''}
             onClick={() => handleNavigation('/picture/select')}
             data-translate="Content"
           >
             Content
           </NavItem>
-          <NavItem 
+          <NavItem
             className={isActivePage('/chat') ? 'active' : ''}
             onClick={() => handleNavigation('/ChatChoice')}
             data-translate="Chat"
@@ -395,48 +396,52 @@ const handleCurrencySelect = async (currency) => {
         {/* 오른쪽 기능 버튼들 */}
         <RightSection>
           {/* 검색 */}
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <IconButton 
-              onClick={handleSearchButtonClick}
-              disabled={loading}
-              style={{ opacity: loading ? 0.6 : 1 }}
-              title="검색"
-            >
-              {loading ? '⏳' : isSearchOpen ? '❌' : '🔍'}
-            </IconButton>
-            
-            {isSearchOpen && (
-              <SearchInput
-                type="text"
-                placeholder="상품을 검색하세요..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={handleSearch}
-                autoFocus
-              />
-            )}
-          </div>
+          {showSearch && (
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <IconButton
+                onClick={handleSearchButtonClick}
+                disabled={loading}
+                style={{ opacity: loading ? 0.6 : 1 }}
+                title="검색"
+              >
+                {loading ? '⏳' : isSearchOpen ? '❌' : '🔍'}
+              </IconButton>
+
+              {isSearchOpen && (
+                <SearchInput
+                  type="text"
+                  placeholder="상품을 검색하세요..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleSearch}
+                  autoFocus
+                />
+              )}
+            </div>
+          )}
 
           {/* 환율 변환 */}
-          <DropdownContainer data-dropdown>
-            <IconButton onClick={toggleExchange} disabled={isExchanging} title="환율 변환">
-              {isExchanging ? '⏳' : '💱'}
-            </IconButton>
-            <DropdownMenu $isOpen={isExchangeOpen}>
-              {Object.entries(SUPPORTED_CURRENCIES).map(([code, name]) => (
-                <DropdownItem 
-                  key={code}
-                  onClick={() => handleCurrencySelect(code)}
-                  style={{ 
-                    backgroundColor: selectedCurrency === code ? '#f0f0f0' : 'transparent',
-                    fontWeight: selectedCurrency === code ? 'bold' : 'normal'
-                  }}
-                >
-                  {name}
-                </DropdownItem>
-              ))}
-            </DropdownMenu>
-          </DropdownContainer>
+          {showExchange && (
+            <DropdownContainer data-dropdown>
+              <IconButton onClick={toggleExchange} disabled={isExchanging} title="환율 변환">
+                {isExchanging ? '⏳' : '💱'}
+              </IconButton>
+              <DropdownMenu $isOpen={isExchangeOpen}>
+                {Object.entries(SUPPORTED_CURRENCIES).map(([code, name]) => (
+                  <DropdownItem
+                    key={code}
+                    onClick={() => handleCurrencySelect(code)}
+                    style={{
+                      backgroundColor: selectedCurrency === code ? '#f0f0f0' : 'transparent',
+                      fontWeight: selectedCurrency === code ? 'bold' : 'normal',
+                    }}
+                  >
+                    {name}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </DropdownContainer>
+          )}
 
           {/* 언어 번역 */}
           <DropdownContainer data-dropdown>
@@ -445,12 +450,12 @@ const handleCurrencySelect = async (currency) => {
             </IconButton>
             <DropdownMenu $isOpen={isLanguageOpen}>
               {Object.entries(supportedLanguages).map(([code, name]) => (
-                <DropdownItem 
+                <DropdownItem
                   key={code}
                   onClick={() => handleLanguageSelect(code)}
-                  style={{ 
+                  style={{
                     backgroundColor: selectedLanguage === code ? '#f0f0f0' : 'transparent',
-                    fontWeight: selectedLanguage === code ? 'bold' : 'normal'
+                    fontWeight: selectedLanguage === code ? 'bold' : 'normal',
                   }}
                 >
                   {name}
@@ -460,79 +465,65 @@ const handleCurrencySelect = async (currency) => {
           </DropdownContainer>
 
           {/* 장바구니 */}
-          <CartContainer>
-            <IconButton onClick={() => handleNavigation('/MD/cart')} title="장바구니">
-              🛒
-            </IconButton>
-            {cartCount > 0 && (
-              <CartBadge>{cartCount > 99 ? '99+' : cartCount}</CartBadge>
-            )}
-          </CartContainer>
+          {showCart && (
+            <CartContainer>
+              <IconButton onClick={() => handleNavigation('/MD/cart')} title="장바구니">
+                🛒
+              </IconButton>
+              {cartCount > 0 && <CartBadge>{cartCount > 99 ? '99+' : cartCount}</CartBadge>}
+            </CartContainer>
+          )}
 
-          {/* 🚀 마이페이지 - 로그인 상태별 분기 */}
-          <IconButton 
-            onClick={handleMyPageClick} 
-            title={
-              !loginStatus.isLoggedIn ? "로그인" :
-              loginStatus.isAdmin ? "관리자 페이지" : "마이페이지"
-            }
+          {/* 로그인/마이페이지 버튼 */}
+          <IconButton
+            onClick={handleMyPageClick}
+            title={!loginStatus.isLoggedIn ? '로그인' : loginStatus.isAdmin ? '관리자 페이지' : '마이페이지'}
             style={{
-              // 🚀 로그인 상태에 따른 시각적 피드백
-              background: loginStatus.isLoggedIn ? 
-                (loginStatus.isAdmin ? 'linear-gradient(135deg, #fd79a8, #e84393)' : 'linear-gradient(135deg, #74b9ff, #0984e3)') : 
-                'transparent',
+              background: loginStatus.isLoggedIn
+                ? loginStatus.isAdmin
+                  ? 'linear-gradient(135deg, #fd79a8, #e84393)'
+                  : 'linear-gradient(135deg, #74b9ff, #0984e3)'
+                : 'transparent',
               color: loginStatus.isLoggedIn ? 'white' : 'inherit',
-              borderRadius: '50%'
+              borderRadius: '50%',
             }}
           >
-            {loginStatus.isLoggedIn ? 
-              (loginStatus.isAdmin ? '🔐' : '👤') : 
-              '🚪'
-            }
+            {loginStatus.isLoggedIn ? (loginStatus.isAdmin ? '🔐' : '👤') : '🚪'}
           </IconButton>
+
+          {/* ✅ 로그인 상태 텍스트: 항상 표시 (버튼 오른쪽) */}
+          <LoginStatusText>
+            {loginStatus.isLoggedIn
+              ? `✅ ${loginStatus.username} ${loginStatus.isAdmin ? '(관리자)' : '(일반)'}`
+              : '❌ 비로그인'}
+          </LoginStatusText>
 
           {/* About - 회사소개/고객센터 */}
-          <IconButton onClick={() => handleNavigation('/MD/about')} title="회사소개">
-            📋
-          </IconButton>
+          {showAbout && (
+            <IconButton onClick={() => handleNavigation('/MD/about')} title="회사소개">
+              📋
+            </IconButton>
+          )}
         </RightSection>
       </HeaderContainer>
-      
-      {/* API 상태 디버그 정보 */}
+
+      {/* API 상태 알림 토스트 */}
       {(isExchanging || isTranslating) && (
-        <div style={{
-          position: 'fixed',
-          top: '80px',
-          right: '20px',
-          background: 'rgba(0,0,0,0.8)',
-          color: 'white',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          fontSize: '14px',
-          zIndex: 9999
-        }}>
+        <div
+          style={{
+            position: 'fixed',
+            top: '80px',
+            right: '20px',
+            background: 'rgba(0,0,0,0.8)',
+            color: 'white',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            zIndex: 9999,
+          }}
+        >
           {isExchanging && '💱 환율 변환 중...'}
           {isTranslating && '🌍 AI 번역 중...'}
-        </div>
-      )}
-
-      {/* 🚀 로그인 상태 디버그 정보 (개발용, 실제 배포시 제거) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{
-          position: 'fixed',
-          top: '80px',
-          left: '20px',
-          background: 'rgba(0,0,0,0.8)',
-          color: 'white',
-          padding: '8px 12px',
-          borderRadius: '8px',
-          fontSize: '12px',
-          zIndex: 9999
-        }}>
-          {loginStatus.isLoggedIn ? 
-            `✅ ${loginStatus.username} ${loginStatus.isAdmin ? '(관리자)' : '(일반)'}` : 
-            '❌ 비로그인'
-          }
         </div>
       )}
     </div>

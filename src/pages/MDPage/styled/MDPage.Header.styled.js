@@ -1,4 +1,6 @@
 // MDPage.Header.styled.js
+// 전체 페이지 상속 헤더
+
 import styled from 'styled-components';
 
 export const HeaderContainer = styled.header`
@@ -9,7 +11,7 @@ export const HeaderContainer = styled.header`
   align-items: center;
   justify-content: space-between;
   margin: 0 auto;
-  padding: 0 60px;
+  padding: 0 40px 0 140px;
   position: relative;
   z-index: 100;
 `;
@@ -26,7 +28,7 @@ export const Logo = styled.h1`
   font-family: 'Pretendard', sans-serif;
   font-size: 25px;
   font-weight: 700;
-  margin: 0;
+  margin: -120px;
   cursor: pointer;
   
   &:hover {
@@ -40,6 +42,7 @@ export const Navigation = styled.nav`
   flex: 1;
   justify-content: center;
   max-width: 700px;
+  margin-left: 70px;
 `;
 
 export const NavItem = styled.button`
@@ -175,4 +178,21 @@ export const SearchInput = styled.input`
     border-color: #74B9FF;
     box-shadow: 0 0 0 2px rgba(116, 185, 255, 0.2);
   }
+`;
+
+export const LoginStatusText = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-left: 4px;        /* 로그인 버튼과 간격 */
+  padding: 6px 8px;
+  border-radius: 8px;
+
+  font-family: 'Pretendard', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #172031;
+
+  background: rgba(23, 32, 49, 0.06);  /* 은은한 배경 */
 `;

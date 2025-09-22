@@ -1,5 +1,4 @@
 import React from "react";
-import Header from "./components/PicturePage.Header"
 import * as itemS from "@/pages/PicturePage/styled/PicturePage.CameraPage.style"
 import { useCamera } from "./hooks/PicturePage.CameraPage.useCamera";
 import CameraFrame from "./components/PicturePage.CameraPage.CameraFrame";
@@ -17,7 +16,6 @@ function CameraPage () {
     return (
         <div>
             
-            <Header />
 
             <itemS.container>
                 <itemS.title>

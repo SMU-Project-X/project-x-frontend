@@ -1,7 +1,6 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import * as itemS from "@/pages/PicturePage/styled/PicturePage.PostPage.View.style";
-import Header from "@/pages/PicturePage/components/PicturePage.Header";
 import { useParams, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
@@ -109,7 +108,6 @@ function PostView() {
     return (
         <div style={{ width: "100%", overflowX: "hidden" }}>
 
-            <Header/>
 
             <itemS.content>
                 <itemS.content_background>

@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import html2canvas from "html2canvas";
 import { useNavigate, useLocation } from "react-router-dom";
-import Header from "@/pages/PicturePage/components/PicturePage.Header";
 import DecoImg from "@/pages/PicturePage/components/PicturePage.MemberDecoPage.DecoImg";
 import * as itemS from "@/pages/PicturePage/styled/PicturePage.MemberDecoPage.style";
 import useDecorationDrop from "./hooks/PicturePage.MemberDecoPage.useDecorationDrop";
@@ -85,7 +84,6 @@ function MemberDecoPage(){
     return (
         <div>
 
-            <Header />
             
             <itemS.container>
                 <itemS.background>
