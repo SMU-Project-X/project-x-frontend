@@ -176,7 +176,10 @@ export default function App() {
         <Route path='/admin' element={<AdminPage/>} />
         <Route path='/admin/post' element={<AdminPostPage/>} />
         <Route path='/admin/user' element={<AdminUserPage/>} />
+        
+        <Route path='/admin2' element={<AdminPage2/>} />
 
+        {/* 챗 봇 */}
         <Route path="/ChatChoice" element={<ChatChoice/>} />
         <Route path="/ChatApp/:chatName" element={<ChatApp />}/>
 
@@ -187,6 +190,7 @@ export default function App() {
 
 // slotIndex를 useParams로 꺼내서 ViewPage에 넘김
 import { useParams } from 'react-router-dom';
+import AdminPage2 from './pages/AdminPage2/AdminPage2';
 function ViewPageWrapper() {
   const { slotIndex } = useParams();
   return <ViewPage slotIndex={parseInt(slotIndex, 10)} />;
