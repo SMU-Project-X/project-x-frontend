@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
-import * as itemS from '@/pages/AdminPage2/styled/AdminPage2.style';
+import * as itemS from '@/pages/MainMyPage/styled/MainMyPage.style';
 import { selectedCharactersState } from '@/recoil/characterAtom';
 import { characters } from '@/assets/data/characters';
 import { traits } from '@/assets/data/traits';
@@ -23,7 +23,7 @@ const ensureSlotShape = (slot = {}) => ({
   mbti: slot?.mbti ?? null,
 });
 
-function AdminPage2() {
+function MainMyPage() {
   const [selectedCharacters, setSelectedCharacters] = useRecoilState(selectedCharactersState);
   const [dialog, setDialog] = useState({ slotIndex: null, mode: null, traitIndex: null });
   const navigate = useNavigate();
@@ -140,7 +140,7 @@ function AdminPage2() {
 
 
   return (
-    <itemS.AdminPageContainer>
+    <itemS.MainMyPageContainer>
       <itemS.PageHeader>
         <itemS.PageTitle>멤버 선택</itemS.PageTitle>
         <itemS.PageSubtitle>
@@ -255,7 +255,7 @@ function AdminPage2() {
             : null
         }
       />
-    </itemS.AdminPageContainer>
+    </itemS.MainMyPageContainer>
   );
 }
 
@@ -372,4 +372,4 @@ function TraitModal({ open, onClose, onSelect, slotIndex, traitIndex, traitUsage
   );
 }
 
-export default AdminPage2;
+export default MainMyPage;

@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
 
-export const AdminPageContainer = styled.div`
+export const MainMyPageContainer = styled.div`
     min-height: 100vh;
     padding: 60px 40px 80px;
     background: linear-gradient(to bottom, #fdfcfb 0%, #eef3fb 40%, #d9e3f2 100%);
