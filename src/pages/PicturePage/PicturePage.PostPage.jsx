@@ -69,7 +69,7 @@ function PostPage() {
   );
 
   return (
-    <div style={{ width: "100%", overflowX: "hidden" }}>
+    <div>
       <Header />
 
       <itemS.container>
@@ -120,7 +120,7 @@ function PostPage() {
             </itemS.photo_grid>
 
             <itemS.page_num>
-              <li className="arrow" onClick={() => setCurrentPage(1)}>{'«'}</li>
+              <li className="arrow" onClick={() => setCurrentPage(1)}>{'‹‹'}</li>
               <li className="arrow" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}>{'‹'}</li>
 
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
@@ -134,7 +134,7 @@ function PostPage() {
               ))}
 
               <li className="arrow" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}>{'›'}</li>
-              <li className="arrow" onClick={() => setCurrentPage(totalPages)}>{'»'}</li>
+              <li className="arrow" onClick={() => setCurrentPage(totalPages)}>{'››'}</li>
             </itemS.page_num>
           </itemS.content>
         </itemS.main_content>

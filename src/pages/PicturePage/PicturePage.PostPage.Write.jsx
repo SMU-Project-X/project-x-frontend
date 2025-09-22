@@ -17,7 +17,7 @@ function PostWrite() {
 
     // 멤버 목록 불러오기
     useEffect(() => {
-        axios.get("http://localhost:8080/api/memberName")
+        axios.get("http://localhost:8080/api/memberinfo")
             .then(res => setMembers(res.data))
             .catch(err => console.error("멤버 불러오기 실패", err));
     }, []);
@@ -51,7 +51,7 @@ function PostWrite() {
         }
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if(!title || !selectedMember || !imageFile) {
@@ -67,12 +67,9 @@ function PostWrite() {
         formData.append("content", content);
         formData.append("image", imageFile);
 
-        try{
-            axios.post("http://localhost:8080/api/posts", formData, {
-                headers: {"Content-Type": "multipart/form-data"},
-            });
-            // 게시판 페이지를 새로고침해서 fetchPosts 재실행
-            window.location.href = "/picture/post";
+        try {
+        await axios.post("http://localhost:8080/api/posts", formData);
+        window.location.href = "/picture/post";
         } catch (err) {
             console.error("게시글 등록 실패", err);
         }
@@ -98,8 +95,8 @@ function PostWrite() {
                         <itemS.form_content>
                             <itemS.label>멤버<itemS.required>*</itemS.required></itemS.label>
                             <itemS.member_container>
-                                {members.map((member) => (
-                                    <itemS.member_toggle key={member.member_id} data-selected={(selectedMember === member.name).toString()} onClick={() => setSelectedMember(selectedMember === member.name ? null : member.name)}>{member.name}</itemS.member_toggle>
+                                {members.map((member, index) => (
+                                    <itemS.member_toggle key={member.member_id || index} data-selected={(selectedMember === member.name).toString()} onClick={() => setSelectedMember(selectedMember === member.name ? null : member.name)}>{member.name}</itemS.member_toggle>
                                 ))}
                             </itemS.member_container>
                         </itemS.form_content>
