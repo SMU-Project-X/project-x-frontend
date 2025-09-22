@@ -54,6 +54,8 @@ function InsertInfoPage() {
             return;
         }
 
+        console.log('전송 payload:', { userId, userName, nickname, age, email, selectedCharacters });
+
         fetch("/api/signup/info", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
