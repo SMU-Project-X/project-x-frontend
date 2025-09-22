@@ -22,9 +22,29 @@ export const group_title = styled.span`
     width: 624px;
     margin: 20%;
 `;
+export const bannerWrapper = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 40px 0;
+`;
+export const arrow = styled.button`
+    background: none;
+    border: none;
+    font-size: 40px;
+    cursor: pointer;
+    padding: 0 15px;
+    color: #71C0E3;
+    &:disabled {
+      color: #ccc;
+      cursor: not-allowed;
+    }
+`;
 export const members = styled.div`
     display: flex;
-    justify-content: center;
+    flex-wrap: nowrap; /* 한 줄로만 유지 */
+    overflow: hidden;  /* 4개 이상은 숨김 */
+    width: 1100px;     /* 4개 카드가 들어갈 너비 (카드 260px * 4 + 마진) */
 `;
 export const member = styled.div`
     width: 260px;
