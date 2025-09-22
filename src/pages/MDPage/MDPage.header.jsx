@@ -357,7 +357,7 @@ const handleCurrencySelect = async (currency) => {
         <Navigation>
           <NavItem 
             className={isActivePage('/') ? 'active' : ''}
-            onClick={() => handleNavigation('/')}
+            onClick={() => handleNavigation('/Home')}
             data-translate="Home"
           >
             Home
@@ -371,21 +371,21 @@ const handleCurrencySelect = async (currency) => {
           </NavItem>
           <NavItem 
             className={isActivePage('/Community') ? 'active' : ''}
-            onClick={() => handleNavigation('/CommunityHome')}
+            onClick={() => handleNavigation('/Community')}
             data-translate="Community"
           >
             Community
           </NavItem>
           <NavItem 
             className={isActivePage('/content') ? 'active' : ''}
-            onClick={() => handleNavigation('/content')}
+            onClick={() => handleNavigation('/picture/select')}
             data-translate="Content"
           >
             Content
           </NavItem>
           <NavItem 
             className={isActivePage('/chat') ? 'active' : ''}
-            onClick={() => handleNavigation('/chat')}
+            onClick={() => handleNavigation('/ChatChoice')}
             data-translate="Chat"
           >
             Chat

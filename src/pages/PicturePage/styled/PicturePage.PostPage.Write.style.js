@@ -45,7 +45,7 @@ export const label=styled.label`
     font-size: 1.2em;
 `;
 export const input=styled.input`
-    width: 100%;
+    width: 740px;
     padding: 15px;
     border: 2px solid #e1e5e9;
     border-radius: 12px;
@@ -72,7 +72,7 @@ export const member_container=styled.div`
     line-height: 30px;
 `;
 export const member_toggle=styled.span`
-    width: 55px;
+    width: 54px;
     color: white;
     border-radius: 12px;
     font-size: 14px;
@@ -141,7 +141,7 @@ export const preview_image=styled.img`
     object-fit: cover;
 `;
 export const textarea=styled.textarea`
-    width: 100%;
+    width: 740px;
     padding: 15px;
     border: 2px solid #e1e5e9;
     border-radius: 12px;
@@ -160,7 +160,9 @@ export const textarea=styled.textarea`
 `;
 export const button_container=styled.div`
     display: flex;
-    margin: 40px 100px;
+    justify-content: space-between;
+    width: 300px;
+    margin: 40px auto;
 `;
 export const btn=styled.button`
     padding: 18px 40px;

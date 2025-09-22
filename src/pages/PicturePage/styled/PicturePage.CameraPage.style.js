@@ -6,9 +6,38 @@ export const container=styled.div`
     text-align: center;
 `;
 export const title=styled.div`
+    display: flex;
+    width: 636px;
+    justify-content: space-between;
+    align-items: center;
+    margin: 40px auto;
+    padding: 0 15px;
+`;
+export const back=styled.div`
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    img{
+      width: 27px;
+      height: 27px;
+      object-fit: cover;
+    }
+`;
+export const photobooth=styled.div`
     font-size: 30px;
     font-weight: 700;
-    margin: 40px 0;
+`;
+export const share=styled.div`
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    img{
+      width: 35px;
+      height: 35px;
+      object-fit: cover;
+    }
 `;
 export const camera_frame=styled.div`
     position: relative;
