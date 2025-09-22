@@ -43,7 +43,7 @@ import About from './pages/MDPage/MDPage.About';
 import MDMain from './pages/MDPage/MDPage.main';
 import Header from './pages/MDPage/MDPage.header';
 
-import MyPage from './pages/MyPage/MyPage';
+import MDMyPage from './pages/MDMyPage/MDMyPage';
 
 // 로그인
 import Login from './pages/LoginPage/LoginPage.main';
@@ -103,7 +103,7 @@ export default function App() {
 
         {/*  인증 관련 페이지 (새로 추가) */}
         <Route path="/login" element={<Login />} />
-        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/MDmypage" element={<MDMyPage />} />
         <Route path="/admin" element={<AdminPage />} />
 
         {/* MD 페이지 path (기존 유지) */}
@@ -119,8 +119,8 @@ export default function App() {
         <Route path="/MD/about" element={<About />} />
 
         {/*  추가 라우트 md */}
-        <Route path="/profile" element={<MyPage />} />
-        <Route path="/profile/orders" element={<MyPage />} />
+        <Route path="/profile" element={<MDMyPage />} />
+        <Route path="/profile/orders" element={<MDMyPage />} />
         <Route path="/dashboard" element={<AdminPage />} />
 
         {/* 404 페이지 (선택사항) */}

@@ -161,7 +161,7 @@ function Header() {
       navigate('/admin');
     } else {
       // 일반회원 → 마이페이지로
-      navigate('/mypage');
+      navigate('/MDmypage');
     }
   };
 
