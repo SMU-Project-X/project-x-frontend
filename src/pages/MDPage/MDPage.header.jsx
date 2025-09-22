@@ -179,6 +179,30 @@ function Header({ showSearch = true, showExchange = true, showCart = true, showA
       navigate('/mypage');
     }
   };
+  const handleLogout = async () => {
+    try {
+      await axios.post('http://localhost:8080/api/users/logout', {}, {
+        withCredentials: true,
+        timeout: 3000,
+      });
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    } finally {
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('username');
+      localStorage.removeItem('isAdmin');
+
+      setLoginStatus({
+        isLoggedIn: false,
+        userId: null,
+        username: null,
+        isAdmin: false,
+      });
+
+      window.dispatchEvent(new Event('loginStatusChanged'));
+    }
+  };
 
   // 네비게이션 핸들러
   const handleNavigation = (path) => {
@@ -491,11 +515,20 @@ function Header({ showSearch = true, showExchange = true, showCart = true, showA
             {loginStatus.isLoggedIn ? (loginStatus.isAdmin ? '🔐' : '👤') : '🚪'}
           </IconButton>
 
-          {/* ✅ 로그인 상태 텍스트: 항상 표시 (버튼 오른쪽) */}
-          <LoginStatusText>
-            {loginStatus.isLoggedIn
-              ? `✅ ${loginStatus.username} ${loginStatus.isAdmin ? '(관리자)' : '(일반)'}`
-              : '❌ 비로그인'}
+          {/* ✅ 로그인 상태 텍스트 */}
+          <LoginStatusText
+            type="button"
+            onClick={loginStatus.isLoggedIn ? handleLogout : undefined}
+            disabled={!loginStatus.isLoggedIn}
+            $showHoverText={loginStatus.isLoggedIn}
+            title={loginStatus.isLoggedIn ? '로그아웃' : '로그인 필요'}
+          >
+            <span className="default-text">
+              {loginStatus.isLoggedIn
+                ? `✅ ${loginStatus.username} ${loginStatus.isAdmin ? '(관리자)' : '(일반)'}`
+                : '❌ 비로그인'}
+            </span>
+            {loginStatus.isLoggedIn && <span className="hover-text">로그아웃</span>}
           </LoginStatusText>
 
           {/* About - 회사소개/고객센터 */}
@@ -531,3 +564,4 @@ function Header({ showSearch = true, showExchange = true, showCart = true, showA
 }
 
 export default Header;
+

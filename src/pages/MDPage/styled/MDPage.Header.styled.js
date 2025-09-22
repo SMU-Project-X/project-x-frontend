@@ -180,19 +180,76 @@ export const SearchInput = styled.input`
   }
 `;
 
-export const LoginStatusText = styled.span`
+export const LoginStatusText = styled.button`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
 
-  margin-left: 4px;        /* 로그인 버튼과 간격 */
-  padding: 6px 8px;
+  margin-left: 4px;
+  padding: 6px 10px;
   border-radius: 8px;
+  border: none;
 
   font-family: 'Pretendard', sans-serif;
   font-size: 12px;
   font-weight: 600;
   color: #172031;
 
-  background: rgba(23, 32, 49, 0.06);  /* 은은한 배경 */
+  background: rgba(23, 32, 49, 0.06);
+  cursor: pointer;
+  position: relative;
+  min-width: 120px;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  .default-text,
+  .hover-text {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .hover-text {
+    position: absolute;
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
+    display: ${({ $showHoverText }) => ($showHoverText ? 'inline-flex' : 'none')};
+  }
+
+  &:hover {
+    background: rgba(23, 32, 49, 0.12);
+    color: #0f1a2c;
+  }
+
+  &:hover .default-text {
+    opacity: ${({ $showHoverText }) => ($showHoverText ? 0 : 1)};
+    transform: ${({ $showHoverText }) => ($showHoverText ? 'translateY(-6px)' : 'translateY(0)')};
+  }
+
+  &:hover .hover-text {
+    opacity: ${({ $showHoverText }) => ($showHoverText ? 1 : 0)};
+    transform: ${({ $showHoverText }) => ($showHoverText ? 'translateY(0)' : 'translateY(6px)')};
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.7;
+    background: rgba(23, 32, 49, 0.04);
+    color: rgba(23, 32, 49, 0.6);
+  }
+
+  &:disabled .default-text {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &:disabled .hover-text {
+    opacity: 0;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(9, 132, 227, 0.6);
+    outline-offset: 2px;
+  }
 `;
+
