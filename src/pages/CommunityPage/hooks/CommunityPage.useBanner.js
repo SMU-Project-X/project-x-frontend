@@ -6,6 +6,12 @@ export const UseBanner = () => {
     const[banners, setBanners] = useState([]);
     const[error, setError] = useState(null);
 
+    // 선택된 배너
+    const [selectedBannerId, setSelectedBannerId] = useState(null);
+    const [options, setOptions] = useState([]);
+
+
+    // 배너 전체 리스트
     useEffect(() => {
         axios.get(`http://localhost:8080/api/banners/list`)
         .then((res) => {
@@ -16,24 +22,23 @@ export const UseBanner = () => {
             console.log("에러 발생: ",error)
         })
     }, []);
-
-    return banners ;
-}
-
-// 후보 옵션 가져오기
-export const useBannerOptions = (bannerId) => {
-    const [options, setOptions ] = useState([]);
-    const [error, setError ] = useState(null);
-
+    
+    
+    // 선택된 배너 가져오기
     useEffect(() => {
-        if(!bannerId) return;
+    if(!selectedBannerId) return;
 
-        axios.get(`http://localhost:8080/api/banners/${bannerId}/units`)
-        .then((res)=> {
-            setOptions(res.data)
-            console.log("units 데이터: ",res.data)
-        })
-        .catch((err) => setError(err))
-    }, [bannerId]);
-    return options;
+    axios.get(`http://localhost:8080/api/banners/${selectedBannerId}`)
+    .then((res)=> {
+        setOptions(res.data)
+        console.log("units 데이터: ",res.data)
+    })
+    .catch((err) => setError(err))
+    }, [selectedBannerId]);
+
+    return {
+        banners,
+        selectedBannerId,
+        setSelectedBannerId
+    };
 }

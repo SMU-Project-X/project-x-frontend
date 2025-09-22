@@ -45,7 +45,7 @@ import { UseBanner } from './hooks/CommunityPage.useBanner';
     `;
 
 export const Banner = () => {
-    const banners = UseBanner();
+    const {banners, selectedBannerId, options} = UseBanner();
     console.log("가져온 배너 데이터: ",banners);
 
 
