@@ -5,15 +5,16 @@ import TraitsModal from '@/pages/RandingPage/RandingPage.SelectMemberPage.Member
 import PsyInlineControl from '@/pages/psychotest/PsyInlineControl';
 import { useRecoilState } from 'recoil';
 import { selectedCharactersState } from '@/recoil/characterAtom';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function SelectMemberPage() {
+    const navigate = useNavigate();
     const [openPsy, setOpenPsy] = useState(false);
     const [openTraitModal, setOpenTraitModal] = useState(false);
     const [currentSlotIndex, setCurrentSlotIndex] = useState(null);
     const [currentTraitIndex, setCurrentTraitIndex] = useState(null);
 
-    const [selectedCharacters, setSelectedCharacters] = useRecoilState(selectedCharactersState);
+    const [selectedCharacters] = useRecoilState(selectedCharactersState);
 
     // 전역에서 이미 선택된 trait
     const selectedTraitsGlobally = selectedCharacters
@@ -25,6 +26,11 @@ function SelectMemberPage() {
         setCurrentTraitIndex(traitIndex);
         setOpenTraitModal(true);
     };
+
+    const handleSubmit = () => {
+        console.log(selectedCharacters);
+        navigate("/home");
+    }
 
     useEffect(() => {
         console.log('현재 선택된 캐릭터:', selectedCharacters);
@@ -44,7 +50,7 @@ function SelectMemberPage() {
 —낯설지만 진심을 배우며 사람들 곁에 스며드는 존재다—`}
             </itemS.contentWapper>
 
-            <itemS.SelectMemberContainer>
+            <itemS.SelectMemberContainer> {/* 마이페이지 */}
                 <itemS.SelectMemberTopContainer>
                     <itemS.SelectMemeberTopText>원하는 캐릭터와 성격을 선택하세요</itemS.SelectMemeberTopText>
 
@@ -75,9 +81,7 @@ function SelectMemberPage() {
                 </itemS.MembersContainer>
 
                 <itemS.SubmitBtnWrapper>
-                    <Link to="/home">
-                        <itemS.SubmitBtn>완료</itemS.SubmitBtn>
-                    </Link>
+                    <itemS.SubmitBtn onClick={handleSubmit}>완료</itemS.SubmitBtn>
                 </itemS.SubmitBtnWrapper>
             </itemS.SelectMemberContainer>
 
