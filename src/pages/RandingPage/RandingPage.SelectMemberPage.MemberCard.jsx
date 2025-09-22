@@ -10,12 +10,14 @@ import QuestionMark from '@/assets/images/RandingPage/QuestionMark.png';
 function MemberCard({ img, name, slotIndex }) {
     const [selectedCharacters] = useRecoilState(selectedCharactersState);
     const traits = selectedCharacters[slotIndex].traits; // Recoil 상태에서 직접 읽음
+    const [type, setType] = useState("");
 
     const [modalOpen, setModalOpen] = useState(false);
     const [traitSlot, setTraitSlot] = useState(null);
 
-    const handleOpenModal = (index) => {
-        setTraitSlot(index);
+    const handleOpenModal = (index, type = "trait") => {
+        setTraitSlot(index); // trait 인덱스 or null(MBTI)
+        setType(type);       // "trait" 또는 "mbti"
         setModalOpen(true);
     };
 
@@ -33,11 +35,14 @@ function MemberCard({ img, name, slotIndex }) {
                             filter: trait ? 'none' : 'grayscale(50%)',
                             cursor: 'pointer'
                         }}
-                        onClick={() => handleOpenModal(idx)}
+                        onClick={() => handleOpenModal(idx, "trait")}
                     >
                         {trait || '???'}
                     </itemS.MemeberPersonalWrapper>
                 ))}
+                <itemS.MemeberPersonalWrapper onClick={() => handleOpenModal(null, "mbti")}>
+                    {selectedCharacters[slotIndex].mbti || '???'}
+                </itemS.MemeberPersonalWrapper>
             </itemS.MemberPersonalContainer>
 
             {/* 모달 */}
@@ -46,6 +51,7 @@ function MemberCard({ img, name, slotIndex }) {
                 slotIndex={slotIndex}
                 traitSlot={traitSlot}
                 onClose={() => setModalOpen(false)}
+                type={type}
             />
         </itemS.MemberCardContainer>
     );

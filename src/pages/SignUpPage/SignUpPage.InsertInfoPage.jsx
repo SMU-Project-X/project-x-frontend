@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import * as S from "@/pages/SignUpPage/styled/SignUpPage.InsertInfoPage.style";
 import { useNavigate } from "react-router-dom";
+import { useRecoilState } from 'recoil';
+import { selectedCharactersState } from '@/recoil/characterAtom';
 
 function InsertInfoPage() {
     const navigate = useNavigate();
@@ -10,7 +12,7 @@ function InsertInfoPage() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [userName, setUserName] = useState("");
     const [nickname, setNickname] = useState("");
-    const [age, setAge] = useState("");
+    const [age, setAge] = useState(0);
     const [sendCode, setSendCode] = useState(false);
     const [email, setEmail] = useState("");
     const [verifyCode, setVerifyCode] = useState("");
@@ -18,6 +20,7 @@ function InsertInfoPage() {
     const [checkCodeMessage, setCheckCodeMessage] = useState("");
     const [checkCodeStatus, setCheckCodeStatus] = useState(false);
 
+    const [selectedCharacters] = useRecoilState(selectedCharactersState);
 
     // 유효성 검사 함수
     const isValidUserId = /^[a-zA-Z0-9]{4,16}$/.test(userId);
@@ -54,7 +57,7 @@ function InsertInfoPage() {
         fetch("/api/signup/info", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId, userName, nickname, password, age, email }),
+            body: JSON.stringify({ userId, userName, nickname, password, age, email, selectedCharacters }),
         })
             .then((res) => res.text())
             .then((data) => { console.log("응답:", data); })
