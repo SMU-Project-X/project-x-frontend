@@ -18,7 +18,10 @@ function PostPage() {
   const [searchInput, setSearchInput] = useState("");
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [posts, setAllPosts] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // 게시글 불러오기
   useEffect (() => {
     const fetchPosts = () => {
       axios.get("http://localhost:8080/api/posts")
@@ -33,6 +36,17 @@ function PostPage() {
     fetchPosts();
   }, []);
 
+  // 로그인 확인
+  useEffect(() => {
+      axios.get("http://localhost:8080/api/users/status", { withCredentials: true })
+      .then(res => setIsLoggedIn(res.data.isLoggedIn))
+      .catch(err => console.error(err))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  if (isLoading) return <div>Loading...</div>;
+
+  // 검색
   const handleSearch = () => {
     const keyword = searchInput.trim().toLowerCase();
     if (!keyword) {
@@ -66,6 +80,22 @@ function PostPage() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const handleUploadClick = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/api/users/status", { withCredentials: true });
+      if (res.data.isLoggedIn) {
+        navigate("/picture/post/write");
+      } else {
+        alert("로그인 후 게시글을 작성할 수 있습니다.");
+        navigate("/login");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("로그인 확인 실패");
+    }
+  };
+
 
   return (
     <div>
@@ -102,7 +132,7 @@ function PostPage() {
                   <itemS.photo_info>
                     <itemS.photo_title>{post.title}</itemS.photo_title>
                     <itemS.photo_meta>
-                      <span>{post.username}</span>
+                      <span>{post.nickname}</span>
                       <span>{formatDate(post.created_at)}</span>
                     </itemS.photo_meta>
                     <itemS.photo_stats>
@@ -137,7 +167,8 @@ function PostPage() {
           </itemS.content>
         </itemS.main_content>
 
-        <itemS.uploadBtn onClick={() => navigate('/picture/post/write')}>
+        {/* <itemS.uploadBtn onClick={() => navigate('/picture/post/write')}> */}
+        <itemS.uploadBtn onClick={handleUploadClick}>
           <img src={write} alt="" />
         </itemS.uploadBtn>
       </itemS.container>

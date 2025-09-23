@@ -187,7 +187,7 @@ export const photo_meta=styled.div`
   color: #666;
 `;
 export const tag=styled.div`
-  width: 45px;
+  width: 25px;
   padding: 4px 8px;
   background: #B3D1F0;
   color: white;
@@ -232,6 +232,7 @@ export const page_num=styled.ul`
     border-radius: 8px;
     cursor: pointer;
     color: #333;
+    font-size: 14px;
     font-weight: 500;
     transition: all 0.3s ease;
     background: #f0f0f0;

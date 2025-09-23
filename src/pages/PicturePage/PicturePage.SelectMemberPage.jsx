@@ -13,15 +13,15 @@ function PictureSelectMemberPage(){
     const [startIndex, setStartIndex] = useState(0); // 현재 보여주는 첫 멤버 인덱스
 
     useEffect(() => {
-    axios.get(`http://localhost:8080/api/memberinfo`)
-        .then(res => {
-            console.log(res);
-            setAllMembers(res.data);
-            console.log("멤버 : ", res.data);
-        })
-        .catch(err => console.error(err));
+        axios.get(`http://localhost:8080/api/memberinfo`)
+            .then(res => {
+                console.log(res);
+                setAllMembers(res.data);
+                console.log("멤버 : ", res.data);
+            })
+            .catch(err => console.error(err));
     }, []);
-
+    
 
     const handleSelect = (member) => {
         setSelectedMember(member);

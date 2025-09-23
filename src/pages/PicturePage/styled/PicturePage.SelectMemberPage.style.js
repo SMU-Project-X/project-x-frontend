@@ -50,6 +50,7 @@ export const member = styled.div`
     width: 260px;
     height: 350px;
     margin: 20px;
+    box-sizing: border-box;
     align-content: center;
     text-align: center;
     border-radius: 20px;
@@ -72,7 +73,7 @@ export const member = styled.div`
 export const member_name = styled.div`
     padding: 15px;
     color: #474B4E; 
-    font-size: 25px;
+    font-size: 22px;
 `;
 export const member_position = styled.div`
     color: #98A3A9;
