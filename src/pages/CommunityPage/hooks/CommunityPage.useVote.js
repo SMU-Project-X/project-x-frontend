@@ -9,7 +9,8 @@ export const useVote = () => {
 
     // 투표저장
     const postVote = async(bannerId,unitId) => {
-        if(!bannerId || !unitId){
+
+        if(!bannerId){
             alert("투표할 유닛을 선택해주세요!");
             return;
         }
@@ -19,16 +20,11 @@ export const useVote = () => {
             const Response = await axios.post(`http://localhost:8080/api/vote/save`,{
                 bannerId,
                 optionId : unitId,
-                userId:1
             });
 
             console.log("투표저장됨: ", Response.data);
             alert("투표완료!");
             fetchVotes(bannerId);  // 결과 갱신
-            // const newVote={bannerId, unitId, votedAt:new Date().toISOString().split('T')[0]}
-            // setVotes((prev) => [...prev,newVote])
-            // console.log("투표 저장됨: ", newVote);
-            // alert(`투표완료! bannerId=${bannerId}, unitId=${unitId}`);
 
         } catch(err) {
             setError(err);
@@ -43,7 +39,8 @@ export const useVote = () => {
     // 투표결과 불러오기
     const fetchVotes = async(bannerId) => {
         try{
-            const res = await axios.get(`http://localhost:8080/api/vote/${bannerId}`)
+            const res = await axios.get(`http://localhost:8080/api/vote/voteResult/${bannerId}`)
+            console.log(res.data);
         } catch(err) {
             console.error("결과 조회 오류: ",err);
         }

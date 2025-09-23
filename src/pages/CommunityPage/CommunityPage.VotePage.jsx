@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
 
 // modal style
 import * as VoteModal from './styled/CommunityPage.VoteModal.style';
@@ -18,6 +18,7 @@ import next from '@/assets/images/CommunityPage/next.png';
 import * as itemS from './styled/CommunityPage.VoteBanner.style';
 import styled from 'styled-components';
 import { useVote } from './hooks/CommunityPage.useVote';
+import Login from '../LoginPage/LoginPage.main';
 
     
     // 이전, 다음 버튼
@@ -51,12 +52,6 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
     const [selectedUnit, setSelectedUnit]=useState(null);
     const [voted, setVoted] = useState(true); // 투표 여부 체크
 
-    // // 처음로드시 결과 불러오기
-    // useEffect(()=>{
-    //     if(banner?.bannerId){
-    //         fetchVotes(banner.bannerId);
-    //     }
-    // })
 
     // 버튼 함수 호출
     const prevRef = useRef(null);
@@ -65,10 +60,20 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
     if(!isModalOpen || !banner) return null;
 
     const handleVote=()=>{
+        const userId = Login();
+        const navigate = useNavigate();
+        console.log("유저아이디: ",userId);
+        
+    // ✅ 로그인 안 된 경우
+    if (!userId) {
+      alert("로그인이 필요합니다! 로그인 페이지로 이동합니다.");
+      navigate("/login"); // 실제로 로그인 페이지로 이동
+      return;
+    }
+        
         postVote(banner.bannerId, selectedUnit);
         setVoted(true)
     };
-
 
     // VoteCard 와 props 이름 일치시키기 필요
     const units = [
@@ -132,10 +137,16 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
                             </PrevBtn>
                                 <Swiper 
                                     modules={[Navigation, Pagination]}
-                                    navigation={{ prevEl: prevRef.current, nextEl: nextRef.current }}
                                     loop={true}
                                     spaceBetween={30}
                                     slidesPerView={1} 
+                                    onBeforeInit={(swiper) => {
+                                        if (typeof swiper.params.navigation !== "boolean"){
+                                            swiper.params.navigation.prevEl = prevRef.current;
+                                            swiper.params.navigation.nextEl = nextRef.current;
+                                        }
+                                        
+                                    }}
                                 >   
                                     {/* 이전으로 넘어가기 */}
                                     {units.map((unit) => (
@@ -147,9 +158,9 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
                                             isSelected={selectedUnit === unit.unit_id}
                                             // 한번 더 클릭시 해제
                                             onSelect={() =>
-                                            setSelectedUnit(
-                                                selectedUnit === unit.unit_id ? null : unit.unit_id
-                                            )
+                                                setSelectedUnit(
+                                                    selectedUnit === unit.unit_id ? null : unit.unit_id
+                                                )
                                             }
                                         />
                                         </VoteModal.UnitContainer>
