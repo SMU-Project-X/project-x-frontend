@@ -9,7 +9,12 @@ export const useVote = () => {
 
     // 투표저장
     const postVote = async(bannerId,unitId) => {
-
+        const userId = localStorage.getItem("userId");
+        if (!userId) {
+            alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
+            window.location.href = "/login"; // ✅ 로그인 페이지 리다이렉트
+            return;
+            }
         if(!bannerId){
             alert("투표할 유닛을 선택해주세요!");
             return;
@@ -20,6 +25,7 @@ export const useVote = () => {
             const Response = await axios.post(`http://localhost:8080/api/vote/save`,{
                 bannerId,
                 optionId : unitId,
+                userId,
             });
 
             console.log("투표저장됨: ", Response.data);

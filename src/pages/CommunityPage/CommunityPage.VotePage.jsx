@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
 // modal style
 import * as VoteModal from './styled/CommunityPage.VoteModal.style';
@@ -60,16 +60,6 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
     if(!isModalOpen || !banner) return null;
 
     const handleVote=()=>{
-        const userId = Login();
-        const navigate = useNavigate();
-        console.log("유저아이디: ",userId);
-        
-    // ✅ 로그인 안 된 경우
-    if (!userId) {
-      alert("로그인이 필요합니다! 로그인 페이지로 이동합니다.");
-      navigate("/login"); // 실제로 로그인 페이지로 이동
-      return;
-    }
         
         postVote(banner.bannerId, selectedUnit);
         setVoted(true)

@@ -248,3 +248,8 @@ export const NoMoreVote = styled.div `
         font-weight: bold;
     }
 `;
+
+
+export const VoteResultChart = styled.div`
+    
+`;
