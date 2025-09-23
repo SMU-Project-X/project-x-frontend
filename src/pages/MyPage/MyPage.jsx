@@ -1,10 +1,10 @@
-// MDMyPage.jsx 
+// MyPage.jsx - 404 에러 및 라우팅 문제 해결
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import * as S from './styled/MDMyPage.styled';
+import * as S from './styled/MyPage.styled';
 
-function MDMyPage() {
+function MyPage() {
   const navigate = useNavigate();
   
   // 상태 관리
@@ -538,4 +538,4 @@ function MDMyPage() {
   );
 }
 
-export default MDMyPage;
+export default MyPage;
