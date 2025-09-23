@@ -15,7 +15,6 @@ export const CommunityHome = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
     return(
       <>        
-      {/* 상단 헤더 */}
 
       <itemS.Maincontainer>
         <itemS.ContentContainer>

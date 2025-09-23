@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import { useVote } from './hooks/CommunityPage.useVote';
 import Login from '../LoginPage/LoginPage.main';
 
+
     
     // 이전, 다음 버튼
     const PrevBtn = styled.div`
@@ -60,7 +61,6 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
     if(!isModalOpen || !banner) return null;
 
     const handleVote=()=>{
-        
         postVote(banner.bannerId, selectedUnit);
         setVoted(true)
     };
@@ -127,6 +127,9 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
                             </PrevBtn>
                                 <Swiper 
                                     modules={[Navigation, Pagination]}
+
+                                    navigation={{ prevEl: prevRef.current, nextEl: nextRef.current }}
+
                                     loop={true}
                                     spaceBetween={30}
                                     slidesPerView={1} 

@@ -45,7 +45,7 @@ export const label=styled.label`
     font-size: 1.2em;
 `;
 export const input=styled.input`
-    width: 740px;
+    width: 735px;
     padding: 15px;
     border: 2px solid #e1e5e9;
     border-radius: 12px;

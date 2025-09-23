@@ -249,7 +249,7 @@ export const NoMoreVote = styled.div `
     }
 `;
 
-
 export const VoteResultChart = styled.div`
     
 `;
+

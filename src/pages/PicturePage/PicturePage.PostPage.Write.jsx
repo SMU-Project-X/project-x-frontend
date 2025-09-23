@@ -13,13 +13,38 @@ function PostWrite() {
     const [imageFile, setImageFile] = useState(null);
     const [members, setMembers] = useState([]);
     const inputRef = useRef(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    
+    // 로그인 유저인지 확인
+    useEffect(() => {
+        const checkLogin = async () => {
+            try {
+                const res = await axios.get("http://localhost:8080/api/users/status", { withCredentials: true });
+                if (res.data.isLoggedIn) {
+                    setIsLoggedIn(true);
+                } else {
+                    navigate("/login");
+                }
+            } catch (err) {
+                console.error(err);
+                navigate("/login");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        checkLogin();
+    }, [navigate]);
 
     // 멤버 목록 불러오기
     useEffect(() => {
         axios.get("http://localhost:8080/api/memberinfo")
             .then(res => setMembers(res.data))
             .catch(err => console.error("멤버 불러오기 실패", err));
-    }, []);
+    }, [isLoggedIn]);
+
+    if (isLoading) return <div>Loading...</div>; // 로딩 중 표시
+    if (!isLoggedIn) return null; // 비로그인 시 렌더링 안함
 
     // 클릭 시 파일 선택창 열기
     const handleAreaClick = () => {
@@ -67,10 +92,11 @@ function PostWrite() {
         formData.append("image", imageFile);
 
         try {
-        await axios.post("http://localhost:8080/api/posts", formData);
-        window.location.href = "/picture/post";
+            await axios.post("http://localhost:8080/api/posts", formData, { withCredentials: true });
+            window.location.href = "/picture/post";
         } catch (err) {
             console.error("게시글 등록 실패", err);
+            alert("게시글 등록에 실패했습니다. 다시 시도해주세요.");
         }
     };
 

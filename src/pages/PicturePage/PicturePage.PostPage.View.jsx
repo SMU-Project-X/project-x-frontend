@@ -148,7 +148,7 @@ function PostView() {
                         <itemS.photo_info>
                             <itemS.photo_title>{post.title}</itemS.photo_title>
                             <itemS.photo_meta>
-                                <span>{post.username}</span>
+                                <span>{post.nickname}</span>
                                 <itemS.created_at>{formatDate(post.created_at)}</itemS.created_at>
                             </itemS.photo_meta>
                             <itemS.photo_stats>
