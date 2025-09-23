@@ -1,7 +1,6 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import * as itemS from "@/pages/PicturePage/styled/PicturePage.PostPage.style";
-import Header from "@/pages/PicturePage/components/PicturePage.Header";
 import { useNavigate } from "react-router-dom";
 
 import write from "@/assets/images/PicturePage/write.png";
@@ -70,7 +69,6 @@ function PostPage() {
 
   return (
     <div>
-      <Header />
 
       <itemS.container>
         <itemS.main_content>

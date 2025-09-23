@@ -6,7 +6,6 @@ import previous from '@/assets/images/CommunityPage/previous.png';
 import sendImg from '@/assets/images/CommunityPage/sendImg.png';
 import shareicon from '@/assets/images/CommunityPage/shareicon.png';
 import { InputComment } from './components/CommunityPage.InputComment';
-import Header from '../PicturePage/components/PicturePage.Header';
 import { CommentSection } from './components/CommunityPage.CommentContent';
 import { PuzzleSection } from './components/CommunityPage.InputComment';
 
@@ -21,9 +20,6 @@ export const CheerArtist = () => {
 
     return (
     <itemS.Maincontainer>
-    {/* 상단 헤더 */}
-      <Header />
-
       {/* 이전으로 넘어가기 */}
       {/* <itemS.ContentTop> */}
         {/* <itemS.prevBtn ><img src={previous}/> 이전 </itemS.prevBtn> */}
