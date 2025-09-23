@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import { BrowserRouter } from "react-router-dom";
 import { createGlobalStyle } from 'styled-components'
+import { RecoilRoot } from 'recoil'   // ⬅️ 추가
 
 const GlobalStyle = createGlobalStyle`
   html, body, #root {
@@ -16,7 +17,9 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <GlobalStyle />
     <BrowserRouter>
-      <App />
+      <RecoilRoot>  
+        <App />
+      </RecoilRoot>
     </BrowserRouter>
   </StrictMode>,
 )
