@@ -9,7 +9,13 @@ export const useVote = () => {
 
     // 투표저장
     const postVote = async(bannerId,unitId) => {
-        if(!bannerId || !unitId){
+        const userId = localStorage.getItem("userId");
+        // if (!userId) {
+        //     alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
+        //     window.location.href = "/login"; // ✅ 로그인 페이지 리다이렉트
+        //     return;
+        //     }
+        if(!bannerId){
             alert("투표할 유닛을 선택해주세요!");
             return;
         }
@@ -29,7 +35,6 @@ export const useVote = () => {
             // setVotes((prev) => [...prev,newVote])
             // console.log("투표 저장됨: ", newVote);
             // alert(`투표완료! bannerId=${bannerId}, unitId=${unitId}`);
-
         } catch(err) {
             setError(err);
             console.log("투표저장 실패: ",err)
@@ -43,14 +48,17 @@ export const useVote = () => {
     // 투표결과 불러오기
     const fetchVotes = async(bannerId) => {
         try{
+            const res = await axios.get(`http://localhost:8080/api/vote/voteResult/${bannerId}`)
+            console.log("투표결과: ",res.data);
+
             const res = await axios.get(`http://localhost:8080/api/vote/${bannerId}`)
         } catch(err) {
             console.error("결과 조회 오류: ",err);
         }
     }
 
-
     return {postVote, fetchVotes,loading,error};
+
 };
 
 
