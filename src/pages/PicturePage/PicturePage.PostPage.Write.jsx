@@ -1,7 +1,6 @@
 import axios from "axios";
 import React, { useState, useRef, useEffect } from "react";
 import * as itemS from "@/pages/PicturePage/styled/PicturePage.PostPage.Write.style";
-import Header from "@/pages/PicturePage/components/PicturePage.Header";
 import { useNavigate } from "react-router-dom";
 
 
@@ -14,13 +13,38 @@ function PostWrite() {
     const [imageFile, setImageFile] = useState(null);
     const [members, setMembers] = useState([]);
     const inputRef = useRef(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    
+    // 로그인 유저인지 확인
+    useEffect(() => {
+        const checkLogin = async () => {
+            try {
+                const res = await axios.get("http://localhost:8080/api/users/status", { withCredentials: true });
+                if (res.data.isLoggedIn) {
+                    setIsLoggedIn(true);
+                } else {
+                    navigate("/login");
+                }
+            } catch (err) {
+                console.error(err);
+                navigate("/login");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        checkLogin();
+    }, [navigate]);
 
     // 멤버 목록 불러오기
     useEffect(() => {
-        axios.get("http://localhost:8080/api/memberName")
+        axios.get("http://localhost:8080/api/memberinfo")
             .then(res => setMembers(res.data))
             .catch(err => console.error("멤버 불러오기 실패", err));
-    }, []);
+    }, [isLoggedIn]);
+
+    if (isLoading) return <div>Loading...</div>; // 로딩 중 표시
+    if (!isLoggedIn) return null; // 비로그인 시 렌더링 안함
 
     // 클릭 시 파일 선택창 열기
     const handleAreaClick = () => {
@@ -51,7 +75,7 @@ function PostWrite() {
         }
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if(!title || !selectedMember || !imageFile) {
@@ -67,21 +91,18 @@ function PostWrite() {
         formData.append("content", content);
         formData.append("image", imageFile);
 
-        try{
-            axios.post("http://localhost:8080/api/posts", formData, {
-                headers: {"Content-Type": "multipart/form-data"},
-            });
-            // 게시판 페이지를 새로고침해서 fetchPosts 재실행
+        try {
+            await axios.post("http://localhost:8080/api/posts", formData, { withCredentials: true });
             window.location.href = "/picture/post";
         } catch (err) {
             console.error("게시글 등록 실패", err);
+            alert("게시글 등록에 실패했습니다. 다시 시도해주세요.");
         }
     };
 
     return (
         <div style={{ width: "100%", overflowX: "hidden" }}>
 
-            <Header/>
 
             <itemS.container>
                 <itemS.upload_container>
@@ -98,8 +119,8 @@ function PostWrite() {
                         <itemS.form_content>
                             <itemS.label>멤버<itemS.required>*</itemS.required></itemS.label>
                             <itemS.member_container>
-                                {members.map((member) => (
-                                    <itemS.member_toggle key={member.member_id} data-selected={(selectedMember === member.name).toString()} onClick={() => setSelectedMember(selectedMember === member.name ? null : member.name)}>{member.name}</itemS.member_toggle>
+                                {members.map((member, index) => (
+                                    <itemS.member_toggle key={member.member_id || index} data-selected={(selectedMember === member.name).toString()} onClick={() => setSelectedMember(selectedMember === member.name ? null : member.name)}>{member.name}</itemS.member_toggle>
                                 ))}
                             </itemS.member_container>
                         </itemS.form_content>

@@ -6,8 +6,7 @@ import MessageArea from './hooks/Chatbot.MessageArea';
 import InputArea from './hooks/Chatbot.InputArea';
 import { findContactByNameOrEnglish } from './utils/helpers';
 import {
-    Container, Header, NavContainer, Logo, NavMenu, NavItem, LoginBtn,
-    ChatMainContainer, ChatArea
+    Container, ChatMainContainer, ChatArea
 } from './styled/ChatApp.js';
 
 const ChatApp = () => {
@@ -292,22 +291,6 @@ const ChatApp = () => {
 
     return (
         <Container>
-            <Header>
-                <NavContainer>
-                    <Logo>Project - X</Logo>
-                    <NavMenu>
-                        <NavItem href="#">Home</NavItem>
-                        <NavItem href="#">MD</NavItem>
-                        <NavItem href="#">Community</NavItem>
-                        <NavItem href="#">Content</NavItem>
-                        <NavItem href="#" className="active">Chat</NavItem>
-                    </NavMenu>
-                    <LoginBtn href="#">
-                        <span>👤</span>
-                        로그인
-                    </LoginBtn>
-                </NavContainer>
-            </Header>
             <ChatMainContainer>
                 <Sidebar contacts={contacts} selectedChat={selectedChat} />
                 <ChatArea>

@@ -51,14 +51,14 @@ export const SwiperWrapper  = styled.div`
 export const ModuleContainer = styled.div `
     background: #eae7f7ff;
     border-radius: 50px;
-    width: 45vw;
-    height: 77vh;
+    width: 46vw;
+    height: 80vh;
     position: relative;
     padding: 20px;
     
     @media (max-width: 1024px) {
         width: 90%;
-        heigth: auto;
+        height: auto;
     }
     @media (max-width:768px) {
         height:auto;
@@ -81,8 +81,7 @@ export const VoteContainer = styled.div `
     h1 {
         width: 70%;
         text-align: center;
-        font-size: 30px; font-family:Arial, Helvetica, sans-serif;
-        padding: 5%;
+        font-size: 23px;
         font-weight: bold;
     }
     @media (max-width: 1024px) {
@@ -147,7 +146,7 @@ export const Unit = styled.div `
     display: grid;
     grid-template-columns: repeat(2,1fr);
     gap: 10px;
-    padding: 20px;
+    padding: 10px;
     justify-items: center;
     align-items: center;
     width: 100%;
@@ -167,7 +166,7 @@ export const Unit = styled.div `
     }
 `;
 export const VoteCard = styled.div `
-    width: 15vw;
+    width: 100%;
     height: 26vh;
     overflow: hidden;
     text-align: center;
@@ -180,9 +179,15 @@ export const VoteCard = styled.div `
 `;
 
 export const VoteImg = styled.div `
+    width: 100%;
+    height: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
     img {
-        width: 90%;
-        height: auto;
+        width: 182px;
+        height: 200px;
         object-fit: cover;
     }
 
@@ -198,13 +203,19 @@ export const VoteImg = styled.div `
 `;
 
 export const UnitInfo = styled.div `
-    padding: 5px;
-    font-size: 14px;
-    height: 5vh;
-
+    padding: 2px;
+    font-size: 11px;
+    height: auto;
+    min-height: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
     span{
-        font-size: 15px;
-
+        font-size: 12px;
+        font-weight: 500;
+        word-break: keep-all;
+        overflow-wrap: break-word;
     }
     
     @media (max-width: 480px) {
@@ -212,6 +223,19 @@ export const UnitInfo = styled.div `
     }
 `;
 
+export const VoteButton = styled.div`
+    width: 100%;
+    max-width: 300px;
+    height: 50px;
+    margin: 15px auto 0;
+    border: 2px solid #333;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+
+`;
 
 /* 투표완료시 안내창 */
 export const VoteBlock= styled.div `
@@ -223,5 +247,9 @@ export const NoMoreVote = styled.div `
         font-size: 40px;
         font-weight: bold;
     }
+`;
+
+export const VoteResultChart = styled.div`
+    
 `;
 

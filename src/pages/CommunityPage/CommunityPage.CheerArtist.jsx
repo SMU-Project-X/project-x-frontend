@@ -6,9 +6,10 @@ import previous from '@/assets/images/CommunityPage/previous.png';
 import sendImg from '@/assets/images/CommunityPage/sendImg.png';
 import shareicon from '@/assets/images/CommunityPage/shareicon.png';
 import { InputComment } from './components/CommunityPage.InputComment';
-import Header from '../PicturePage/components/PicturePage.Header';
 import { CommentSection } from './components/CommunityPage.CommentContent';
 import { PuzzleSection } from './components/CommunityPage.InputComment';
+import { useComment } from './hooks/CommunityPage.useComment';
+
 
 export const CheerArtist = () => {
   const location = useLocation();
@@ -17,13 +18,11 @@ export const CheerArtist = () => {
   const memberId = searchParams.get("memberId");
   const memberName = searchParams.get("memberName");
   
+  const commentHook = useComment(memberId, memberName);
 
 
     return (
     <itemS.Maincontainer>
-    {/* 상단 헤더 */}
-      <Header />
-
       {/* 이전으로 넘어가기 */}
       {/* <itemS.ContentTop> */}
         {/* <itemS.prevBtn ><img src={previous}/> 이전 </itemS.prevBtn> */}
@@ -35,8 +34,16 @@ export const CheerArtist = () => {
 
       {/* 본문 */}
       <itemS.CheerArtistContainer>
-        <PuzzleSection memberId={memberId} memberName={memberName} />
-        <CommentSection memberId={memberId} memberName = {memberName} />
+        <PuzzleSection 
+          reply = {commentHook.reply}
+          saveComment = {commentHook.saveComment}
+          memberId = {memberId}
+          memberName = {memberName} 
+        />
+        <CommentSection
+          reply = {commentHook.reply}
+          error = {commentHook.error}
+        />
 
 
       </itemS.CheerArtistContainer>

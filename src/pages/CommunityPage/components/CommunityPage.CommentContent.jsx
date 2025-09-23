@@ -6,9 +6,11 @@ import { useComment } from '@/pages/CommunityPage/hooks/CommunityPage.useComment
 import { useLocation } from 'react-router-dom';
 import * as itemS from '@/pages/CommunityPage/styled/CommunityPage.CheerArtist.style';
 
-export const CommentSection = ({memberId, memberName}) => {
-  const {reply, error} = useComment(memberId, memberName);
-
+export const CommentSection = ({reply, error}) => {
+  
+  // const {reply, error} = useComment(memberId, memberName);
+  console.log("현재 reply: ",reply);
+  
   return(
     <itemS.CommentContainer>
       {/* 댓글 리스트 */}
@@ -16,7 +18,7 @@ export const CommentSection = ({memberId, memberName}) => {
         {reply.length === 0 ? (
           <p>댓글이 없습니다.</p>
         ) : (
-         reply.map((m) => <CommentContent key={m.commentId} comment={m} />)
+         reply.map((m) => <CommentContent key={m.commentId || Math.random()} comment={m} />)
         )}
       </itemS.CommentList>
     </itemS.CommentContainer>

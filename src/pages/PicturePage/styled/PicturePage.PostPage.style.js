@@ -26,7 +26,7 @@ export const filter_title=styled.h3`
   color: #333;
 `;
 export const search_input=styled.input`
-  width: 100%;
+  width: 280px;
   padding: 12px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
@@ -77,7 +77,7 @@ export const searchBtn=styled.button`
   font-weight: bold;
   transition: all 0.3s ease;
   margin-top: 15px;
-  width: 260px;
+  width: 310px;
   height: 55px;
   line-height: 35px;
 
@@ -187,7 +187,7 @@ export const photo_meta=styled.div`
   color: #666;
 `;
 export const tag=styled.div`
-  width: 45px;
+  width: 25px;
   padding: 4px 8px;
   background: #B3D1F0;
   color: white;
@@ -232,6 +232,7 @@ export const page_num=styled.ul`
     border-radius: 8px;
     cursor: pointer;
     color: #333;
+    font-size: 14px;
     font-weight: 500;
     transition: all 0.3s ease;
     background: #f0f0f0;
@@ -272,4 +273,9 @@ export const uploadBtn=styled.button`
   right: 32px;
   cursor: pointer;
   z-index: 999;
+  
+  img{
+    width: 35px;
+    height: 35px;
+  }
 `;
