@@ -1,14 +1,35 @@
-import axios from 'axios';
 import React, { useRef, useEffect, useState } from 'react';
+import axios from 'axios';
 import { number } from 'framer-motion';
 import { member } from '@/pages/PicturePage/styled/PicturePage.SelectMemberPage.style';
+
 
 export const useComment = (memberId, memberName, user_id) => {
     const [reply, setReply] = useState([]); 
     const [error, setError] = useState(null);
 
+
+    // // 댓글 목록
+    // useEffect(() => {
+    //     if(!memberId || !memberName) return;
+
+    //     axios.get('http://localhost:8080/api/comments/search',{
+    //         params: {memberId, memberName, user_id}
+    //     })
+    //     .then((res) => {
+    //         console.log('성공:', res.data);
+    //         const sortReply = res.data.sort(
+    //             (a,b) => new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime()
+    //         );
+    //         setReply(sortReply);
+    //     })
+    //     .catch((error) => {
+    //         console.error('에러 발생:', error); // 여기에서 AxiosError 상세 확인
+    //         setError(error);
+    //     });
+    // }, [memberId,memberName]);
     
-    // 댓글 목록
+
     // 댓글 불러오기
     const fetchComments = async () => {
         if (!memberId || !memberName) return;
@@ -33,6 +54,8 @@ export const useComment = (memberId, memberName, user_id) => {
         fetchComments();
     }, [memberId, memberName]);
 
+
+    
     // 댓글 저장
     const saveComment = async (commentText) => {
         console.log("useComment.saveComment호출됨: ", {memberId,memberName,commentText})
@@ -43,11 +66,14 @@ export const useComment = (memberId, memberName, user_id) => {
                 name: memberName,
                 content: commentText,
         });
+        
+        // 새댓글을 reply 바로 반영
+        // console.log("res.data 반환 데이터:",res.data)
+        const newComment = res.data;
+        setReply((prev) => [newComment, ...prev]);
+        await fetchComments();
 
-            // 새댓글을 reply 바로 반영
-            setReply((prev) => [res.data, ...prev]);
-            console.log(res.data);
-            return res.data;
+        return newComment;
             
         } catch(err) {
             setError(err);

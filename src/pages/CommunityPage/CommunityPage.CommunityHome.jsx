@@ -7,8 +7,9 @@ import * as itemS from './styled/CommunityPage.CommunityHome.style';
 import puzzle from '@/assets/images/CommunityPage/puzzle.png';
 
 import Banner from '@/pages/CommunityPage/CommunityPage.Banner';
-import Unit from '@/pages/CommunityPage/components/CommunityPage.VotePage.Unit';
+import Unit from '@/pages/CommunityPage/components/CommunityPage.VotePage.UnitAll';
 import VotePage from '@/pages/CommunityPage/CommunityPage.VotePage'
+import Header from '../PicturePage/components/PicturePage.Header';
 
 
 export const CommunityHome = () => {
@@ -16,18 +17,17 @@ export const CommunityHome = () => {
     return(
       <>        
 
-
       <itemS.Maincontainer>
         <itemS.ContentContainer>
           {/* 배너부분 */}
           <itemS.Container>
-            <Banner onOpenModal={()=>setIsModalOpen(true)}></Banner>
+            <Banner onOpenModal={()=>setIsModalOpen(true)} />
           </itemS.Container>
           
           {/* 모달창 오픈 */}
           <VotePage
-          isModalOpen={isModalOpen}
-          onClose={()=>setIsModalOpen(false)}
+            isModalOpen={isModalOpen}
+            onClose={()=>setIsModalOpen(false)}
           />
 
           {/* 게시판 콘텐츠 */}
