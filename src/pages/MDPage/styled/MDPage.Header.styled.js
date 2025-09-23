@@ -1,4 +1,6 @@
 // MDPage.Header.styled.js
+// 전체 페이지 상속 헤더
+
 import styled from 'styled-components';
 
 export const HeaderContainer = styled.header`
@@ -9,7 +11,7 @@ export const HeaderContainer = styled.header`
   align-items: center;
   justify-content: space-between;
   margin: 0 auto;
-  padding: 0 60px;
+  padding: 0 40px 0 140px;
   position: relative;
   z-index: 100;
 `;
@@ -26,7 +28,7 @@ export const Logo = styled.h1`
   font-family: 'Pretendard', sans-serif;
   font-size: 25px;
   font-weight: 700;
-  margin: 0;
+  margin: -120px;
   cursor: pointer;
   
   &:hover {
@@ -40,6 +42,7 @@ export const Navigation = styled.nav`
   flex: 1;
   justify-content: center;
   max-width: 700px;
+  margin-left: 70px;
 `;
 
 export const NavItem = styled.button`
@@ -176,3 +179,77 @@ export const SearchInput = styled.input`
     box-shadow: 0 0 0 2px rgba(116, 185, 255, 0.2);
   }
 `;
+
+export const LoginStatusText = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  margin-left: 4px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+
+  font-family: 'Pretendard', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #172031;
+
+  background: rgba(23, 32, 49, 0.06);
+  cursor: pointer;
+  position: relative;
+  min-width: 120px;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  .default-text,
+  .hover-text {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .hover-text {
+    position: absolute;
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
+    display: ${({ $showHoverText }) => ($showHoverText ? 'inline-flex' : 'none')};
+  }
+
+  &:hover {
+    background: rgba(23, 32, 49, 0.12);
+    color: #0f1a2c;
+  }
+
+  &:hover .default-text {
+    opacity: ${({ $showHoverText }) => ($showHoverText ? 0 : 1)};
+    transform: ${({ $showHoverText }) => ($showHoverText ? 'translateY(-6px)' : 'translateY(0)')};
+  }
+
+  &:hover .hover-text {
+    opacity: ${({ $showHoverText }) => ($showHoverText ? 1 : 0)};
+    transform: ${({ $showHoverText }) => ($showHoverText ? 'translateY(0)' : 'translateY(6px)')};
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.7;
+    background: rgba(23, 32, 49, 0.04);
+    color: rgba(23, 32, 49, 0.6);
+  }
+
+  &:disabled .default-text {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &:disabled .hover-text {
+    opacity: 0;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(9, 132, 227, 0.6);
+    outline-offset: 2px;
+  }
+`;
+

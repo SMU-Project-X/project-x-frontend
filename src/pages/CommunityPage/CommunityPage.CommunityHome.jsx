@@ -9,15 +9,13 @@ import puzzle from '@/assets/images/CommunityPage/puzzle.png';
 import Banner from '@/pages/CommunityPage/CommunityPage.Banner';
 import Unit from '@/pages/CommunityPage/components/CommunityPage.VotePage.UnitAll';
 import VotePage from '@/pages/CommunityPage/CommunityPage.VotePage'
-import Header from '../PicturePage/components/PicturePage.Header';
-
+import Header from '../MDPage/MDPage.header';
 
 export const CommunityHome = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
     return(
       <>        
       {/* 상단 헤더 */}
-        <Header />
 
       <itemS.Maincontainer>
         <itemS.ContentContainer>

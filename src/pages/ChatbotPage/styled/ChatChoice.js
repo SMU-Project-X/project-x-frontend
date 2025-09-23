@@ -1,22 +1,20 @@
-import styled, { createGlobalStyle } from 'styled-components';
+import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
-// 전역 스타일
-export const GlobalStyle = createGlobalStyle`
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+// ���� ��Ÿ��
+export const PageWrapper = styled.div`
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: rgba(255, 255, 255, 0.95);
+    min-height: 100vh;
 
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: rgba(255, 255, 255, 0.95);
-        min-height: 100vh;
+    & *,
+    & *::before,
+    & *::after {
+        box-sizing: border-box;
     }
 `;
 
-// 스타일이 적용된 컴포넌트들
+// ��Ÿ���� ����� ������Ʈ��
 export const Header = styled.header`
     background: linear-gradient(90deg, #64b5f6 0%, #42a5f5 50%, #2196f3 100%);
     padding: 15px 0;
@@ -86,7 +84,7 @@ export const TitleSection = styled.div`
     h1 {
         text-align: center;
         color: #333;
-        margin-bottom: 30px;
+        margin: 0 0 30px;
         font-size: 2.5em;
         background: linear-gradient(45deg, #87ceeb, #4fc3f7);
         -webkit-background-clip: text;

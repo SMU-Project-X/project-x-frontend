@@ -1,7 +1,6 @@
 import axios from "axios";
 import React, { useState, useRef, useEffect } from "react";
 import * as itemS from "@/pages/PicturePage/styled/PicturePage.PostPage.Write.style";
-import Header from "@/pages/PicturePage/components/PicturePage.Header";
 import { useNavigate } from "react-router-dom";
 
 
@@ -78,7 +77,6 @@ function PostWrite() {
     return (
         <div style={{ width: "100%", overflowX: "hidden" }}>
 
-            <Header/>
 
             <itemS.container>
                 <itemS.upload_container>

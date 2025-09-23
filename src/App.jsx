@@ -1,11 +1,11 @@
-
-import { useState, useEffect } from 'react'
+ 
+import { useState } from 'react'
 
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
-import { Route, Routes, Link, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 
 // 랜딩페이지
 import SplashPage from './pages/RandingPage/RandingPage.SplashPage';
@@ -66,22 +66,25 @@ import ChatChoice from './pages/ChatbotPage/Chatbot.ChatChoice';
 export default function App() {
   const location = useLocation();
   
-  //  헤더 표시 조건 (새 페이지 제외)
-  const shouldShowHeader = 
-    location.pathname.startsWith('/MD/product') ||
-    location.pathname.startsWith('/MD/cart') ||
-    location.pathname.startsWith('/MD/payment') ||
-    location.pathname.startsWith('/MD/products') ||
-    location.pathname.startsWith('/MD/search') ||
-    location.pathname.startsWith('/MD/about') ||
-    location.pathname === '/MD';
-    
+  // 헤더가 필요한 주요 경로 정의
+  const normalizedPath = location.pathname.toLowerCase();
+  const headerPrefixes = ['/md', '/home', '/picture', '/community', '/chatapp', '/chatchoice', '/light_stick'];
+  const shouldShowHeader = headerPrefixes.some((prefix) => normalizedPath.startsWith(prefix));
+  const isMDRoute = normalizedPath.startsWith('/md');
+
   const [units, setUnits] = useState();
 
 
   return (
     <>
-      {shouldShowHeader && <Header />}
+      {shouldShowHeader && (
+        <Header
+          showSearch={isMDRoute}
+          showExchange={isMDRoute}
+          showCart={isMDRoute}
+          showAbout={isMDRoute}
+        />
+      )}
       <Routes>
         {/* 랜딩페이지 path */}
         <Route path="/"  element={<SplashPage />} />
@@ -176,7 +179,10 @@ export default function App() {
         <Route path='/admin' element={<AdminPage/>} />
         <Route path='/admin/post' element={<AdminPostPage/>} />
         <Route path='/admin/user' element={<AdminUserPage/>} />
+        
+        <Route path='/mainmypage' element={<MyPage initialTab="settings" />} />
 
+        {/* 챗 봇 */}
         <Route path="/ChatChoice" element={<ChatChoice/>} />
         <Route path="/ChatApp/:chatName" element={<ChatApp />}/>
 

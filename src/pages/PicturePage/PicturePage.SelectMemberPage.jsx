@@ -1,7 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from 'react';
 import * as itemS from "@/pages/PicturePage/styled/PicturePage.SelectMemberPage.style"
-import Header from "@/pages/PicturePage/components/PicturePage.Header"
 import Title from '@/pages/PicturePage/components/PicturePage.SelectMemberPage.Title';
 import MemberCard from '@/pages/PicturePage/components/PicturePage.SelectMemberPage.MemberCard';
 import MemberChoice from '@/pages/PicturePage/components/PicturePage.SelectMemberPage.MemberChoice';
@@ -44,8 +43,6 @@ function PictureSelectMemberPage(){
 
     return (
         <div>
-
-            <Header />
 
             <itemS.container>
                 <itemS.title>

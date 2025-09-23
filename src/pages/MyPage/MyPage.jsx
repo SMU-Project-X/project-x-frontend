@@ -1,17 +1,146 @@
-// MyPage.jsx - 404 에러 및 라우팅 문제 해결
-import { useState, useEffect } from 'react';
+// MyPage.jsx
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useRecoilState } from 'recoil';
+import { selectedCharactersState } from '@/recoil/characterAtom';
+import { characters } from '@/assets/data/characters';
+import { traits } from '@/assets/data/traits';
+import { mbtiOptions } from '@/assets/data/mbtiOptions';
 import * as S from './styled/MyPage.styled';
 
-function MyPage() {
+const TRAIT_SLOTS = 2;
+
+const ensureTraits = (list = []) => {
+  const next = [...list];
+  while (next.length < 3) next.push(null);
+  return next.slice(0, 3);
+};
+
+const ensureSlotShape = (slot = {}) => ({
+  img: slot?.img ?? null,
+  name: slot?.name ?? null,
+  traits: ensureTraits(slot?.traits ?? []),
+  mbti: slot?.mbti ?? null,
+});
+
+function MyPage({ initialTab = 'info' }) {
   const navigate = useNavigate();
   
   // 상태 관리
+  const [selectedCharacters, setSelectedCharacters] = useRecoilState(selectedCharactersState);
+  const [dialog, setDialog] = useState({ slotIndex: null, mode: null, traitIndex: null });
+
+  const normalizedSlots = useMemo(() => selectedCharacters.map(ensureSlotShape), [selectedCharacters]);
+
+  const characterUsage = useMemo(
+    () =>
+      normalizedSlots
+        .map((slot, idx) => (slot?.name ? { name: slot.name, index: idx } : null))
+        .filter(Boolean),
+    [normalizedSlots]
+  );
+
+  const traitUsage = useMemo(() => {
+    const usage = [];
+    normalizedSlots.forEach((slot, slotIdx) => {
+      ensureTraits(slot?.traits).forEach((traitName, traitIdx) => {
+        if (traitName) usage.push({ traitName, slotIdx, traitIdx });
+      });
+    });
+    return usage;
+  }, [normalizedSlots]);
+
+  const openCharacterModal = (slotIndex) => setDialog({ slotIndex, mode: 'character', traitIndex: null });
+  const openTraitModal = (slotIndex, traitIndex) => setDialog({ slotIndex, mode: 'trait', traitIndex });
+  const openMbtiModal = (slotIndex) => setDialog({ slotIndex, mode: 'mbti', traitIndex: null });
+  const closeDialog = () => setDialog({ slotIndex: null, mode: null, traitIndex: null });
+
+  const handleSave = () => {
+    setSelectedCharacters(normalizedSlots.map(ensureSlotShape));
+    closeDialog();
+    navigate('/home');
+  };
+
+  const handleCharacterSelect = (character) => {
+    if (dialog.slotIndex === null) return;
+    setSelectedCharacters((prev) =>
+      prev.map((slot, idx) => {
+        if (idx !== dialog.slotIndex) return slot;
+        const base = ensureSlotShape(slot);
+        const preservedTail = base.traits.slice(TRAIT_SLOTS);
+        const resetTraits = [...Array(TRAIT_SLOTS).fill(null), ...preservedTail];
+        return {
+          ...base,
+          ...character,
+          img: character.img ?? null,
+          name: character.name ?? null,
+          traits: resetTraits,
+          mbti: null,
+        };
+      })
+    );
+    closeDialog();
+  };
+
+  const handleClearSlot = (slotIndex) => {
+    setSelectedCharacters((prev) =>
+      prev.map((slot, idx) => (idx === slotIndex ? ensureSlotShape({}) : slot))
+    );
+  };
+
+  const handleTraitSelect = (traitName) => {
+    if (dialog.slotIndex === null || dialog.traitIndex === null) return;
+    setSelectedCharacters((prev) =>
+      prev.map((slot, idx) => {
+        if (idx !== dialog.slotIndex) return slot;
+        const base = ensureSlotShape(slot);
+        const nextTraits = [...base.traits];
+        nextTraits[dialog.traitIndex] = traitName;
+        return { ...base, traits: nextTraits };
+      })
+    );
+    closeDialog();
+  };
+
+  const handleTraitClear = (slotIndex, traitIndex) => {
+    setSelectedCharacters((prev) =>
+      prev.map((slot, idx) => {
+        if (idx !== slotIndex) return slot;
+        const base = ensureSlotShape(slot);
+        const nextTraits = [...base.traits];
+        nextTraits[traitIndex] = null;
+        return { ...base, traits: nextTraits };
+      })
+    );
+  };
+
+  const handleMbtiSelect = (mbti) => {
+    if (dialog.slotIndex === null) return;
+    setSelectedCharacters((prev) =>
+      prev.map((slot, idx) => {
+        if (idx !== dialog.slotIndex) return slot;
+        const base = ensureSlotShape(slot);
+        return { ...base, mbti };
+      })
+    );
+    closeDialog();
+  };
+
+  const handleMbtiClear = (slotIndex) => {
+    setSelectedCharacters((prev) =>
+      prev.map((slot, idx) => {
+        if (idx !== slotIndex) return slot;
+        const base = ensureSlotShape(slot);
+        return { ...base, mbti: null };
+      })
+    );
+  };
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('info');
+  const [activeTab, setActiveTab] = useState(initialTab);
   
   // 사용자 정보 상태
   const [userInfo, setUserInfo] = useState({
@@ -107,7 +236,7 @@ function MyPage() {
       const userData = {
         userId: serverUserData?.userId || localUserId,
         name: serverUserData?.name || localUsername || `사용자${localUserId}`,
-        email: serverUserData?.email || `user${localUserId}@example.com`,
+        email: serverUserData?.email || `${localUserId}@example.com`,
         phone: serverUserData?.phone || '',
         address: serverUserData?.address || '',
         isAdmin: serverUserData?.isAdmin || localIsAdmin,
@@ -329,7 +458,7 @@ function MyPage() {
           active={activeTab === 'settings'} 
           onClick={() => setActiveTab('settings')}
         >
-          계정 설정
+          멤버 선택
         </S.Tab>
       </S.TabContainer>
 
@@ -509,33 +638,238 @@ function MyPage() {
 
       {activeTab === 'settings' && (
         <S.ContentSection>
-          <h2>계정 설정</h2>
-          
-          {userInfo.isAdmin && (
-            <S.AdminSection>
-              <S.AdminTitle>관리자 메뉴</S.AdminTitle>
-              <S.AdminDescription>
-                관리자 권한으로 시스템을 관리할 수 있습니다.
-              </S.AdminDescription>
-              <S.Button primary onClick={goToAdminPage}>
-                관리자 페이지로 이동
-              </S.Button>
-            </S.AdminSection>
-          )}
+          <S.MainMyPageContainer>
+            <S.PageHeader>
+              <S.PageTitle>멤버 선택 수정</S.PageTitle>
+            </S.PageHeader>
 
-          <S.SettingsSection>
-            <S.SettingsTitle>로그아웃</S.SettingsTitle>
-            <S.SettingsDescription>
-              현재 세션에서 로그아웃합니다.
-            </S.SettingsDescription>
-            <S.Button onClick={handleLogout}>
-              로그아웃
-            </S.Button>
-          </S.SettingsSection>
+            <S.SlotsGrid>
+              {normalizedSlots.map((slot, idx) => {
+                const traitsForSlot = ensureTraits(slot?.traits).slice(0, TRAIT_SLOTS);
+                const slotLabel = `슬롯 ${idx + 1}`;
+                return (
+                  <S.SlotCard key={idx}>
+                    <S.SlotHeader>
+                      <div>
+                        <S.SlotTitle>{slotLabel}</S.SlotTitle>
+                        <S.SlotSubtitle>{slot?.name || '선택된 멤버 없음'}</S.SlotSubtitle>
+                      </div>
+                      {slot?.img ? (
+                        <S.Avatar src={slot.img} alt={slot?.name || '선택된 멤버'} />
+                      ) : (
+                        <S.EmptyAvatar>?</S.EmptyAvatar>
+                      )}
+                    </S.SlotHeader>
+
+                    <S.CardSection>
+                      <S.SectionTitle>멤버</S.SectionTitle>
+                      <S.ButtonRow>
+                        <S.PrimaryButton type="button" onClick={() => openCharacterModal(idx)}>
+                          멤버 선택
+                        </S.PrimaryButton>
+                        <S.SecondaryButton type="button" onClick={() => handleClearSlot(idx)}>
+                          초기화
+                        </S.SecondaryButton>
+                      </S.ButtonRow>
+                    </S.CardSection>
+
+                    <S.CardSection>
+                      <S.SectionTitle>성격</S.SectionTitle>
+                      <S.TagGrid>
+                        {traitsForSlot.map((traitName, traitIdx) => (
+                          <S.TagSlot key={traitIdx}>
+                            <S.TagLabel>성격 {traitIdx + 1}</S.TagLabel>
+                            <S.TraitButton type="button" onClick={() => openTraitModal(idx, traitIdx)}>
+                              {traitName || '태그 선택'}
+                            </S.TraitButton>
+                            {traitName && (
+                              <S.ClearTagButton type="button" onClick={() => handleTraitClear(idx, traitIdx)}>
+                                제거
+                              </S.ClearTagButton>
+                            )}
+                          </S.TagSlot>
+                        ))}
+                      </S.TagGrid>
+                    </S.CardSection>
+
+                    <S.CardSection>
+                      <S.SectionTitle>MBTI</S.SectionTitle>
+                      <S.TagGrid>
+                        <S.TagSlot>
+                          <S.TagLabel>MBTI</S.TagLabel>
+                          <S.TraitButton type="button" onClick={() => openMbtiModal(idx)}>
+                            {slot?.mbti || 'MBTI 선택'}
+                          </S.TraitButton>
+                          {slot?.mbti && (
+                            <S.ClearTagButton type="button" onClick={() => handleMbtiClear(idx)}>
+                              제거
+                            </S.ClearTagButton>
+                          )}
+                        </S.TagSlot>
+                      </S.TagGrid>
+                    </S.CardSection>
+                  </S.SlotCard>
+                );
+              })}
+            </S.SlotsGrid>
+
+            <S.PageFooter>
+              <S.SaveButton type="button" onClick={handleSave}>
+                저장
+              </S.SaveButton>
+            </S.PageFooter>
+
+          <CharacterModal
+              open={dialog.mode === 'character'}
+              onClose={closeDialog}
+              onSelect={handleCharacterSelect}
+              slotIndex={dialog.slotIndex}
+              characterUsage={characterUsage}
+              currentName={dialog.slotIndex !== null ? normalizedSlots[dialog.slotIndex]?.name || null : null}
+            />
+
+            <MbtiModal
+              open={dialog.mode === 'mbti'}
+              onClose={closeDialog}
+              onSelect={handleMbtiSelect}
+              currentMbti={
+                dialog.slotIndex !== null ? normalizedSlots[dialog.slotIndex]?.mbti ?? null : null
+              }
+            />
+
+            <TraitModal
+              open={dialog.mode === 'trait'}
+              onClose={closeDialog}
+              onSelect={handleTraitSelect}
+              slotIndex={dialog.slotIndex}
+              traitIndex={dialog.traitIndex}
+              traitUsage={traitUsage}
+              currentTrait={
+                dialog.slotIndex !== null && dialog.traitIndex !== null
+                  ? ensureTraits(normalizedSlots[dialog.slotIndex]?.traits)[dialog.traitIndex]
+                  : null
+              }
+            />
+          </S.MainMyPageContainer>
         </S.ContentSection>
       )}
     </S.Container>
   );
 }
+
+function CharacterModal({ open, onClose, onSelect, slotIndex, characterUsage, currentName }) {
+  if (!open) return null;
+
+  const isUsedElsewhere = (name) => characterUsage.some((entry) => entry.name === name && entry.index !== slotIndex);
+
+  return (
+    <S.ModalOverlay>
+      <S.ModalContent>
+        <S.ModalHeader>
+          <S.ModalTitle>멤버 선택</S.ModalTitle>
+          <S.CloseButton type="button" onClick={onClose}>
+            닫기
+          </S.CloseButton>
+        </S.ModalHeader>
+        <S.ModalList>
+          {characters.map((character) => {
+            const disabled = isUsedElsewhere(character.name);
+            const isActive = currentName === character.name;
+            return (
+              <S.ModalListItem key={character.name}>
+                <S.CharacterButton
+                  type="button"
+                  disabled={disabled}
+                  $active={isActive}
+                  onClick={() => onSelect(character)}
+                >
+                  <S.CharacterInfo>
+                    <S.CharacterName>{character.name}</S.CharacterName>
+                    {character.original && <S.CharacterMeta>{character.original}</S.CharacterMeta>}
+                  </S.CharacterInfo>
+                  <S.CharacterThumb>
+                    {character.img ? <img src={character.img} alt={character.name} /> : <span>이미지 없음</span>}
+                  </S.CharacterThumb>
+                </S.CharacterButton>
+                {disabled && <S.HelperText>이미 사용 중인 멤버입니다.</S.HelperText>}
+              </S.ModalListItem>
+            );
+          })}
+        </S.ModalList>
+      </S.ModalContent>
+    </S.ModalOverlay>
+  );
+}
+
+function MbtiModal({ open, onClose, onSelect, currentMbti }) {
+  if (!open) return null;
+
+  return (
+    <S.ModalOverlay>
+      <S.ModalContent>
+        <S.ModalHeader>
+          <S.ModalTitle>MBTI 선택</S.ModalTitle>
+          <S.CloseButton type="button" onClick={onClose}>
+            닫기
+          </S.CloseButton>
+        </S.ModalHeader>
+        <S.ModalList>
+          {mbtiOptions.map((option) => (
+            <S.ModalListItem key={option}>
+              <S.ModalButton
+                type="button"
+                $active={currentMbti === option}
+                onClick={() => onSelect(option)}
+              >
+                {option}
+              </S.ModalButton>
+            </S.ModalListItem>
+          ))}
+        </S.ModalList>
+      </S.ModalContent>
+    </S.ModalOverlay>
+  );
+}
+
+function TraitModal({ open, onClose, onSelect, slotIndex, traitIndex, traitUsage, currentTrait }) {
+  if (!open || slotIndex === null || traitIndex === null) return null;
+
+  const isUsedElsewhere = (name) =>
+    traitUsage.some((entry) => entry.traitName === name && !(entry.slotIdx === slotIndex && entry.traitIdx === traitIndex));
+
+  return (
+    <S.ModalOverlay>
+      <S.ModalContent>
+        <S.ModalHeader>
+          <S.ModalTitle>태그 선택</S.ModalTitle>
+          <S.CloseButton type="button" onClick={onClose}>
+            닫기
+          </S.CloseButton>
+        </S.ModalHeader>
+        <S.ModalList>
+          {traits.map((traitName) => {
+            const disabled = isUsedElsewhere(traitName);
+            const isActive = currentTrait === traitName;
+            return (
+              <S.ModalListItem key={traitName}>
+                <S.ModalButton
+                  type="button"
+                  disabled={disabled}
+                  $active={isActive}
+                  onClick={() => onSelect(traitName)}
+                >
+                  {traitName}
+                </S.ModalButton>
+                {disabled && <S.HelperText>이미 다른 슬롯에서 사용 중입니다.</S.HelperText>}
+              </S.ModalListItem>
+            );
+          })}
+        </S.ModalList>
+      </S.ModalContent>
+    </S.ModalOverlay>
+  );
+}
+
+
 
 export default MyPage;
