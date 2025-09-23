@@ -88,6 +88,10 @@ export default function App() {
       <Routes>
         {/* 랜딩페이지 path */}
         <Route path="/"  element={<SplashPage />} />
+        <Route path="/carosel"  element={<Carousel />} />
+
+
+
         <Route path="/selectMember" element={<SelectMemberPage />} />
         <Route path="/light_stick" element={<LightStickCustomPage />} />
         <Route path="/selectMember/view" element={<ViewPage />} />
@@ -193,6 +197,7 @@ export default function App() {
 
 // slotIndex를 useParams로 꺼내서 ViewPage에 넘김
 import { useParams } from 'react-router-dom';
+import Carousel from './pages/RandingPage/RandingPage.SelectMemberPage.Carosel';
 function ViewPageWrapper() {
   const { slotIndex } = useParams();
   return <ViewPage slotIndex={parseInt(slotIndex, 10)} />;
