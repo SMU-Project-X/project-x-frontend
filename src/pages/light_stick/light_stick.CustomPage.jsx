@@ -1,6 +1,6 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  PageRoot, Header, HeaderLeft, Logo, Button, Content,
+  PageRoot, Button, Content,
   ViewerCard, ViewerStage, ViewerActions, Sidebar, Panel, PanelTitle, SubTitle,
   IconGrid, IconRow, CapBtn, GripBtn, Field, ColorField, SliderField,
   UploadCard
@@ -268,13 +268,6 @@ export default function LightStickCustomPage() {
   return (
     <PageRoot>
       {/* 헤더 */}
-      <Header>
-        <HeaderLeft>
-          <Logo aria-hidden>✨</Logo>
-          <h1>응원봉 커스텀</h1>
-        </HeaderLeft>
-      </Header>
-
       <Content>
         {/* 좌: 3D 뷰어 */}
         <ViewerCard>

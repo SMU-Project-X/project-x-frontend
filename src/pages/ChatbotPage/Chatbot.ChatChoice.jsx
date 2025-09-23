@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-    GlobalStyle,
-    Header,
-    NavContainer,
-    Logo,
-    NavMenu,
-    NavItem,
-    LoginBtn,
+    PageWrapper,
     MainContainer,
     TitleSection,
     CharactersSection,
@@ -37,24 +31,7 @@ function ChatChoice() {
     };
 
     return (
-        <>
-            <GlobalStyle />
-            <Header>
-                <NavContainer>
-                    <Logo>Project - X</Logo>
-                    <NavMenu>
-                        <NavItem href="#">Home</NavItem>
-                        <NavItem href="#">MD</NavItem>
-                        <NavItem href="#">Community</NavItem>
-                        <NavItem href="#">Content</NavItem>
-                        <NavItem href="#">Chat</NavItem>
-                    </NavMenu>
-                    <LoginBtn href="#">
-                        <span>👤</span>
-                        로그인
-                    </LoginBtn>
-                </NavContainer>
-            </Header>
+        <PageWrapper>
             <MainContainer>
                 <TitleSection>
                     <h1>✨ We Are Fixer ✨</h1>
@@ -83,8 +60,9 @@ function ChatChoice() {
                     </Link>
                 </CTASection>
             </MainContainer>
-        </>
+        </PageWrapper>
     );
 }
 
 export default ChatChoice;
+

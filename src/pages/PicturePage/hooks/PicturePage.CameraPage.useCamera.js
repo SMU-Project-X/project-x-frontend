@@ -1,8 +1,12 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function useCamera() {
     const videoRef = useRef(null);
     const photoRef = useRef(null);
+    const [lastCapture, setLastCapture] = useState(null); // 마지막 캡처 저장
+    const navigate = useNavigate();
+
 
     // 카메라 연결
     useEffect(() => {
@@ -86,26 +90,23 @@ export function useCamera() {
         a.download = "찰칵.png";
         a.click();
 
-        // 클립보드 저장
-        if (navigator.clipboard && window.ClipboardItem) {
-            canvas.toBlob(async (blob) => {
-                try {
-                    const item = new ClipboardItem({ 'image/png': blob });
-                    await navigator.clipboard.write([item]);
-                    alert('이미지가 클립보드에 복사되었습니다!');
-                } catch (err) {
-                    console.error('클립보드 복사 실패:', err);
-                    alert('클립보드 복사에 실패했습니다.');
-                }
-            }, 'image/png')
-        } else {
-            alert('브라우저가 클립보드 이미지 복사를 지원하지 않습니다.');
+        // 마지막 캡처 저장
+        setLastCapture(dataUrl);
+    }
+
+    // 공유 버튼 클릭 시 실행
+    const sharing = async () => {
+        if (!lastCapture) {
+            alert("먼저 사진을 찍어주세요!");
+            return;
         }
+        navigate('/picture/post');
     }
 
     return {
         videoRef,
         photoRef,
-        handleCapture
+        handleCapture,
+        sharing
     }
 }

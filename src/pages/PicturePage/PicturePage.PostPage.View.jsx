@@ -1,8 +1,8 @@
+import axios from "axios";
 import React, { useState, useEffect } from "react";
 import * as itemS from "@/pages/PicturePage/styled/PicturePage.PostPage.View.style";
-import Header from "@/pages/PicturePage/components/PicturePage.Header";
 import { useParams, useNavigate } from "react-router-dom";
-import { postList, imageMap } from "@/pages/PicturePage/PicturePage.PostPage.data";
+import dayjs from "dayjs";
 
 import back from "@/assets/images/PicturePage/back.png";
 import share from "@/assets/images/PicturePage/share.png";
@@ -12,18 +12,28 @@ import link from "@/assets/images/PicturePage/link.png";
 
 function PostView() {
     const {id} = useParams();   // 클릭한 post id
-    const post = postList.find(p => p.id === parseInt(id));
-    if (!post) return <div>게시글이 없습니다.</div>;
+    const [post, setPost] = useState(null);
     const navigate = useNavigate();
     const [showShare, setShowShare] = useState(false);  // 바텀시트 토글
     const [kakaoReady, setKakaoReady] = useState(false);
     const currentURL = window.location.href;    // 현재 url
 
     useEffect(() => {
+        // 조회수 증가
+        axios.patch(`http://localhost:8080/api/posts/hit/${id}`)
+            .then(() => {
+                // 증가 후 최신 post 가져오기
+                return axios.get(`http://localhost:8080/api/posts/${id}`);
+            })
+            .then(res => setPost(res.data))
+            .catch(err => console.error(err));
+    }, [id]);
+
+    useEffect(() => {
         // 이미 스크립트가 있으면 바로 init
         if (window.Kakao) {
             if (!window.Kakao.isInitialized()) {
-                window.Kakao.init("YOUR_KAKAO_JS_KEY");
+                window.Kakao.init("685921f3c75dcb3652a49e7cdce9673d");
             }
             setKakaoReady(true);
             return;
@@ -58,7 +68,7 @@ function PostView() {
             content: {
                 title: post.title,
                 description: `${post.member}와 찍은 사진`,
-                imageUrl: window.location.origin + imageMap[post.image_url],
+                imageUrl: `http://localhost:8080${post.image_url}`,
                 link: {
                     mobileWebUrl: window.location.href,
                     webUrl: window.location.href,
@@ -85,11 +95,19 @@ function PostView() {
         }
     };
 
+    // 날짜 포맷 함수
+    const formatDate = (isoString) => {
+        return dayjs(isoString).tz("Asia/Seoul").format("YYYY-MM-DD HH:mm");
+    }
+
+    if (post === null) {
+        return <div>로딩중...</div>;
+    }
+
 
     return (
         <div style={{ width: "100%", overflowX: "hidden" }}>
 
-            <Header/>
 
             <itemS.content>
                 <itemS.content_background>
@@ -125,13 +143,13 @@ function PostView() {
                     </itemS.pocanavi>
                     <itemS.deco_item>
                         <itemS.result_img>
-                            <img src={imageMap[post.image_url]} alt=""/>
+                            <img src={`http://localhost:8080${post.image_url}`} alt="" />
                         </itemS.result_img>
                         <itemS.photo_info>
                             <itemS.photo_title>{post.title}</itemS.photo_title>
                             <itemS.photo_meta>
-                                <span>{post.user}</span>
-                                <itemS.created_at>{post.created_at}</itemS.created_at>
+                                <span>{post.nickname}</span>
+                                <itemS.created_at>{formatDate(post.created_at)}</itemS.created_at>
                             </itemS.photo_meta>
                             <itemS.photo_stats>
                                 <itemS.tag>{post.member}</itemS.tag>
