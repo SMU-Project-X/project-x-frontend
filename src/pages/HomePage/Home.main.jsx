@@ -16,6 +16,9 @@ import DetailContent from "./Home.main.DetailContent";
 
 import { useState } from "react";
 import Modal from "@/pages/HomePage/Home.main.DetailContent.Modal"; // 새로 추가할 모달 컴포넌트
+import Modal0920 from "@/pages/HomePage/Home.main.DetailContent.Modal0920";
+import Modal0922 from "@/pages/HomePage/Home.main.DetailContent.Modal0922";
+import Modal0923 from "@/pages/HomePage/Home.main.DetailContent.Modal0923";
 
 function Home() {
     const navigate = useNavigate();
@@ -83,7 +86,17 @@ function Home() {
             </itemS.ContentContainer>
 
             {/* 모달 */}
-            {open && <Modal onClose={handleCloseModal} index={activeIndex} />}
+            {open && (
+                activeIndex === 0 ? (
+                    <Modal0920 onClose={handleCloseModal} />
+                ) : activeIndex === 1 ? (
+                    <Modal onClose={handleCloseModal} />  
+            ) : activeIndex === 2 ? (
+            <Modal0922 onClose={handleCloseModal} />
+            ) : activeIndex === 3 ? (
+            <Modal0923 onClose={handleCloseModal} />
+            ) : null // 0924는 아무 동작 X
+)}
         </itemS.HomePageContainer>
     );
 }
