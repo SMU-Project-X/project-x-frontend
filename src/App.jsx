@@ -88,9 +88,6 @@ export default function App() {
       <Routes>
         {/* 랜딩페이지 path */}
         <Route path="/"  element={<SplashPage />} />
-        <Route path="/carosel"  element={<Carousel />} />
-
-
 
         <Route path="/selectMember" element={<SelectMemberPage />} />
         <Route path="/light_stick" element={<LightStickCustomPage />} />
@@ -111,7 +108,6 @@ export default function App() {
         {/*  인증 관련 페이지 (새로 추가) */}
         <Route path="/login" element={<Login />} />
         <Route path="/mypage" element={<MyPage />} />
-        <Route path="/admin" element={<AdminPage />} />
 
         {/* MD 페이지 path (기존 유지) */}
         <Route path="/MD" element={<MDMain />} />

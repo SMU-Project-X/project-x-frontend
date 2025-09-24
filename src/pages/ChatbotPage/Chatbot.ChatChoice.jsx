@@ -34,7 +34,7 @@ function ChatChoice() {
         <PageWrapper>
             <MainContainer>
                 <TitleSection>
-                    <h1>✨ We Are Fixer ✨</h1>
+                    <h1>✨ We Are Fixie ✨</h1>
                 </TitleSection>
                 <CharactersSection>
                     {members.map(member => (
