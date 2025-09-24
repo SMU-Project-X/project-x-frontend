@@ -113,6 +113,13 @@ export const TitleMainText = styled.h1`
     animation: ${fadeIn} 1s ease-out forwards;
     animation-delay: 2.5s;              /* 원이 커진 뒤 시작 */
     margin: 0;
+
+    color: #172031;
+
+font-size: 80px;
+font-style: normal;
+font-weight: 700;
+
 `;
 
 export const LetterWrapper = styled.div`
