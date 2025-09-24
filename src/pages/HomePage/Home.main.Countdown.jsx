@@ -22,7 +22,7 @@ function Countdown() {
             onTick={({ timeDelta, completed }) => {
                 // timeDelta: { total, days, hours, minutes, seconds }
                 // completed: boolean
-                console.log('남은 시간: ', timeDelta);
+                // console.log('남은 시간: ', timeDelta);
             }}
             style={{ transform: 'scale(2.5)' }}
         >

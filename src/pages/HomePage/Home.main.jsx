@@ -1,3 +1,6 @@
+// Home.jsx
+import html2canvas from "html2canvas";
+
 import * as itemS from "@/pages/HomePage/styled/Home.main.style";
 
 import Video from "@/assets/images/HomaPage/LogoVideo2.mp4";
@@ -14,8 +17,8 @@ import { useRecoilState } from "recoil";
 import { selectedCharactersState } from "@/recoil/characterAtom";
 import DetailContent from "./Home.main.DetailContent";
 
-import { useState } from "react";
-import Modal from "@/pages/HomePage/Home.main.DetailContent.Modal"; // 새로 추가할 모달 컴포넌트
+import { useRef, useState } from "react";
+import Modal from "@/pages/HomePage/Home.main.DetailContent.Modal"; 
 import Modal0920 from "@/pages/HomePage/Home.main.DetailContent.Modal0920";
 import Modal0922 from "@/pages/HomePage/Home.main.DetailContent.Modal0922";
 import Modal0923 from "@/pages/HomePage/Home.main.DetailContent.Modal0923";
@@ -26,9 +29,11 @@ function Home() {
         selectedCharactersState
     );
 
-    // 모달 관리 state
     const [open, setOpen] = useState(false);
     const [activeIndex, setActiveIndex] = useState(null);
+
+    // 캡처용 ref
+    const captureRef = useRef(null);
 
     const handleOpenModal = (index) => {
         setActiveIndex(index);
@@ -40,8 +45,31 @@ function Home() {
         setActiveIndex(null);
     };
 
+    // 화면 캡처 후 이미지로 저장
+    const handleSaveCapture = async () => {
+        if (!captureRef.current) return;
+
+        // DOM을 캔버스로 변환
+        const canvas = await html2canvas(captureRef.current, {
+            useCORS: true,
+            allowTaint: true,
+            logging: true,
+        });
+
+        // 캔버스를 이미지 데이터 URL로 변환
+        const imgData = canvas.toDataURL("image/png");
+
+        // 임시 <a> 태그를 만들어 다운로드 트리거
+        const link = document.createElement("a");
+        link.href = imgData;
+        link.download = `capture_${Date.now()}.png`;
+        link.dispatchEvent(new MouseEvent("click"));
+
+        alert("이미지를 SNS에 공유해 보세요!");
+    };
+
     return (
-        <itemS.HomePageContainer>
+        <itemS.HomePageContainer >
             <itemS.LogoVideoWrapper>
                 <itemS.LogoVideo autoPlay muted loop playsInline preload="none">
                     <source src={Video} />
@@ -53,7 +81,7 @@ function Home() {
                 </itemS.MemberInfoNavContainer>
             </itemS.LogoVideoWrapper>
 
-            <itemS.MemberInfoContainer>
+            <itemS.MemberInfoContainer ref={captureRef}>
                 {selectedCharacters.map((char, i) => (
                     <MemberInfoCard
                         key={i}
@@ -77,7 +105,9 @@ function Home() {
                     <itemS.JoinTitleText>“지금, 우리와 더 가까워지자!"</itemS.JoinTitleText>
                     <ArrowContainer color={Chevron_grey} rotate={90} count={2} />
                     <itemS.JoinBtnContainer>
-                        <itemS.JoinBtn>그룹 공유하기</itemS.JoinBtn>
+                        <itemS.JoinBtn onClick={handleSaveCapture}>
+                            그룹 이미지 다운로드
+                        </itemS.JoinBtn>
                         <itemS.JoinBtn onClick={() => navigate("/signup/terms")}>
                             회원가입
                         </itemS.JoinBtn>
@@ -91,12 +121,12 @@ function Home() {
                     <Modal0920 onClose={handleCloseModal} />
                 ) : activeIndex === 1 ? (
                     <Modal onClose={handleCloseModal} />  
-            ) : activeIndex === 2 ? (
-            <Modal0922 onClose={handleCloseModal} />
-            ) : activeIndex === 3 ? (
-            <Modal0923 onClose={handleCloseModal} />
-            ) : null // 0924는 아무 동작 X
-)}
+                ) : activeIndex === 2 ? (
+                    <Modal0922 onClose={handleCloseModal} />
+                ) : activeIndex === 3 ? (
+                    <Modal0923 onClose={handleCloseModal} />
+                ) : null
+            )}
         </itemS.HomePageContainer>
     );
 }
