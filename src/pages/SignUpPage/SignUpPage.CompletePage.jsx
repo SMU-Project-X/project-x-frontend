@@ -4,7 +4,7 @@ import * as S from "@/pages/SignUpPage/styled/SignUpPage.CompletePage.style";
 const CompletePage = () => {
     const goToHome = () => {
         alert("홈으로 이동합니다.");
-        window.location.href = "/";
+        window.location.href = "/home";
     };
 
     return (
