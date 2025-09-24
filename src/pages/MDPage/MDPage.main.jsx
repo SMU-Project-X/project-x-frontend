@@ -82,7 +82,7 @@ function MDMain() {
         const text = element.textContent?.trim();
         if (text && translatableTexts.includes(text)) {
           element.setAttribute('data-translate', text);
-          console.log('번역 속성 추가:', text);
+          // console.log('번역 속성 추가:', text);
         }
       }
     });
@@ -110,7 +110,7 @@ function MDMain() {
             const price = parseInt(priceMatch[0].replace(/,/g, ''));
             element.setAttribute('data-price', price.toString());
             element.setAttribute('data-original-currency', 'KRW');
-            console.log('가격 속성 추가:', priceText, '→', price);
+            // console.log('가격 속성 추가:', priceText, '→', price);
           }
         }
       });
