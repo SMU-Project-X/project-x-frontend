@@ -71,8 +71,8 @@ export const VotePage = ({isModalOpen, onClose, banner}) => {
             unit_id: 1,
             title: "유닛 A",
             unit: [
-                { CharacterName: "가온", Personality: "#귀염 #ENFP", Position:"리더", img:'/Character/가운.png'},
-                { CharacterName: "다온", Personality: "#시크 #INTJ", Position:"메인보컬", img:'/Character/다은.png'},
+                { CharacterName: "가온", Personality: "#귀염 #ENFP", Position:"리더", img:'/Character/가온.png'},
+                { CharacterName: "다온", Personality: "#시크 #INTJ", Position:"메인보컬", img:'/Character/다온.png'},
                 { CharacterName: "류하", Personality: "#시크 #INTJ", Position:"메인댄서", img:'/Character/류하.png' },
                 { CharacterName: "모아", Personality: "#시크 #INTJ", Position:"메인래퍼", img:'/Character/모아.png' }
                 
