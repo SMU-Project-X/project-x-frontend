@@ -1,8 +1,5 @@
-// Modal0920.jsx
 import React from "react";
 import styled from "styled-components";
-
-import Video from "@/assets/images/HomaPage/LogoVideo2.mp4";
 
 const Backdrop = styled.div`
   position: fixed;
@@ -67,17 +64,16 @@ const Title = styled.div`
 const VideoWrapper = styled.div`
   width: 100%;
   max-width: 1000px;
-  height: auto;
-  aspect-ratio: 16/9;
+  aspect-ratio: 16 / 9;
   background: black;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 0 20px rgba(255,255,255,0.2);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 
-  video {
+  iframe {
     width: 100%;
     height: 100%;
-    display: block;
+    border: none;
   }
 `;
 
@@ -89,15 +85,21 @@ function Modal0920({ onClose }) {
 
                 <Title>
                     <h1 className="text">스페셜 영상</h1>
-                    <h1 aria-hidden="true" className="text outline-text">스페셜 영상</h1>
-                    <h1 aria-hidden="true" className="text filter-text">스페셜 영상</h1>
+                    <h1 aria-hidden="true" className="text outline-text">
+                        스페셜 영상
+                    </h1>
+                    <h1 aria-hidden="true" className="text filter-text">
+                        스페셜 영상
+                    </h1>
                 </Title>
 
                 <VideoWrapper>
-                    <video controls autoPlay>
-                        <source src={Video} />
-                        지원되지 않는 브라우저입니다.
-                    </video>
+                    <iframe
+                        src="https://www.youtube.com/embed/PtoYFcMhA7Y?autoplay=1&rel=0"
+                        title="YouTube video"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                    />
                 </VideoWrapper>
             </ModalBox>
         </Backdrop>
